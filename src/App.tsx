@@ -658,8 +658,8 @@ export default function App() {
       </main>
 
       {/* --- ADD THIS FOOTER BLOCK --- */}
-      <footer className="w-full md:absolute md:bottom-0 md:left-0 md:w-[320px] p-4 bg-bg-surface border-t border-border-dim text-center z-30">
-        <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest opacity-60">
+      <footer className="w-full md:absolute md:bottom-0 md:right-0 md:w-[1590px] p-4 bg-bg-surface border-t border-border-dim text-center z-30">
+        <p className="text-[18px] font-bold text-text-dim uppercase tracking-widest opacity-60">
           © {new Date().getFullYear()} Ahtesham Latif
         </p>
       </footer>

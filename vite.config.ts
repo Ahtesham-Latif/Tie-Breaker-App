@@ -8,21 +8,18 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [react(), tailwindcss()],
-    // This allows the test environment to use jsdom and global variables
     test: {
       globals: true,
       environment: 'jsdom',
     },
     define: {
-      'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY),
+      // Maps Azure portal variables or local .env to the frontend
+      'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY),
     },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
-    },
-    server: {
-      hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
 });
