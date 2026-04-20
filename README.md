@@ -1,22 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# THE TIEBREAKER 🥴
+### AI-Powered Decision Intelligence Engine
 
-# Run and deploy your AI Studio app
+The TieBreaker is a professional-grade web application designed to help users navigate complex dilemmas. By leveraging advanced LLMs via OpenRouter, the app generates structured Pros & Cons, Side-by-Side Comparisons, SWOT analyses, and final Verdicts.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/4be75623-a33f-4c99-9496-7911009dcf07
+## 🚀 Tech Stack
 
-## Run Locally
+### Core Framework
+- **React 19**: Utilizing the latest concurrent rendering and performance improvements.
+- **TypeScript 5.8**: Full type safety for AI schemas and component props.
+- **Vite 6**: Next-generation frontend tooling for near-instant HMR.
 
-**Prerequisites:**  Node.js
+### AI & Intelligence
+- **OpenRouter API**: Unified gateway for LLM access.
+- **OpenAI SDK**: Implementation client for OpenRouter compatibility.
+- **Gemini 2.0 Flash**: Default model for high-speed, structured reasoning.
 
+### UI & Styling
+- **Tailwind CSS 4.0**: CSS-first configuration using the new `@tailwindcss/vite` engine.
+- **Framer Motion**: Fluid UI transitions and `AnimatePresence` for state changes.
+- **Lucide React**: Clean, consistent iconography.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `OPENROUTER_API_KEY` in .env.local to your OpenRouter API key
-3. Run the app:
-   `npm run dev`
-"# Tie-Breaker-App" 
-"# Tie-Breaker-App" 
+### Testing Suite
+- **Vitest**: Vite-native testing runner.
+- **React Testing Library**: User-centric component testing.
+- **jsdom**: Browser environment simulation for Node.js.
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/your-username/tie-breaker.git](https://github.com/your-username/tie-breaker.git)
+cd tie-breaker
