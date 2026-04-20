@@ -35,3 +35,22 @@ The TieBreaker is a professional-grade web application designed to help users na
 ```bash
 git clone [https://github.com/your-username/tie-breaker.git](https://github.com/your-username/tie-breaker.git)
 cd tie-breaker
+
+### 2. Install Dependencies
+```bash
+npm install
+
+Enivronment Variables Configuration:
+OPENROUTER_API_KEY=your_api_key_here
+VITE_API_URL=http://localhost:3000
+
+
+Run Development Server
+```bash
+npm run dev
+
+# Run tests
+npm test
+
+# Run tests with UI dashboard
+npm run test -- --ui
