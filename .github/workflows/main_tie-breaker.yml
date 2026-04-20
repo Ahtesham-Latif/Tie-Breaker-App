@@ -22,6 +22,9 @@ jobs:
           cache: 'npm'
 
       - name: Install, build, and test
+        # This env block is what fixes the "Missing API Key" error
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           npm install
           npm run build
