@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { expect, test, vi, beforeEach, describe } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { expect, test, vi, beforeEach, afterEach, describe } from 'vitest';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { MotionConfig } from 'framer-motion';
 import App from './App';
@@ -42,21 +42,31 @@ vi.mock('openai', () => {
 describe('The Tie Breaker App', () => {
   
   beforeEach(() => {
+    vi.clearAllMocks();
     document.documentElement.setAttribute('data-theme', 'light');
-    render(
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  const renderApp = () => {
+    return render(
       <MotionConfig transition={{ duration: 0 }}>
         <App />
       </MotionConfig>
     );
-  });
+  };
 
   test('renders the landing page with the main title', () => {
+    renderApp();
     const titles = screen.getAllByText(/TIE/i);
     expect(titles.length).toBeGreaterThan(0);
     expect(screen.getByText(/BREAK THE/i)).toBeInTheDocument();
   });
 
   test('shows format validation error when missing "and/or"', async () => {
+    renderApp();
     const textarea = screen.getByPlaceholderText(/What's the dilemma/i);
     
     // Typing something without 'and' enables the button but fails the regex
@@ -71,18 +81,21 @@ describe('The Tie Breaker App', () => {
   });
 
   test('allows typing in the decision textarea', () => {
+    renderApp();
     const textarea = screen.getByPlaceholderText(/What's the dilemma/i);
     fireEvent.change(textarea, { target: { value: 'Coffee and Tea' } });
     expect(textarea.value).toBe('Coffee and Tea');
   });
 
   test('can toggle the dark/light theme', () => {
+    renderApp();
     const themeBtn = screen.getByTitle(/Toggle Theme/i);
     fireEvent.click(themeBtn);
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   test('can add a new factor/option input', () => {
+    renderApp();
     const addButton = screen.getByText(/Add Option/i);
     fireEvent.click(addButton);
     const newInputs = screen.getAllByPlaceholderText(/Option \d/i);
@@ -90,6 +103,7 @@ describe('The Tie Breaker App', () => {
   });
 
   test('triggers AI analysis when valid input is provided', async () => {
+    renderApp();
     const textarea = screen.getByPlaceholderText(/What's the dilemma/i);
     fireEvent.change(textarea, { target: { value: 'Cat and Dog' } });
 

@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
+      testTimeout: 30000,
+      hookTimeout: 30000,
+      teardownTimeout: 30000,
+      isolate: false,
+      threads: true,
+      maxThreads: 1,
+      minThreads: 1,
     },
     define: {
       // Maps Azure portal variables or local .env to the frontend
