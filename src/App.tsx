@@ -46,14 +46,6 @@ interface AnalysisResult {
 
 // --- AI Service ---
 
-/**
- * AI CORE INITIALIZATION
- *
- * If you want to use your personal model:
- * 1. Replace '@google/genai' with your preferred client (e.g., 'openai' or 'axios' for custom API).
- * 2. Update the API key variable (process.env.YOUR_API_KEY).
- * 3. Update the ai.models.generateContent call inside analyzeDecision().
- */
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
