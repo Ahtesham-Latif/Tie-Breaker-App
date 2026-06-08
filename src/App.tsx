@@ -26,6 +26,8 @@ import { cn } from "./lib/utils";
 
 type AnalysisType = "pros-cons" | "comparison" | "swot" | "verdict";
 
+// The structured data format for the comparison analysis type
+// This is the expected structure of the data returned from the AI for the comparison analysis type
 interface ComparisonData {
   factor: string;
   options: {
@@ -36,7 +38,8 @@ interface ComparisonData {
     notes: string;
   }[];
 }
-
+// The structured data returned from the AI for each analysis type
+// This is a generic interface that can accommodate the different types of analyses (comparison, pros-cons, swot, verdict)
 interface AnalysisResult {
   type: AnalysisType;
   content: string; // Markdown or JSON string
@@ -49,6 +52,8 @@ interface AnalysisResult {
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
+// For development purposes, we allow browser access.  
+// In production, consider using a backend proxy to keep the key secure.
   dangerouslyAllowBrowser: true,
 });
 
@@ -76,8 +81,8 @@ async function analyzeDecision(
 
   if (type === "comparison") {
     prompt = `Perform a deep side-by-side comparison of ${entitiesText}. Analyze them ${factorsText}. 
-    Focus on specific dimensions like "Cost", "When to use" (scenarios), and "Ease of use". 
-    Return a structured comparison table with the identified factors and values for each entity.`;
+    Focus on at most 3 specific dimensions like "Cost", "When to use", and "Ease of use". 
+    Return a structured comparison table. Limit each list to 5 concise items.`;
 
     schema = {
       type: "object",
@@ -85,7 +90,6 @@ async function analyzeDecision(
         factors: {
           type: "array",
           items: { type: "string" },
-          description: "The dimensions or factors used for comparison",
         },
         comparison: {
           type: "array",
@@ -94,12 +98,10 @@ async function analyzeDecision(
             properties: {
               optionName: {
                 type: "string",
-                description: "The name of the entity being compared",
               },
               values: {
                 type: "array",
                 items: { type: "string" },
-                description: "The performance/value for each factor",
               },
             },
             required: ["optionName", "values"],
@@ -111,7 +113,7 @@ async function analyzeDecision(
       additionalProperties: false,
     };
   } else if (type === "pros-cons") {
-    prompt = `Analyze the pros and cons of ${entitiesText} ${factorsText}. Provide descriptive summaries for each.`;
+    prompt = `Perform an individual pros and cons analysis for each entity: ${entities.join(", ")}. Analyze them ${factorsText}. Ensure you do not mix up their attributes. Provide exactly 3 pros, 3 cons, and a unique summary for each specific entity.`;
     schema = {
       type: "object",
       properties: {
@@ -134,7 +136,7 @@ async function analyzeDecision(
       additionalProperties: false,
     };
   } else if (type === "swot") {
-    prompt = `Generate a SWOT analysis for each of these entities: ${entities.join(", ")} ${factorsText}.`;
+    prompt = `Generate a SWOT analysis for each: ${entities.join(", ")} ${factorsText}. Limit to 3 points per quadrant.`;
     schema = {
       type: "object",
       properties: {
@@ -164,7 +166,7 @@ async function analyzeDecision(
       additionalProperties: false,
     };
   } else {
-    prompt = `Provide a final, concise verdict between ${entitiesText} ${factorsText}. Who is the winner?`;
+    prompt = `Provide a final, concise verdict between ${entitiesText} ${factorsText}. Who is the winner. Must be one ? Limit to 3 key takeaways.`;
     schema = {
       type: "object",
       properties: {
@@ -178,7 +180,7 @@ async function analyzeDecision(
   }
 
   const completion = await openai.chat.completions.create({
-    model: "google/gemini-2.0-flash-001",
+    model: "deepseek/deepseek-chat",
     messages: [{ role: "user", content: prompt }],
     temperature: 0.6,
     response_format: {
@@ -192,6 +194,12 @@ async function analyzeDecision(
   });
 
   const text = completion.choices[0].message.content || "";
+  
+  // Log actual token usage to the console for monitoring
+    if(completion.usage) {
+          console.log(`[AI Usage - ${type}]`, completion.usage);
+      }
+
   try {
     let data = JSON.parse(text);
     // Unwrap array from 'results' wrapper when necessary since openai strict standard schemas require objects
@@ -206,6 +214,72 @@ async function analyzeDecision(
       structuredData: null,
     };
   }
+}
+
+/**
+ * Utility to format analysis results for human-readable clipboard copying.
+ */
+function formatForClipboard(result: AnalysisResult): string {
+  const { type, structuredData, content } = result;
+  if (!structuredData) return content;
+
+  let text = "";
+
+  switch (type) {
+    case "pros-cons":
+      text = "Pros & Cons Analysis\n\n";
+      structuredData.forEach((opt: any) => {
+        text += `${opt.optionName}\n\n`;
+        text += `Summary\n${opt.summary}\n\n`;
+        text += "Pros\n";
+        opt.pros.forEach((p: string) => (text += `• ${p}\n`));
+        text += "\nCons\n";
+        opt.cons.forEach((c: string) => (text += `• ${c}\n`));
+        text += "\n";
+      });
+      break;
+
+    case "comparison":
+      text = "Comparison Analysis\n\n";
+      const { factors, comparison } = structuredData;
+      factors.forEach((factor: string, i: number) => {
+        text += `${factor}\n`;
+        comparison.forEach((opt: any) => {
+          text += `• ${opt.optionName}: ${opt.values[i]}\n`;
+        });
+        text += "\n";
+      });
+      break;
+
+    case "swot":
+      text = "SWOT Analysis\n\n";
+      structuredData.forEach((opt: any) => {
+        text += `${opt.optionName}\n\n`;
+        text += "Strengths\n";
+        opt.strengths.forEach((s: string) => (text += `• ${s}\n`));
+        text += "\nWeaknesses\n";
+        opt.weaknesses.forEach((w: string) => (text += `• ${w}\n`));
+        text += "\nOpportunities\n";
+        opt.opportunities.forEach((o: string) => (text += `• ${o}\n`));
+        text += "\nThreats\n";
+        opt.threats.forEach((t: string) => (text += `• ${t}\n`));
+        text += "\n";
+      });
+      break;
+
+    case "verdict":
+      text = "The Final Verdict\n\n";
+      text += `Winner: ${structuredData.winner}\n\n`;
+      text += `Recommendation\n${structuredData.recommendation}\n\n`;
+      text += "Key Takeaways\n";
+      structuredData.keyTakeaways.forEach((t: string) => (text += `• ${t}\n`));
+      break;
+
+    default:
+      text = content;
+  }
+
+  return text.trim();
 }
 
 // --- Components ---
@@ -307,12 +381,7 @@ export default function App() {
     setLastRequestTime(now);
 
     try {
-      /**
-       * CUSTOM MODEL ENTRY POINT
-       *
-       * This function handles the actual prompt construction and API call.
-       * If you change models, ensure it still returns the structuredData needed for the tables.
-       */
+    
       const { content, structuredData } = await analyzeDecision(
         trimmedDecision,
         type,
@@ -360,12 +429,7 @@ export default function App() {
 
   const handleCopy = () => {
     if (result) {
-      let textToCopy = "";
-      if (result.structuredData) {
-        textToCopy = JSON.stringify(result.structuredData, null, 2);
-      } else {
-        textToCopy = result.content;
-      }
+      const textToCopy = formatForClipboard(result);
       navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -711,7 +775,9 @@ function ComparisonTable({
                   key={oIdx}
                   className="p-8 align-middle border-l-4 border-accent/5 font-bold text-text-main text-sm text-center"
                 >
-                  {opt.values[fIdx]}
+                  <ReactMarkdown components={{ p: "span" }}>
+                    {opt.values[fIdx]}
+                  </ReactMarkdown>
                 </td>
               ))}
             </tr>
@@ -742,9 +808,11 @@ function ProsConsDescriptive({ data }: { data: any[] }) {
             </h2>
           </div>
 
-          <p className="text-lg font-medium leading-relaxed text-text-main mb-10 italic border-l-8 border-accent pl-6 opacity-90">
-            {opt.summary}
-          </p>
+          <div className="text-lg font-medium leading-relaxed text-text-main mb-10 italic border-l-8 border-accent pl-6 opacity-90">
+            <ReactMarkdown components={{ p: "span" }}>
+              {opt.summary}
+            </ReactMarkdown>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="space-y-6">
@@ -762,9 +830,11 @@ function ProsConsDescriptive({ data }: { data: any[] }) {
                       className="text-accent shrink-0 mt-1"
                       size={18}
                     />
-                    <span className="text-sm font-bold text-text-main leading-snug">
-                      {pro}
-                    </span>
+                    <div className="text-sm font-bold text-text-main leading-snug flex-1">
+                      <ReactMarkdown components={{ p: "span" }}>
+                        {pro}
+                      </ReactMarkdown>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -821,7 +891,9 @@ function SWOTGridView({ data }: { data: any[] }) {
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
                   >
-                    {s}
+                    <ReactMarkdown components={{ p: "span" }}>
+                      {s}
+                    </ReactMarkdown>
                   </li>
                 ))}
               </ul>
@@ -840,7 +912,9 @@ function SWOTGridView({ data }: { data: any[] }) {
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
                   >
-                    {w}
+                    <ReactMarkdown components={{ p: "span" }}>
+                      {w}
+                    </ReactMarkdown>
                   </li>
                 ))}
               </ul>
@@ -859,7 +933,9 @@ function SWOTGridView({ data }: { data: any[] }) {
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
                   >
-                    {o}
+                    <ReactMarkdown components={{ p: "span" }}>
+                      {o}
+                    </ReactMarkdown>
                   </li>
                 ))}
               </ul>
@@ -878,7 +954,9 @@ function SWOTGridView({ data }: { data: any[] }) {
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
                   >
-                    {t}
+                    <ReactMarkdown components={{ p: "span" }}>
+                      {t}
+                    </ReactMarkdown>
                   </li>
                 ))}
               </ul>
@@ -915,9 +993,11 @@ function VerdictBullets({
           </h2>
         </div>
 
-        <p className="text-xl font-bold italic leading-tight">
-          "{data.recommendation}"
-        </p>
+        <div className="text-xl font-bold italic leading-tight">
+        &ldquo;<ReactMarkdown components={{ p: "span" }}>
+            {data.recommendation}
+          </ReactMarkdown>&rdquo;
+        </div>
 
         <div className="space-y-6 pt-8 border-t border-bg-surface/20">
           <h3 className="text-xs font-black uppercase tracking-widest opacity-60">
@@ -927,10 +1007,12 @@ function VerdictBullets({
             {data.keyTakeaways.map((point: string, i: number) => (
               <li
                 key={i}
-                className="flex items-center gap-4 text-base font-black italic"
+                className="flex items-start gap-4 text-base font-black italic"
               >
-                <ArrowRight size={20} className="shrink-0" />
-                <span>{point}</span>
+                <ArrowRight size={20} className="shrink-0 mt-1" />
+                <div className="flex-1">
+                  <ReactMarkdown components={{ p: "span" }}>{point}</ReactMarkdown>
+                </div>
               </li>
             ))}
           </ul>

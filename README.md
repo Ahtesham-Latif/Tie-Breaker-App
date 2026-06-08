@@ -1,131 +1,147 @@
-# THE TIEBREAKER 🥴
-**AI-Powered Decision Intelligence Engine**
+# 🧠 THE TIEBREAKER
 
-🌍 **Live Demo:** [Experience The TieBreaker Here](https://tie-breaker-fjgrfwbkakakgham.canadacentral-01.azurewebsites.net/)
+A production-ready AI decision intelligence engine built to help users resolve complex dilemmas using structured reasoning. The system leverages LLM-powered analysis to generate Pros & Cons, Side-by-Side Comparisons, SWOT breakdowns, and final verdicts with clear, structured outputs.
 
-The TieBreaker is a professional-grade web application designed to help users navigate complex dilemmas. By leveraging advanced Large Language Models (LLMs) via OpenRouter, the app acts as your personal decision-making assistant, generating structured Pros & Cons, Side-by-Side Comparisons, SWOT analyses, and objective final Verdicts.
+[![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Azure](https://img.shields.io/badge/Azure-Deployment-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM%20Gateway-orange?style=for-the-badge)](https://openrouter.ai/)
+
+> **⚠️ Deployment Notice:** Azure deployment is currently paused as the free tier limit has been reached. The CI/CD pipeline remains intact, and I am currently exploring free-tier alternatives (Railway, Render, Vercel) for redeployment.
+
+**🔗 Live Demo:** [Experience TieBreaker](https://tie-breaker-fjgrfwbkakakgham.canadacentral-01.azurewebsites.net/)
 
 ---
 
-## ✨ Features
-* **Pros & Cons Generator:** Instantly weigh the benefits and drawbacks of any choice.
-* **Side-by-Side Comparisons:** Evaluate multiple options against each other with structured metrics.
-* **SWOT Analysis:** Break down Strengths, Weaknesses, Opportunities, and Threats.
-* **The Final Verdict:** Get an AI-driven, objective recommendation to break the tie.
+## 📸 Previews
+
+![Tie Breaker](Pictures/TieBreakertheme(Changed).png)
+--
+
+# Verdict
+
+![Tie Breaker](Pictures/Verdict.png)
+
+AI-powered decision engine that supports:
+
+- Simple comparisons (e.g. Python or C++)
+- You can add supporting factors how , what factors you want in analysis
+
+Outputs include:
+- Pros & Cons analysis
+- Side-by-side structured comparisons
+- SWOT analysis (Strengths, Weaknesses, Opportunities, Threats)
+- Final AI-generated verdict
 
 ---
 
-## 🚀 Tech Stack
+## 🚀 Overview
 
-### Core Framework
-* **React 19:** Utilizing the latest concurrent rendering and performance improvements.
-* **TypeScript 5.8:** Full type safety for AI schemas, components, and server logic.
-* **Vite 6:** Next-generation frontend tooling for near-instant HMR and optimized builds.
+TieBreaker is designed as a **decision intelligence system**, not just a chatbot UI. It transforms unstructured user dilemmas into structured analytical outputs using LLMs and schema-enforced responses.
 
-### AI & Intelligence
-* **OpenRouter API:** Unified gateway for LLM access.
-* **OpenAI JS Client:** Browser-compatible `openai` SDK with OpenRouter support.
-* **Gemini 2.0 Flash:** Default model chosen for high-speed, structured reasoning.
+**Key User Features:**
+* Compare multiple options with structured scoring dimensions
+* Generate AI-driven Pros & Cons breakdowns
+* Perform SWOT analysis automatically per entity
+* Produce a final verdict with key reasoning points
+* Render AI outputs in clean Markdown UI
+* Handle both simple and complex multi-option inputs
 
-### UI & Styling
-* **Tailwind CSS 4.0:** CSS-first configuration using the new `@tailwindcss/vite` engine.
-* **Motion:** Animations and transitions powered by the `motion/react` package.
-* **Lucide React:** Clean, consistent iconography.
+---
 
-### Server & Deployment
-* **Express.js (Node.js):** Custom lightweight backend to serve the compiled Vite static assets and handle React routing.
-* **Azure App Service:** Production-ready configuration supporting dynamic port binding.
+## ✨ Core Functionalities
 
-### Testing Suite
-* **Vitest:** Vite-native testing runner.
-* **React Testing Library:** User-centric component testing.
-* **jsdom:** Browser environment simulation for Node.js.
+* **Structured AI Output Engine:** Uses strict JSON schema enforcement to ensure consistent AI responses across all analysis types.
+* **Multi-Mode Decision System:** Supports pros-cons, comparison, SWOT, and verdict generation.
+* **Dynamic Prompt Engineering:** Automatically adapts prompts based on number of entities and complexity level.
+* **Markdown Rendering Layer:** AI outputs are rendered using ReactMarkdown for readable formatting.
+* **Token Optimization Layer:** Reduces unnecessary output verbosity and improves response efficiency.
+* **Model Abstraction Layer:** Works with OpenRouter-compatible models (Gemini, OpenAI, etc.).
+
+---
+
+## 🏗️ Project Architecture
+
+### 1. AI Processing Layer
+- OpenRouter API integration
+- Structured JSON schema enforcement
+- Prompt-engineered decision pipelines
+
+### 2. Frontend Layer
+```text
+src/
+  components/   → UI rendering (comparison, SWOT, verdict views)
+  lib/          → utilities (cn, helpers)
+  hooks/        → state + AI orchestration
+```
+
+### 3. Decision Flow
+```mermaid
+graph LR
+  A[User Input] --> B[Entity Parser]
+  B --> C[Prompt Builder]
+  C --> D[LLM via OpenRouter]
+  D --> E[JSON Schema Validation]
+  E --> F[React UI Renderer]
+```
 
 ---
 
 ## 🛠️ Installation & Setup
 
-### 1. Clone the Repository
+**Clone the Repository**
 ```bash
-git clone https://github.com/Ahtesham-Latif/Tie-Breaker-App
+git clone [https://github.com/Ahtesham-Latif/Tie-Breaker-App](https://github.com/Ahtesham-Latif/Tie-Breaker-App)
 cd tie-breaker
 ```
 
-### 2. Install Dependencies
-
+**Install Dependencies**
 ```bash
 npm install
-
 ```
 
-### 3. Environment Variables Configuration
-
-Create a `.env` file in the root directory and add the following key:
-
+**Environment Setup**
+Create a `.env` file and add your API key:
 ```env
-OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_API_KEY=your_key_here
 ```
 
-### 4. Run the Development Server
-
+**Run Development Server**
 ```bash
 npm run dev
-
 ```
 
 ---
 
 ## 🧪 Testing
-
-Run standard tests:
-
 ```bash
 npm test
-
 ```
-
-Run tests with the interactive UI dashboard:
-
+Run interactive UI tests:
 ```bash
 npm run test -- --ui
-
 ```
 
 ---
 
-## ☁️ Deployment (Azure Readiness)
+## 🚀 Deployment
 
-The application is currently live and deployed via **Azure App Service (Canada Central)**.
+The project is configured for deployment via Azure App Service using GitHub Actions CI/CD.
+However:
 
-The included `server.js` acts as an Express production server that:
-
-1. Serves the static compiled files from the `dist` folder.
-2. Catches all React Router paths and redirects them to `index.html` to prevent 404 errors on refresh.
-3. Dynamically listens to Azure's injected `PORT` environment variable (falling back to `8080`).
-
-**To build and test the production server locally:**
-
-```bash
-# 1. Build the frontend assets
-npm run build
-
-# 2. Start the Express production server
-node server.js
-
-```
-
-*You should see: `The TieBreaker is live on port 8080`*
+> **⚠️ Deployment Notice:** Azure deployment is currently paused as the free tier limit has been reached. The CI/CD pipeline remains intact, and alternative free-tier platforms are under evaluation.
 
 ---
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request or open an Issue to discuss potential changes, feature requests, or bug fixes.
 
 ## 📄 License
 
-© 2026 Ahtesham-Latif. All rights reserved.
+Open-source under the MIT License.
 
-```
+---
 
-```
+## 👨‍💻 Author
+
+**Ahtesham Latif**
+AI Systems Developer · Decision Intelligence Engineering
+[GitHub](https://github.com/Ahtesham-Latif)
