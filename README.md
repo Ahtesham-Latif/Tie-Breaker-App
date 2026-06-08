@@ -16,7 +16,7 @@ A production-ready AI decision intelligence engine built to help users resolve c
 
 ## 📸 Previews
 
-![Tie Breaker](Pictures/TieBreakertheme(Changed).png)
+![Tie Breaker](Pictures/TieBreakerTheme(Changed).png)
 --
 
 # Verdict
