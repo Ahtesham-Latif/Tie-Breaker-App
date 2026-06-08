@@ -196,7 +196,9 @@ async function analyzeDecision(
   const text = completion.choices[0].message.content || "";
   
   // Log actual token usage to the console for monitoring
-  console.log(`[AI Usage - ${type}]`, completion.usage);
+    if(completion.usage) {
+          console.log(`[AI Usage - ${type}]`, completion.usage);
+      }
 
   try {
     let data = JSON.parse(text);
