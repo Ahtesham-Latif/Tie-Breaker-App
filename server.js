@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { rateLimit } from 'express-rate-limit';
-import { AzureCliCredential } from "@azure/identity";
+// Import removed for AzureCliCredential as it's now dynamically imported using DefaultAzureCredential
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -45,8 +45,9 @@ app.post('/api/analyze', async (req, res) => {
       return res.status(500).json({ error: "Missing Foundry Agent configuration on server setup" });
     }
 
-    // 1. Authenticate using Azure's CLI credentials
-    const credential = new AzureCliCredential();
+    // 1. Authenticate using Azure's Default Credentials (supports Managed Identity in App Service and Azure CLI locally)
+    const { DefaultAzureCredential } = await import("@azure/identity");
+    const credential = new DefaultAzureCredential();
 
     // 2. Request a scoped access token specifically for Azure AI services
     const tokenResponse = await credential.getToken("https://ai.azure.com");
