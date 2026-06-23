@@ -51,6 +51,6 @@ jobs:
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'Tie-Breaker'
+          app-name: 'Tie-Breaker-v2'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_44AA72BB063748579B55C518114AE93F }}
