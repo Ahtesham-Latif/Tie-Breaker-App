@@ -38,11 +38,11 @@ app.post('/api/analyze', async (req, res) => {
     const { decision, type, factors, useWebSearch, contextData, myCase } = req.body;
 
     if (!decision || !type) {
-      return res.status(400).json({ error: 'Missing decision or analysis type' });
+      return res.status(400).json({ error: 'Please provide both a decision and an analysis type so I can help you! (Error Code: ERR-01)' });
     }
 
     if (!foundryEndpoint) {
-      return res.status(500).json({ error: "Missing Foundry Agent configuration on server setup" });
+      return res.status(500).json({ error: 'My connection to the AI engine is temporarily unavailable. Please try again later. (Error Code: ERR-02)' });
     }
 
     // 1. Authenticate using Azure's Default Credentials (supports Managed Identity in App Service and Azure CLI locally)
@@ -52,7 +52,7 @@ app.post('/api/analyze', async (req, res) => {
     // 2. Request a scoped access token specifically for Azure AI services
     const tokenResponse = await credential.getToken("https://ai.azure.com");
     if (!tokenResponse) {
-      throw new Error("Failed to get Azure CLI authentication token.");
+      throw new Error("Failed to authenticate with Azure AI services. (Error Code: ERR-03)");
     }
     const token = tokenResponse.token;
 
@@ -91,7 +91,7 @@ app.post('/api/analyze', async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Azure Agent responded with status ${response.status}: ${errText}`);
+      throw new Error(`The AI service is currently experiencing issues (${response.status}). Please try again shortly. (Error Code: ERR-04)`);
     }
 
     // 5. Parsing the Complex Azure Response
@@ -107,7 +107,7 @@ app.post('/api/analyze', async (req, res) => {
     // Safety Check: If there's no text, Azure's safety guardrails likely blocked the request
     if (!textContent) {
       return res.status(400).json({
-        error: 'Request blocked by safety guardrails. Please enter a valid topic.'
+        error: 'I could not process that request. Please ensure your topic is clear and try again. (Error Code: ERR-05)'
       });
     }
 
@@ -157,12 +157,16 @@ app.post('/api/analyze', async (req, res) => {
       return res.json({ content: JSON.stringify(result) });
     } catch (parseError) {
       console.error("Failed to parse agent JSON:", sanitized);
-      throw new Error("Agent returned invalid JSON.");
+      throw new Error("I had trouble formatting the AI's response. Please try clicking Analyze again! (Error Code: ERR-06)");
     }
 
   } catch (error) {
     console.error('❌ Analysis error details:', error);
-    res.status(500).json({ error: error.message || 'The AI engine encountered an internal error.' });
+    // If the error already has an ERR- code, pass it through, otherwise wrap it in ERR-07
+    const errorMsg = error.message?.includes('ERR-') 
+      ? error.message 
+      : 'An unexpected internal error occurred. Please try again in a moment! (Error Code: ERR-07)';
+    res.status(500).json({ error: errorMsg });
   }
 });
 
