@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js", 
+    "dev:full": "concurrently \"npm run dev\" \"npm run start\"",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
@@ -12,8 +13,12 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@azure/ai-projects": "latest",
+    "@azure/identity": "latest",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "openai": "^4.0.0",
@@ -26,6 +31,7 @@
     "@tailwindcss/vite": "^4.0.7",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "concurrently": "^9.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",

@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [react(), tailwindcss()],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8080',
+          changeOrigin: true,
+        },
+      },
+    },
     test: {
       globals: true,
       environment: 'jsdom',
@@ -18,10 +26,6 @@ export default defineConfig(({ mode }) => {
       threads: true,
       maxThreads: 1,
       minThreads: 1,
-    },
-    define: {
-      // Maps Azure portal variables or local .env to the frontend
-      'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY),
     },
     resolve: {
       alias: {

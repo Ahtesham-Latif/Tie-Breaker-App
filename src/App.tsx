@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import OpenAI from "openai";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Scale,
@@ -21,198 +20,73 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
+import { AnalysisType, AnalysisResult } from "./types";
+import { 
+  AnalysisDisplay, 
+  TypeTab, 
+  AnalysisButton, 
+  WelcomeModal, 
+  AuthWallModal 
+} from "./components";
 
-// --- Types ---
-
-type AnalysisType = "pros-cons" | "comparison" | "swot" | "verdict";
-
-// The structured data format for the comparison analysis type
-// This is the expected structure of the data returned from the AI for the comparison analysis type
-interface ComparisonData {
-  factor: string;
-  options: {
-    name: string;
-    pros: string[];
-    cons: string[];
-    impactScore: number;
-    notes: string;
-  }[];
-}
-// The structured data returned from the AI for each analysis type
-// This is a generic interface that can accommodate the different types of analyses (comparison, pros-cons, swot, verdict)
-interface AnalysisResult {
-  type: AnalysisType;
-  content: string; // Markdown or JSON string
-  structuredData?: any;
-  options?: string[];
-}
 
 // --- AI Service ---
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-// For development purposes, we allow browser access.  
-// In production, consider using a backend proxy to keep the key secure.
-  dangerouslyAllowBrowser: true,
-});
-
 /**
- * CORE LOGIC: PROMPT GENERATION & API INTERACTION
+ * Updated to call the backend proxy instead of direct OpenRouter access
  */
 async function analyzeDecision(
   decision: string,
   type: AnalysisType,
   factors: string[],
+  useWebSearch: boolean,
+  contextData?: any,
+  myCase?: string
 ): Promise<{ content: string; structuredData?: any }> {
-  let prompt = "";
-  let schema: any = {};
-
-  // Extract entities from decision string (e.g., "Cat and Dog" -> ["Cat", "Dog"])
-  const entities = decision
-    .split(/\s+and\s+|\s+&\s+|\s+or\s+/i)
-    .map((e) => e.trim())
-    .filter(Boolean);
-  const entitiesText = entities.join(" vs ");
-  const factorsText =
-    factors.length > 0
-      ? `using these specific factors: ${factors.join(", ")}`
-      : "by identifying the most relevant comparison factors automatically";
-
-  if (type === "comparison") {
-    prompt = `Perform a deep side-by-side comparison of ${entitiesText}. Analyze them ${factorsText}. 
-    Focus on at most 3 specific dimensions like "Cost", "When to use", and "Ease of use". 
-    Return a structured comparison table. Limit each list to 5 concise items.`;
-
-    schema = {
-      type: "object",
-      properties: {
-        factors: {
-          type: "array",
-          items: { type: "string" },
-        },
-        comparison: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              optionName: {
-                type: "string",
-              },
-              values: {
-                type: "array",
-                items: { type: "string" },
-              },
-            },
-            required: ["optionName", "values"],
-            additionalProperties: false,
-          },
-        },
-      },
-      required: ["factors", "comparison"],
-      additionalProperties: false,
-    };
-  } else if (type === "pros-cons") {
-    prompt = `Perform an individual pros and cons analysis for each entity: ${entities.join(", ")}. Analyze them ${factorsText}. Ensure you do not mix up their attributes. Provide exactly 3 pros, 3 cons, and a unique summary for each specific entity.`;
-    schema = {
-      type: "object",
-      properties: {
-        results: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              optionName: { type: "string" },
-              pros: { type: "array", items: { type: "string" } },
-              cons: { type: "array", items: { type: "string" } },
-              summary: { type: "string" },
-            },
-            required: ["optionName", "pros", "cons", "summary"],
-            additionalProperties: false,
-          },
-        },
-      },
-      required: ["results"],
-      additionalProperties: false,
-    };
-  } else if (type === "swot") {
-    prompt = `Generate a SWOT analysis for each: ${entities.join(", ")} ${factorsText}. Limit to 3 points per quadrant.`;
-    schema = {
-      type: "object",
-      properties: {
-        results: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              optionName: { type: "string" },
-              strengths: { type: "array", items: { type: "string" } },
-              weaknesses: { type: "array", items: { type: "string" } },
-              opportunities: { type: "array", items: { type: "string" } },
-              threats: { type: "array", items: { type: "string" } },
-            },
-            required: [
-              "optionName",
-              "strengths",
-              "weaknesses",
-              "opportunities",
-              "threats",
-            ],
-            additionalProperties: false,
-          },
-        },
-      },
-      required: ["results"],
-      additionalProperties: false,
-    };
-  } else {
-    prompt = `Provide a final, concise verdict between ${entitiesText} ${factorsText}. Who is the winner. Must be one ? Limit to 3 key takeaways.`;
-    schema = {
-      type: "object",
-      properties: {
-        winner: { type: "string" },
-        recommendation: { type: "string" },
-        keyTakeaways: { type: "array", items: { type: "string" } },
-      },
-      required: ["winner", "recommendation", "keyTakeaways"],
-      additionalProperties: false,
-    };
-  }
-
-  const completion = await openai.chat.completions.create({
-    model: "deepseek/deepseek-chat",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.6,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: `${type.replace("-", "_")}_schema`,
-        schema: schema,
-        strict: true,
-      },
-    },
+  const response = await fetch('/api/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ decision, type, factors, useWebSearch, contextData, myCase }),
   });
 
-  const text = completion.choices[0].message.content || "";
-  
-  // Log actual token usage to the console for monitoring
-    if(completion.usage) {
-          console.log(`[AI Usage - ${type}]`, completion.usage);
+  if (!response.ok) {
+    let errorMessage = 'Failed to fetch analysis from server';
+    const contentType = response.headers.get("content-type");
+    try {
+      if (contentType && contentType.includes("application/json")) {
+        const errorBody = await response.json();
+        if (errorBody && errorBody.error) {
+          errorMessage = errorBody.error;
+        }
+      } else {
+        errorMessage = await response.text();
       }
-
-  try {
-    let data = JSON.parse(text);
-    // Unwrap array from 'results' wrapper when necessary since openai strict standard schemas require objects
-    if (data.results && Array.isArray(data.results)) {
-      data = data.results;
+    } catch (jsonError) {
+      console.warn('Server error response was not JSON:', jsonError);
     }
+    throw new Error(`${errorMessage} (Status: ${response.status})`);
+  }
+
+  const { content } = await response.json();
+  const text = content?.trim() || "";
+
+  if (!text) {
+    throw new Error('The AI engine returned an empty response. Please try again.');
+  }
+
+  // Robust parsing logic to handle potential markdown wrappers or thinking blocks
+  try {
+    const cleanedText = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+    const jsonMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || 
+                      cleanedText.match(/{[\s\S]*}/);
+    
+    const jsonToParse = jsonMatch ? (jsonMatch[1] || jsonMatch[0]).trim() : cleanedText;
+    const data = JSON.parse(jsonToParse);
+
     return { content: text, structuredData: data };
   } catch (e) {
-    console.error("Failed to parse JSON", e);
-    return {
-      content: "Error processing structured data.",
-      structuredData: null,
-    };
+    console.error("Failed to parse JSON", e, text);
+    return { content: text, structuredData: null };
   }
 }
 
@@ -228,7 +102,8 @@ function formatForClipboard(result: AnalysisResult): string {
   switch (type) {
     case "pros-cons":
       text = "Pros & Cons Analysis\n\n";
-      structuredData.forEach((opt: any) => {
+      const prosConsResults = structuredData.results || structuredData;
+      prosConsResults.forEach((opt: any) => {
         text += `${opt.optionName}\n\n`;
         text += `Summary\n${opt.summary}\n\n`;
         text += "Pros\n";
@@ -253,7 +128,8 @@ function formatForClipboard(result: AnalysisResult): string {
 
     case "swot":
       text = "SWOT Analysis\n\n";
-      structuredData.forEach((opt: any) => {
+      const swotResults = structuredData.results || structuredData;
+      swotResults.forEach((opt: any) => {
         text += `${opt.optionName}\n\n`;
         text += "Strengths\n";
         opt.strengths.forEach((s: string) => (text += `• ${s}\n`));
@@ -285,26 +161,43 @@ function formatForClipboard(result: AnalysisResult): string {
 // --- Components ---
 
 export default function App() {
-  const [decision, setDecision] = useState("");
+  const [optionA, setOptionA] = useState("");
+  const [optionB, setOptionB] = useState("");
+  const [myCase, setMyCase] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [useWebSearch, setUseWebSearch] = useState(false);
+  const [loadingTypes, setLoadingTypes] = useState<Record<string, boolean>>({});
+  const [hasStarted, setHasStarted] = useState(false);
   const [selectedType, setSelectedType] = useState<AnalysisType>("pros-cons");
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastRequestTime, setLastRequestTime] = useState<number>(0);
-  const [cooldown, setCooldown] = useState<number>(0);
+  const [notifications, setNotifications] = useState<{id: number, text: string}[]>([]);
   const [analysisCache, setAnalysisCache] = useState<
     Record<string, AnalysisResult>
   >({});
 
-  const RATE_LIMIT_MS = 10000; // 10 seconds cooldown between AI calls
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showAuthWall, setShowAuthWall] = useState(false);
+  const [usageCount, setUsageCount] = useState<number>(0);
 
-  // Clear cache if decision or factors change to ensure fresh results for new context
   useEffect(() => {
-    setAnalysisCache({});
-  }, [decision, options]);
+    const welcomed = localStorage.getItem("tiebreaker_welcomed");
+    if (!welcomed) {
+      setShowWelcome(true);
+    }
+    const count = parseInt(localStorage.getItem("tiebreaker_usage_count") || "0", 10);
+    setUsageCount(count);
+  }, []);
+
+  const handleCloseWelcome = () => {
+    localStorage.setItem("tiebreaker_welcomed", "true");
+    setShowWelcome(false);
+  };
+
+  const RATE_LIMIT_MS = 10000;
+  const MAX_CACHE_SIZE = 30;
 
   // Theme Toggler Logic
   const toggleTheme = () => {
@@ -321,7 +214,9 @@ export default function App() {
     document.body.setAttribute("data-theme", theme);
   }, [theme]);
 
-  const handleAddOption = () => setOptions([...options, ""]);
+  const handleAddFactor = () => {
+    if (options.length < 6) setOptions([...options, ""]);
+  };
   const handleRemoveOption = (index: number) => {
     if (options.length > 2) {
       setOptions(options.filter((_, i) => i !== index));
@@ -334,36 +229,56 @@ export default function App() {
     setOptions(newOptions);
   };
 
+  const addNotification = (text: string) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { id, text }]);
+    // Auto-remove after 4 seconds
+    setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 4000);
+  };
+
   const handleAnalyze = async (type: AnalysisType = selectedType) => {
-    const trimmedDecision = decision.trim();
-    // Regex to match "Word Operator Word" where Operator is 'and', '&', or 'or'
-    const match = trimmedDecision.match(/^(.+?)\s+(and|&|or)\s+(.+)$/i);
+    const trimmedA = optionA.trim();
+    const trimmedB = optionB.trim();
+    const validFactors = options.filter((o) => o.trim()).map(f => f.toLowerCase()).sort();
 
-    // 1. INPUT VALIDATION
-    if (!trimmedDecision) {
-      setValidationError("Please describe the decision you're trying to make.");
+    if (usageCount >= 3) {
+      setShowAuthWall(true);
       return;
     }
 
-    if (!match) {
-      setValidationError(
-        "Please enter what you want to compare in a clear format, for example: 'Cat and Dog' or 'Coffee & Tea'.",
-      );
+    if (!trimmedA || !trimmedB) {
+      setValidationError("Please enter both options to break the tie.");
       return;
     }
 
-    // 2. CHECK CACHE
-    // We only call the API once per unique analysis type for the current input set
-    if (analysisCache[type]) {
-      setResult(analysisCache[type]);
+    const decisionQuery = `${trimmedA} vs ${trimmedB}`;
+    // Canonical normalization of the decision for the cache key
+    const canonicalDecision = decisionQuery
+      .toLowerCase()
+      .replace(/\b(vs|and|or)\b|&/g, " ")
+      .split(/\s+/)
+      .sort()
+      .join(" ");
+    const cacheKey = `${type}-${canonicalDecision}-${validFactors.join("|")}`;
+
+    if (analysisCache[cacheKey]) {
       setSelectedType(type);
+      setHasStarted(true);
       setValidationError(null);
+      // Promote to end of object (LRU behavior)
+      setAnalysisCache((prev) => {
+        const { [cacheKey]: hit, ...rest } = prev;
+        return { ...rest, [cacheKey]: hit };
+      });
       return;
     }
 
-    const validFactors = options.filter((o) => o.trim());
+    if (loadingTypes[type]) {
+      setSelectedType(type);
+      setHasStarted(true);
+      return;
+    }
 
-    // 3. RATE LIMITING (Client-Side)
     const now = Date.now();
     if (now - lastRequestTime < RATE_LIMIT_MS) {
       const remaining = Math.ceil(
@@ -375,66 +290,120 @@ export default function App() {
       return;
     }
 
-    setValidationError(null);
-    setLoading(true);
     setSelectedType(type);
+    setHasStarted(true);
+    setValidationError(null);
+    setLoadingTypes((prev) => ({ ...prev, [type]: true }));
     setLastRequestTime(now);
 
     try {
-    
+      let contextData = null;
+      if (type === "verdict") {
+        contextData = {
+          comparison: analysisCache[`comparison-${canonicalDecision}-${validFactors.join("|")}`]?.structuredData,
+          prosCons: analysisCache[`pros-cons-${canonicalDecision}-${validFactors.join("|")}`]?.structuredData,
+          swot: analysisCache[`swot-${canonicalDecision}-${validFactors.join("|")}`]?.structuredData,
+        };
+      }
+
       const { content, structuredData } = await analyzeDecision(
-        trimmedDecision,
+        decisionQuery,
         type,
         validFactors,
+        useWebSearch,
+        contextData,
+        myCase
       );
+
+      if (structuredData?.entities?.length < 2 && (type === "comparison" || type === "verdict")) {
+        throw new Error("Analysis failed: Could not identify multiple entities for comparison.");
+      }
+
       const newResult = {
         type,
         content,
         structuredData,
-        options: validFactors,
+        factors: validFactors,
       };
 
-      setAnalysisCache((prev) => ({ ...prev, [type]: newResult }));
-      setResult(newResult);
+      setAnalysisCache((prev) => {
+        // Implementation of LRU via Map-like object behavior
+        const next = { ...prev };
+        if (next[cacheKey]) delete next[cacheKey];
+        next[cacheKey] = newResult;
+
+        const keys = Object.keys(next);
+        if (keys.length > MAX_CACHE_SIZE) {
+          delete next[keys[0]];
+        }
+        return next;
+      });
+      
+      addNotification(`${type.replace("-", " ").toUpperCase()} analysis ready!`);
+
+      setUsageCount(prev => {
+        const next = prev + 1;
+        localStorage.setItem("tiebreaker_usage_count", next.toString());
+        return next;
+      });
     } catch (error: any) {
       console.error(error);
       const errorMessage = error?.message || "";
-      if (
-        errorMessage.includes("quota") ||
-        errorMessage.includes("429") ||
-        errorMessage.includes("RESOURCE_EXHAUSTED")
-      ) {
-        setResult({
-          type,
-          content:
-            "## Quota Exceeded\n\nThe AI service is currently at its limit. Please wait a moment and try again later. This usually happens when many requests are made in a short time.",
-        });
-      } else {
-        setResult({
-          type,
-          content:
-            "## Connection Error\n\nFailed to connect to the AI. Please check your internet connection or try a different analysis type.",
-        });
-      }
+      const errorContent = (errorMessage.includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED"))
+        ? "## Quota Exceeded\n\nThe AI service is currently at its limit. Please wait a moment and try again later."
+        : errorMessage.includes("Too many requests") // Check for server-side rate limit message
+          ? "## Rate Limit Exceeded\n\n" + errorMessage
+          : `## Connection Error\n\nFailed to connect to the analysis server. ${errorMessage || "Please ensure your backend server is running on port 8080."}`;
+
+      setAnalysisCache(prev => ({
+        ...prev, 
+        [cacheKey]: { type, content: errorContent, structuredData: null }
+      }));
     } finally {
-      setLoading(false);
+      setLoadingTypes((prev) => ({ ...prev, [type]: false }));
     }
   };
 
   const reset = () => {
-    setResult(null);
-    setDecision("");
+    setHasStarted(false);
+    setAnalysisCache({});
+    setLoadingTypes({});
+    setOptionA("");
+    setOptionB("");
+    setMyCase("");
     setOptions(["", ""]);
   };
 
   const handleCopy = () => {
-    if (result) {
-      const textToCopy = formatForClipboard(result);
+    const validFactors = options.filter((o) => o.trim()).map((f) => f.toLowerCase()).sort();
+    const canonicalDecision = `${optionA.trim()} vs ${optionB.trim()}`
+      .toLowerCase()
+      .replace(/\b(vs|and|or)\b|&/g, " ")
+      .split(/\s+/)
+      .sort()
+      .join(" ");
+    const currentCacheKey = `${selectedType}-${canonicalDecision}-${validFactors.join("|")}`;
+    const currentResult = analysisCache[currentCacheKey];
+    if (currentResult) {
+      const textToCopy = formatForClipboard(currentResult);
       navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
+  
+
+  const validFactorsForSearch = options.filter((o) => o.trim()).map((f) => f.toLowerCase()).sort();
+  const canonicalSearchDecision = `${optionA.trim()} vs ${optionB.trim()}`
+    .toLowerCase()
+    .replace(/\b(vs|and|or)\b|&/g, " ")
+    .split(/\s+/)
+    .sort()
+    .join(" ");
+  const activeCacheKey = `${selectedType}-${canonicalSearchDecision}-${validFactorsForSearch.join("|")}`;
+  const currentResult = analysisCache[activeCacheKey];
+  const isCurrentTypeLoading = !!loadingTypes[selectedType];
+  const isAnyLoading = Object.values(loadingTypes).some(Boolean);
 
   return (
     <div
@@ -443,10 +412,15 @@ export default function App() {
         "md:h-screen md:overflow-hidden", // Locked height only on desktop
       )}
     >
+      <AnimatePresence>
+        {showWelcome && <WelcomeModal onClose={handleCloseWelcome} />}
+        {showAuthWall && <AuthWallModal onClose={() => setShowAuthWall(false)} />}
+      </AnimatePresence>
+
       {/* Sidebar - Inputs */}
       <aside className={cn(
-        "w-full md:w-[320px] bg-bg-surface border-b md:border-b-0 md:border-r border-border-dim flex flex-col p-6 flex-shrink-0 shadow-sm z-20 relative transition-all duration-300",
-        result && "md:hidden" // Hide sidebar on desktop when result appears
+        "w-full md:w-1/3 lg:max-w-[450px] bg-bg-surface border-b md:border-b-0 md:border-r border-border-dim flex flex-col p-6 shrink-0 shadow-sm z-20 relative transition-all duration-300",
+        hasStarted && "md:hidden" // Hide sidebar on desktop when result appears
       )}>
         <div className="flex items-center justify-between mb-10">
           <div
@@ -488,19 +462,70 @@ export default function App() {
           </AnimatePresence>
 
           <div className="space-y-3">
-            <label className="text-[11px] font-bold uppercase tracking-[0.1em] text-accent block">
-              The Decision
+            <label className="text-[11px] font-bold uppercase tracking-widest text-accent block">
+              The Contenders
             </label>
-            <textarea
-              value={decision}
-              onChange={(e) => setDecision(e.target.value)}
-              placeholder="What's the dilemma?"
-              className="w-full bg-bg-panel border-2 border-transparent rounded-xl p-4 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all resize-none min-h-[120px] placeholder:text-accent/30 font-semibold shadow-inner"
-            />
+            <div className="flex flex-col gap-3">
+              <textarea
+                value={optionA}
+                onChange={(e) => setOptionA(e.target.value)}
+                maxLength={100}
+                placeholder="Option A (e.g. iPhone 15 Pro Max)"
+                rows={2}
+                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
+              />
+              <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
+                VS
+              </div>
+              <textarea
+                value={optionB}
+                onChange={(e) => setOptionB(e.target.value)}
+                maxLength={100}
+                placeholder="Option B (e.g. Galaxy S24 Ultra)"
+                rows={2}
+                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
+              />
+            </div>
+            
+            <div className="mt-4">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
+                My Case / Context
+                <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
+                  Optional (Max 500 words)
+                </span>
+              </label>
+              <textarea
+                value={myCase}
+                maxLength={3000}
+                onChange={(e) => {
+                  // Limit to ~500 words simply by counting spaces
+                  const words = e.target.value.trim().split(/\s+/).length;
+                  if (words <= 500 || e.target.value.length < myCase.length) {
+                    setMyCase(e.target.value);
+                  }
+                }}
+                placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                rows={3}
+                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[80px]"
+              />
+            </div>
+            
+            <label className="flex items-center gap-2 cursor-pointer mt-3 group w-fit">
+              <input 
+                type="checkbox" 
+                checked={useWebSearch} 
+                onChange={(e) => setUseWebSearch(e.target.checked)}
+                className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
+              />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-text-main opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
+                🌐 Deep Web Search 
+                <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border border-accent/20">SLOWER</span>
+              </span>
+            </label>
           </div>
 
           <div className="space-y-4">
-            <label className="text-[11px] font-bold uppercase tracking-[0.1em] text-accent flex items-center justify-between">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between">
               Analysis Factors
               <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
                 Optional
@@ -515,7 +540,8 @@ export default function App() {
                   <input
                     value={opt}
                     onChange={(e) => handleOptionChange(idx, e.target.value)}
-                    placeholder={`Option ${idx + 1}`}
+                    maxLength={25}
+                    placeholder={`Factor ${idx + 1} (e.g. Cost)`}
                     className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                   />
                   {options.length > 2 && (
@@ -528,23 +554,25 @@ export default function App() {
                   )}
                 </div>
               ))}
-              <button
-                onClick={handleAddOption}
-                className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
-              >
-                <Plus size={16} className="mr-2" />
-                Add Option
-              </button>
+              {options.length < 6 && (
+                <button
+                  onClick={handleAddFactor}
+                  className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Add Option
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         <button
           onClick={() => handleAnalyze(selectedType)}
-          disabled={loading || !decision.trim()}
+          disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
           className="mt-6 w-full py-4 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
         >
-          {loading ? (
+          {isAnyLoading ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <RefreshCcw size={16} />
@@ -553,10 +581,30 @@ export default function App() {
         </button>
       </aside>
 
+      {/* Floating Notifications */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-100 flex flex-col gap-2 pointer-events-none">
+        <AnimatePresence>
+          {notifications.map((n) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-accent text-bg-surface px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border-2 border-white/10 backdrop-blur-md"
+            >
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                {n.text}
+              </span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
       {/* Main Content - Results */}
       <main className="flex-1 flex flex-col min-w-0 bg-bg-base md:overflow-hidden relative z-10">
         <AnimatePresence mode="wait">
-          {!result ? (
+          {!hasStarted ? (
             <motion.div
               key="hero"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -585,25 +633,25 @@ export default function App() {
                     title="Pros & Cons"
                     icon={<CheckCircle2 size={18} />}
                     onClick={() => handleAnalyze("pros-cons")}
-                    disabled={loading || !decision.trim()}
+                    disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
                   />
                   <AnalysisButton
                     title="Comparison"
                     icon={<Columns size={18} />}
                     onClick={() => handleAnalyze("comparison")}
-                    disabled={loading || !decision.trim()}
+                    disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
                   />
                   <AnalysisButton
                     title="SWOT"
                     icon={<Zap size={18} />}
                     onClick={() => handleAnalyze("swot")}
-                    disabled={loading || !decision.trim()}
+                    disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
                   />
                   <AnalysisButton
                     title="The Verdict"
                     icon={<ArrowRight size={18} />}
                     onClick={() => handleAnalyze("verdict")}
-                    disabled={loading || !decision.trim()}
+                    disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
                     highlight
                   />
                 </div>
@@ -631,7 +679,7 @@ export default function App() {
                     </button>
                   </div>
                   <h2 className="text-xl md:text-2xl font-black text-text-bright tracking-tight max-w-2xl uppercase italic leading-tight">
-                    {decision}
+                    {optionA} <span className="text-accent text-sm mx-2">VS</span> {optionB}
                   </h2>
                 </div>
 
@@ -678,7 +726,7 @@ export default function App() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar">
-                  {loading && (
+                  {isCurrentTypeLoading && !currentResult && (
                     <div className="absolute inset-0 bg-bg-surface/95 backdrop-blur-md z-30 flex items-center justify-center flex-col gap-6">
                       <div className="relative">
                         <Loader2
@@ -698,15 +746,21 @@ export default function App() {
                   )}
 
                   <div className="max-w-7xl mx-auto space-y-12">
-                    {result.structuredData ? (
-                      <AnalysisDisplay
-                        type={result.type}
-                        data={result.structuredData}
-                      />
+                    {currentResult ? (
+                      currentResult.structuredData ? (
+                        <AnalysisDisplay
+                          type={currentResult.type}
+                          data={currentResult.structuredData}
+                        />
+                      ) : (
+                        <div className="markdown-body">
+                          <ReactMarkdown>{currentResult.content}</ReactMarkdown>
+                        </div>
+                      )
                     ) : (
-                      <div className="markdown-body">
-                        <ReactMarkdown>{result.content}</ReactMarkdown>
-                      </div>
+                       !isCurrentTypeLoading && (
+                         <div className="text-center opacity-20 py-20 font-black uppercase tracking-widest">Select an analysis type to begin</div>
+                       )
                     )}
                   </div>
                 </div>
@@ -719,368 +773,3 @@ export default function App() {
   );
 }
 
-// --- Helper Components ---
-
-function AnalysisDisplay({ type, data }: { type: AnalysisType; data: any }) {
-  if (!data) return null;
-
-  switch (type) {
-    case "comparison":
-      return <ComparisonTable data={data} />;
-    case "pros-cons":
-      return <ProsConsDescriptive data={data} />;
-    case "swot":
-      return <SWOTGridView data={data} />;
-    case "verdict":
-      return <VerdictBullets data={data} />;
-    default:
-      return null;
-  }
-}
-
-function ComparisonTable({
-  data,
-}: {
-  data: { factors: string[]; comparison: any[] };
-}) {
-  return (
-    <div className="overflow-x-auto rounded-[2rem] border-4 border-accent shadow-2xl bg-bg-panel overflow-hidden">
-      <table className="w-full text-left border-collapse table-auto min-w-[600px]">
-        <thead>
-          <tr className="bg-accent text-bg-surface">
-            <th className="p-8 font-black uppercase tracking-[0.2em] text-[12px] border-b-4 border-accent">
-              Factor / Metric
-            </th>
-            {data.comparison.map((opt, i) => (
-              <th
-                key={i}
-                className="p-8 font-black uppercase tracking-[0.2em] text-[12px] border-b-4 border-accent border-l-4 border-bg-surface/10 text-center"
-              >
-                {opt.optionName}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y-4 divide-accent/10">
-          {data.factors.map((factor, fIdx) => (
-            <tr
-              key={fIdx}
-              className="hover:bg-accent-muted/10 transition-colors"
-            >
-              <td className="p-8 font-black text-accent text-sm bg-accent-muted/5 border-r-4 border-accent/10">
-                {factor}
-              </td>
-              {data.comparison.map((opt, oIdx) => (
-                <td
-                  key={oIdx}
-                  className="p-8 align-middle border-l-4 border-accent/5 font-bold text-text-main text-sm text-center"
-                >
-                  <ReactMarkdown components={{ p: "span" }}>
-                    {opt.values[fIdx]}
-                  </ReactMarkdown>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ProsConsDescriptive({ data }: { data: any[] }) {
-  return (
-    <div className="grid grid-cols-1 gap-10">
-      {data.map((opt, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className="bg-bg-panel border-4 border-accent/20 rounded-[2.5rem] p-10 shadow-xl"
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-accent rounded-2xl flex items-center justify-center text-bg-surface shadow-lg">
-              <CheckCircle2 size={24} />
-            </div>
-            <h2 className="text-3xl font-black text-text-bright tracking-tighter uppercase">
-              {opt.optionName}
-            </h2>
-          </div>
-
-          <div className="text-lg font-medium leading-relaxed text-text-main mb-10 italic border-l-8 border-accent pl-6 opacity-90">
-            <ReactMarkdown components={{ p: "span" }}>
-              {opt.summary}
-            </ReactMarkdown>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-6">
-              <h3 className="text-sm font-black text-accent uppercase tracking-widest flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-accent" /> Strategic
-                Advantages
-              </h3>
-              <ul className="space-y-4">
-                {opt.pros.map((pro: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-4 p-5 rounded-2xl bg-bg-surface border-2 border-accent/5 hover:border-accent/20 transition-all shadow-sm"
-                  >
-                    <CheckCircle2
-                      className="text-accent shrink-0 mt-1"
-                      size={18}
-                    />
-                    <div className="text-sm font-bold text-text-main leading-snug flex-1">
-                      <ReactMarkdown components={{ p: "span" }}>
-                        {pro}
-                      </ReactMarkdown>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h3 className="text-sm font-black text-danger uppercase tracking-widest flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-danger" /> Potential
-                Constraints
-              </h3>
-              <ul className="space-y-4">
-                {opt.cons.map((con: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-4 p-5 rounded-2xl bg-bg-surface border-2 border-danger/5 hover:border-danger/20 transition-all shadow-sm"
-                  >
-                    <XCircle className="text-danger shrink-0 mt-1" size={18} />
-                    <span className="text-sm font-bold text-text-main leading-snug">
-                      {con}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function SWOTGridView({ data }: { data: any[] }) {
-  return (
-    <div className="space-y-16">
-      {data.map((opt, i) => (
-        <div key={i} className="space-y-8">
-          <div className="flex items-center gap-4">
-            <div className="px-6 py-2 bg-accent text-bg-surface font-black rounded-full text-sm uppercase tracking-widest shadow-lg">
-              {opt.optionName}
-            </div>
-            <div className="flex-1 h-1 bg-accent/10 rounded-full" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-bg-panel border-4 border-accent p-8 rounded-[2rem] shadow-xl hover:scale-[1.02] transition-transform">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
-                  Strengths
-                </span>
-                <span className="text-4xl font-black text-accent/20">S</span>
-              </div>
-              <ul className="space-y-2">
-                {opt.strengths.map((s: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
-                  >
-                    <ReactMarkdown components={{ p: "span" }}>
-                      {s}
-                    </ReactMarkdown>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-bg-panel border-4 border-danger p-8 rounded-[2rem] shadow-xl hover:scale-[1.02] transition-transform">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
-                  Weaknesses
-                </span>
-                <span className="text-4xl font-black text-danger/20">W</span>
-              </div>
-              <ul className="space-y-2">
-                {opt.weaknesses.map((w: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
-                  >
-                    <ReactMarkdown components={{ p: "span" }}>
-                      {w}
-                    </ReactMarkdown>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-bg-panel border-4 border-accent p-8 rounded-[2rem] shadow-xl hover:scale-[1.02] transition-transform">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
-                  Opportunities
-                </span>
-                <span className="text-4xl font-black text-accent/20">O</span>
-              </div>
-              <ul className="space-y-2">
-                {opt.opportunities.map((o: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
-                  >
-                    <ReactMarkdown components={{ p: "span" }}>
-                      {o}
-                    </ReactMarkdown>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-bg-panel border-4 border-danger p-8 rounded-[2rem] shadow-xl hover:scale-[1.02] transition-transform">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
-                  Threats
-                </span>
-                <span className="text-4xl font-black text-danger/20">T</span>
-              </div>
-              <ul className="space-y-2">
-                {opt.threats.map((t: string, idx: number) => (
-                  <li
-                    key={idx}
-                    className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
-                  >
-                    <ReactMarkdown components={{ p: "span" }}>
-                      {t}
-                    </ReactMarkdown>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function VerdictBullets({
-  data,
-}: {
-  data: { winner: string; recommendation: string; keyTakeaways: string[] };
-}) {
-  return (
-    <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className="max-w-3xl mx-auto bg-accent text-bg-surface p-12 rounded-[3rem] shadow-2xl relative overflow-hidden"
-    >
-      <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
-        <Zap size={160} />
-      </div>
-
-      <div className="relative z-10 space-y-10">
-        <div className="space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-60">
-            The Winning Choice
-          </span>
-          <h2 className="text-6xl font-black tracking-tighter uppercase leading-none">
-            {data.winner}
-          </h2>
-        </div>
-
-        <div className="text-xl font-bold italic leading-tight">
-        &ldquo;<ReactMarkdown components={{ p: "span" }}>
-            {data.recommendation}
-          </ReactMarkdown>&rdquo;
-        </div>
-
-        <div className="space-y-6 pt-8 border-t border-bg-surface/20">
-          <h3 className="text-xs font-black uppercase tracking-widest opacity-60">
-            Analysis Takeaways
-          </h3>
-          <ul className="space-y-4">
-            {data.keyTakeaways.map((point: string, i: number) => (
-              <li
-                key={i}
-                className="flex items-start gap-4 text-base font-black italic"
-              >
-                <ArrowRight size={20} className="shrink-0 mt-1" />
-                <div className="flex-1">
-                  <ReactMarkdown components={{ p: "span" }}>{point}</ReactMarkdown>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function AnalysisButton({
-  title,
-  icon,
-  onClick,
-  disabled,
-  highlight = false,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  highlight?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "p-5 md:p-6 rounded-2xl flex items-center gap-4 transition-all text-left disabled:opacity-30 disabled:cursor-not-allowed group border-4",
-        highlight
-          ? "bg-accent border-accent text-bg-surface hover:brightness-110 shadow-xl shadow-accent/20 active:scale-95"
-          : "bg-bg-panel border-accent/10 text-text-main hover:border-accent hover:shadow-lg active:scale-95",
-      )}
-    >
-      <div
-        className={cn(
-          "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-inner",
-          highlight ? "bg-white/10" : "bg-accent-muted text-accent",
-        )}
-      >
-        {icon}
-      </div>
-      <span className="font-black text-xs md:text-sm uppercase tracking-tighter leading-tight">
-        {title}
-      </span>
-    </button>
-  );
-}
-
-function TypeTab({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "px-4 md:px-6 py-2 md:py-3 rounded-xl text-[10px] md:text-xs font-black transition-all uppercase tracking-widest border-2",
-        active
-          ? "bg-accent text-bg-surface border-accent shadow-md shadow-accent/20"
-          : "bg-bg-panel text-accent border-transparent hover:bg-accent-muted",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
