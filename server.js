@@ -17,6 +17,9 @@ if (!foundryEndpoint) {
 
 app.use(express.json());
 
+// Trust the Azure Load Balancer to provide correct IP addresses for the rate limiter
+app.set('trust proxy', 1);
+
 // Rate limiting configuration: 50 requests per 15 minutes
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
