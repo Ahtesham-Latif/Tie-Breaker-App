@@ -6,36 +6,123 @@
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Azure AI Foundry](https://img.shields.io/badge/Azure%20AI%20Foundry-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
 
 ---
 
 ## 🚀 Overview
 
-### The Problem
 When users ask general-purpose AI to choose between two options—for example, *“MacBook Air vs iPad Pro”*—the response is typically an open-ended, markdown-heavy wall of text concluding with *"it depends on your needs."* While comprehensive, it fails to deliver a structured, actionable decision framework.
 
-### The Solution
-**The TieBreaker** operates on the opposite philosophy: **deterministic structure over free-form AI conversation**. 
+**The TieBreaker** operates on the opposite philosophy: **deterministic structure over free-form AI conversation**.
 
 Instead of a chat interface, it enforces a strict backend execution pipeline. Users submit two contenders along with optional personal constraints and evaluation factors. The system processes the input through a schema-driven AI engine, rendering a multi-tab analytical dashboard featuring objective comparison matrices, SWOT profiles, and a definitive, context-grounded winner.
 
+With the integration of **Supabase**, The TieBreaker extends from a session-based utility into a persistent cloud platform. Authenticated users can securely save and manage their past decisions.
+
 ---
 
-## 🏗️ System Architecture & Data Flow
+## 📸 Application Previews
+
+### The Tiebreaker Engine
+![Tiebreaker Setup](Pictures/TieBreaker.png)
+*Dual-input fields alongside the 500-word constraint personalized context input engine.*
+
+### Authenticated Cloud State
+![Logged User Interface](Pictures/LoggedUser.png)
+*Adaptive layout for authenticated users, featuring a dedicated "My History" panel to retrieve cloud-synced matrices.*
+
+---
+
+## ✨ What Makes This Different?
+
+Most AI tools generate conversational text. The TieBreaker generates **structured data**.
+
+Every dilemma is transformed into a structured decision artifact:
+* Objective Comparison Matrices
+* Fact-based Pros & Cons
+* SWOT Profiles
+* Final Verdicts tailored exactly to the user's "My Case" context
+* Persistent Cloud History for authenticated users
+
+The result is a decision-first experience designed for action rather than endless conversation.
+
+---
+
+## 🏗️ Architecture
 
 ```mermaid
 flowchart LR
-    User([User])
-    User -->|"Option A vs B + Context + Factors"| React["React Frontend"]
-    React -->|"Check Local Storage Usage"| AuthWall{"Anonymous Limit < 3?"}
-    AuthWall -- No --> Block["Show Auth Wall Modal"]
-    AuthWall -- Yes --> Express["Express Backend"]
-    Express -->|"Rate Limit Check"| BRL["Backend Rate Limiter"]
-    BRL -->|"Passed"| Payload["Dynamic Payload Assembly & Factor Padding"]
-    Payload -->|"REST Fetch"| Melinda["Melinda Agent (Azure AI Foundry)"]
-    Melinda -->|"Strict JSON Response"| Validation["Express JSON Parsing & Regex Sanitization"]
-    Validation -->|"Validated Matrix Data"| React
+    %% =========================
+    %% Client Layer
+    %% =========================
+    U[User]
+    FE[React Frontend]
+    UI[Decision Dashboard UI]
+    LS[(Local Cache / Session State)]
+
+    U -->|Enter Option A vs B, Factors, My Case| FE
+    FE -->|Render results, tabs, verdict views| UI
+    FE <-->|Cache reads / repeat session checks| LS
+
+    %% =========================
+    %% Identity + Persistence
+    %% =========================
+    SB[(Supabase Auth + Postgres)]
+    FE <-->|Auth session, fetch history, save decisions| SB
+
+    %% =========================
+    %% Client Access Control
+    %% =========================
+    FE --> G{Authenticated?}
+    G -- Yes --> API
+    G -- No --> L{Free local usage remaining?}
+    L -- Yes --> API
+    L -- No --> WALL[Show Auth Wall / Upgrade Prompt]
+
+    %% =========================
+    %% Backend Orchestration
+    %% =========================
+    API[Express API Gateway]
+
+    subgraph BACKEND[Backend Orchestration Layer]
+        RL[Rate Limiter]
+        NORM[Input Validation + Normalization]
+        PAD[Factor Padding + Payload Assembly]
+        AIREQ[AI Request Builder]
+        SAN[Response Sanitization]
+        VAL[Schema Validation]
+    end
+
+    API --> RL
+    RL --> NORM
+    NORM --> PAD
+    PAD --> AIREQ
+
+    %% =========================
+    %% AI Decision Layer
+    %% =========================
+    subgraph AI[Melinda Decision Engine - Azure AI Foundry]
+        MEL[Structured Decision Agent]
+        WEB[Optional Live Web Grounding]
+    end
+
+    AIREQ --> MEL
+    MEL <-->|Optional retrieval for current facts| WEB
+    MEL -->|Structured JSON decision payload| SAN
+
+    %% =========================
+    %% Contract Enforcement
+    %% =========================
+    SAN --> VAL
+    VAL -->|Validated decision artifact| API
+
+    %% =========================
+    %% Return + Persistence
+    %% =========================
+    API -->|Comparison matrix, SWOT, verdict, reasoning| FE
+    FE -->|Persist authenticated decision history| SB
 ```
 
 ### Staged Processing Pipeline
@@ -43,16 +130,19 @@ flowchart LR
 2. **Deterministic Fallback Padding:** Analyzes requested factors and automatically injects universal baseline dimensions if data is sparse.
 3. **Structured Orchestration:** Dispatches a structured schema instruction set via REST to the hosted Azure AI Agent.
 4. **Sanitization Interceptor:** Sanitizes raw LLM output strings via RegEx, parses the JSON payload, and validates it against the expected UI schema before returning it to the client.
+5. **Persistence & Authentication:** Leverages Supabase to authenticate users and securely store generated decision matrices in a cloud database for instant historical retrieval.
 
 ---
 
-## 🤖 Architectural Decisions: Why Azure AI Foundry?
+## 🤖 Why Azure AI Foundry Agents?
 
-Building a structured data application around a probabilistic LLM requires strict behavioral guardrails. The TieBreaker rejects typical chat paradigms in favor of a production-style AI subsystem engineered for reliability.
+Melinda was engineered as an Azure AI Foundry Agent instead of a standard completion endpoint to enforce strict execution constraints over a probabilistic model. 
 
-* **Strict Contract Compliance:** Standard completions APIs are prone to markdown bleed and formatting hallucinations. Azure AI Foundry Agents allow us to lock down system-level constraints, ensuring the engine behaves like a structured API rather than a conversational chatbot.
-* **Predictable Component Rendering:** The frontend relies entirely on matching array shapes and object keys to prevent UI layout shifts or broken table columns. By leveraging structured output expectations at the agent level, the application maintains absolute presentation stability.
-* **Contextual Grounding:** It allows clean separation between system instructions, schema expectations, and dynamic user payloads, maximizing prompt execution accuracy.
+The TieBreaker relies heavily on:
+* **Live Web Grounding (Bing Search Tool):** Access to real-time tools ensures Melinda evaluates current market prices, volatile tech specs, and modern product configurations rather than relying on stale training data.
+* **Low Volatility (0.3 Temperature):** A strict `0.3` temperature setting prevents hallucinated product specifications, ensuring objective and repeatable data artifacts.
+* **Enterprise Guardrails:** Azure content safety filters ensure that inappropriate or malformed requests are categorically blocked before compute resources are wasted or bad data enters the Supabase ecosystem.
+* **Schema Enforced Output:** Standard conversational APIs are prone to markdown bleed and formatting hallucinations. By enforcing structured output at the agent level, we lock down a strict JSON contract that guarantees the React frontend never encounters a layout shift or broken table.
 
 ---
 
@@ -66,25 +156,13 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 ```json
 {
   "entities": ["MacBook Air M3", "iPad Pro M4"],
-  "analyticalReasoning": "Given the user's focus on heavy video editing and multitasking, the MacBook offers a true desktop OS while the iPad is limited by iPadOS workflows.",
+  "analyticalReasoning": "Given the user's focus on heavy video editing...",
   "factors": ["Usability", "Cost", "Performance", "Ecosystem"],
   "comparison": [
     {
       "optionName": "MacBook Air M3",
       "values": {
-        "Usability": "Full macOS with desktop-class multitasking.",
-        "Cost": "Starting at $1099, excellent value.",
-        "Performance": "M3 chip handles 4K video editing effortlessly.",
-        "Ecosystem": "Seamless integration with iOS devices."
-      }
-    },
-    {
-      "optionName": "iPad Pro M4",
-      "values": {
-        "Usability": "Touch-first iPadOS, limited multitasking.",
-        "Cost": "Starting at $999, but requires $299 Magic Keyboard.",
-        "Performance": "Incredibly fast M4, but bottlenecked by software.",
-        "Ecosystem": "Excellent for Apple Pencil drawing and media consumption."
+        "Usability": "Full macOS with desktop-class multitasking."
       }
     }
   ]
@@ -93,116 +171,72 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 
 ---
 
-## 🧩 Technical Challenges Solved
+## 🎯 Key Features
 
-### 1. Constraining LLM Output for Structured Interfaces
-**Challenge:** LLMs often output leading/trailing markdown prose (e.g., ```json ... ```) or subtle structural errors that break `JSON.parse()`.
-**Solution:** Implemented a robust Express backend sanitization interceptor utilizing regex matching patterns combined with catch-and-repair fallback logic to guarantee predictable frontend payload delivery.
+### Cloud Identity & History Persistence
+* **Authentication:** Integrated Supabase GoTrue Auth with background blur modal.
+* **Data Persistence:** Decisions are securely saved to a Supabase PostgreSQL database.
+* **Adaptive UI States:** Layouts dynamically collapse and expand based on authentication status.
 
-### 2. Preserving UI Matrix Completeness (Mathematical Factor Padding)
-**Challenge:** If a user provides only one comparison factor, standard comparisons fail or look broken in a multi-column data grid.
-**Solution:** The Node.js layer computes the data deficit and dynamically injects universal baseline dimensions (e.g., *Usability*, *Cost*, *Performance*) to round out the grid, ensuring a full dashboard presentation regardless of input depth.
+### AI Decision Engine
+* **No Chatbot UX:** Form-driven data dashboard components.
+* **"My Case" Context Engine:** Personalized analysis tailored to 500-word user constraints.
+* **Multi-Lens Analytical Views:** Pros & Cons, Comparison Matrices, SWOT, and Final Verdicts.
+* **Mathematical Factor Padding:** The Node.js layer dynamically injects baseline evaluation criteria if user input is sparse.
 
-### 3. Context Cascading & Hallucination Prevention
-**Challenge:** Generating final verdicts directly from a raw prompt can result in the AI introducing new, unverified facts not covered in the original comparison blocks.
-**Solution:** Implemented an architectural pipeline where the final verdict layer strictly harvests and consumes previously established matrices from the payload, preventing the model from generating disconnected assumptions.
+### Interface Design
+* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding and a fixed micro-toolbar.
+* **Theme Adaptability:** Full dark/light structural synchronization across all customized components.
 
-### 4. Cache-Aware Usage Gating
-**Challenge:** Users were getting blocked by the "Auth Wall" usage limit when simply trying to re-read analyses they had already generated.
-**Solution:** Built an intelligent server/client LRU cache that evaluates memory state *before* pinging the rate limiter. This decoupling guarantees users can endlessly toggle through their historical session tabs without triggering new API deductions.
-
----
-
-## ✨ Key Product Features
-
-* **No Chatbot UX:** Replaces conversational fatigue with form-driven data dashboard components.
-* **"My Case" Context Engine:** Processes up to 500 words of specific lifestyle constraints (e.g., budget, travel metrics) to derive hyper-personalized choices rather than generic data sheets.
-* **Multi-Lens Analytical Views:** Splits a single resolution workflow into clear, distinct visual tabs: *Pros & Cons*, *Comparison Matrix*, *SWOT Analysis*, and *Final Verdict*.
-* **Live Web Grounding (Optional Toggle):** Supplements the static agent knowledge base with external search execution to account for volatile real-time variables like pricing updates.
-* **Zero-Scroll Mobile Engine:** Fluid side-by-side data grids powered by sub-millimeter padding and a fixed micro-toolbar, ensuring a premium native-app feel on mobile devices.
-* **Lightning Cache:** In-memory LRU Maps prevent duplicate AI API requests, granting instantaneous cross-tab rendering.
+### UX Messaging Architecture
+* **Emotionally Intelligent Feedback:** System boundaries (rate limits, validation failures, auth walls) are handled by a centralized messaging layer ensuring a calm, premium, and reassuring tone.
+* **Zero Technical Bleed:** Backend errors and JSON parsing failures are elegantly abstracted. Users receive actionable, clear guidance without ever seeing raw stack traces or internal agent details.
 
 ---
 
-## 📸 App Previews
+## 🔒 Security & Reliability
 
-### WelcomeModal
-![WelcomeModal](Pictures/WelcomeModal.png)
-*An onboarding modal introducing users to the structured decision framework.*
-
-### Tiebreaker Setup
-![Tiebreaker](Pictures/TieBreaker.png)
-*Dual-input fields alongside the 500-word constraint personalized context input engine.*
-
-### Theme Adaptability
-![Theme Change](Pictures/TieBreakerTheme(Changed).png)
-*Full dark/light structural synchronization across all customized components.*
-
-### The Final Verdict
-![Verdict](Pictures/Verdict.png)
-*Definitive conclusion screen driven strictly by context-cascaded data blocks.*
-
-### Premium Gating
-![Free Limit Reached](Pictures/FreeLimitReachedModal.png)
-*A local storage-tracked client block prompting account initialization after 3 free inquiries.*
-
----
-
-## 🔒 Security, Guardrails & Reliability
-
-| Identified Risk | Mitigation Vector | Implementation Layer |
-| :--- | :--- | :--- |
+| Concern | Protection | Implementation Layer |
+| --- | --- | --- |
 | **Excessive API Compute Costs** | String length boundaries & 500-word payload enforcement | Frontend Input & Express Router |
 | **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
 | **Broken UI / Layout Collapse** | Regex structural parsing interceptors & schema key validations | Express Response Pipe |
-| **Stale Evaluation Data** | Optional dynamic Live Web Grounding routing toggle | Azure Agent Integration |
+| **Anonymous Spam** | Local storage-tracked client block prompting account initialization after 3 free inquiries | React Frontend |
+
+### API Rate Limiting
+```text
+5 requests per IP every 15 minutes
+```
+
+### Validation & Resiliency Checks
+* **Structured AI Formatting:** Pre-hydration regex parsers repair markdown bleed and enforce strict JSON shape.
+* **Schema Contract Compliance:** Express explicitly guarantees backend structure before payload delivery to React.
+* **Input Enforcement:** Hard truncation constraints prevent massive unstructured uploads from crashing prompt generation.
+* **Fallback Matrix Padding:** Node dynamically injects default properties if the AI returns sparse rows, preventing UI grid collapse.
 
 ---
 
 ## ⚙️ Technology Stack
 
-* **Frontend:** React 19, Vite, Tailwind CSS v4, Framer Motion
-* **Backend Runtime:** Node.js, Express
-* **AI Ecosystem:** Azure AI Foundry, `@azure/identity` (`AzureCliCredential`)
-* **Languages:** TypeScript, JavaScript (ES6+)
-* **Testing Engine:** Vitest, automated execution verification suites
+| Layer | Technology |
+| --- | --- |
+| **Frontend** | React 19, Vite, Tailwind CSS v4, Framer Motion |
+| **Backend** | Node.js, Express |
+| **Database & Auth**| Supabase (PostgreSQL, GoTrue Auth) |
+| **AI Platform** | Azure AI Foundry, `@azure/identity` |
+| **Language** | TypeScript |
+| **Testing** | Vitest |
 
 ---
 
-## 🧪 Test Coverage
+## 🧪 Testing & Quality Assurance
 
-The codebase includes an automated suite proving behavioral state persistence, interface stability, and error mitigation vectors.
+The TieBreaker incorporates targeted component test suites (`App.test.jsx`) to verify interface stability, state persistence, and error mitigation vectors.
 
-```bash
-✓ src/tests/ThemeToggle.test.tsx (1)
-✓ src/tests/UsageWallGate.test.tsx (2)
-✓ src/tests/ApiResponseValidation.test.tsx (4)
-✓ src/tests/UIComponentRender.test.tsx (2)
-
-Test Files  5 passed (5)
-Tests       9 passed (9)
-```
-![Vitest Results](TestResults.png)
-
----
-
-## 📂 Project Structure
-
-```text
-root/
-├── server.js                  # Express API, REST orchestration, JSON sanitization interceptors
-├── TieBreaker_Agent_Prompt.md # Isolated system persona prompt & production JSON schemas
-├── package.json               # Development scripts (concurrent execution, vite, tailwind)
-├── src/
-│   ├── App.tsx                # Context cascading, global application state, and cache routing
-│   ├── main.tsx               # React application mounting node
-│   ├── index.css              # PostCSS Tailwind architecture configurations
-│   └── lib/
-│       └── utils.ts           # Class merging utilities
-├── Pictures/                  # Architectural documentation images
-├── .env.example               # Environment template keys
-└── README.md                  # System core engineering documentation
-```
+### Core Testing Priorities
+* **Component Render Stability:** Verifying the multi-lens dashboard layout maintains layout stability regardless of missing AI matrix factors.
+* **Auth & Gate Logic:** Validating the strict lock-out mechanisms for users who exhaust the free tier, ensuring the local storage triggers align perfectly with the React state.
+* **State Management:** Guaranteeing theme toggling (Dark/Light) and caching layers seamlessly persist across intense UI state changes.
 
 ---
 
@@ -214,16 +248,21 @@ git clone https://github.com/Ahtesham-Latif/Tie-Breaker-App.git
 cd Tie-Breaker-App
 ```
 
-### 2. Provision Dependencies
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Environment Environment Variables
-Instantiate a `.env` deployment file inside the system root:
+### 3. Configure Environment Variables
+```bash
+cp .env.example .env
+```
+Populate `.env` with:
 ```env
 FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-05-15-preview
 Melinda_Agent=your-agent-identifier
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 ### 4. Authenticate Infrastructure
@@ -243,10 +282,11 @@ npm run dev:full
 
 The **Google Gemini CLI** was utilized as an engineering accelerator throughout development to bootstrap system components and refine backend safety configurations.
 
-### Key Workflows Assisted:
-* Creating early Node.js express proxy routes and integration patterns.
-* Implementing strict regex sanitizers to parse corrupted JSON output blocks cleanly.
-* Structuring automated UI and integration testing patterns inside Vitest.
+### Contributions
+* Structuring the React interface and Zero-Scroll mobile layout
+* Integrating Supabase authentication and PostgreSQL history tracking
+* Implementing strict regex sanitizers to parse corrupted JSON output blocks
+* Structuring automated UI and integration testing patterns inside Vitest
 
 ### Verified Badges
 **Build AI Agents with Gemini**
@@ -254,17 +294,24 @@ The **Google Gemini CLI** was utilized as an engineering accelerator throughout 
 
 ---
 
-## 🔮 Roadmap & Next Milestones
-* Integrate **Supabase** for full user authentication and secure multi-tenant data structures.
-* Implement persistent cloud database storage for historical evaluation tracking.
+## 🔮 Future Enhancements
 * Develop a backend layout engine to support **PDF Export** for completed decision matrices.
 * Introduce cryptographically unique shareable links for cross-user scenario exploration.
+* Build advanced surveying modules to capture user feedback on engine accuracy.
+
+---
+
+## 🤝 Contributing
+Contributions, suggestions, and feedback are welcome.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
 
 ---
 
 ## 📄 License
-
-Distributed under the MIT License.
+MIT License
 
 ---
 

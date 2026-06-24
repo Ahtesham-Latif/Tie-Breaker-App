@@ -23,10 +23,10 @@ app.use(express.json());
 // Trust the Azure Load Balancer to provide correct IP addresses for the rate limiter
 app.set('trust proxy', 1);
 
-// Rate limiting configuration: 50 requests per 15 minutes
+// Rate limiting configuration: 5 requests per 15 minutes
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 requests per window
+  max: 5, // Limit each IP to 5 requests per window
   message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
