@@ -10,16 +10,16 @@ import { ProsConsDescriptive } from "./ProsConsDescriptive";
 import { SWOTGridView } from "./SWOTGridView";
 import { VerdictBullets } from "./VerdictBullets";
 
-export function AnalysisDisplay({ type, data }: { type: AnalysisType; data: any }) {
+export function AnalysisDisplay({ type, data, isSideBySide }: { type: AnalysisType; data: any; isSideBySide?: boolean }) {
   if (!data) return null;
 
   switch (type) {
     case "comparison":
-      return <ComparisonTable data={data} />;
+      return <ComparisonTable data={data} isSideBySide={isSideBySide} />;
     case "pros-cons":
-      return <ProsConsDescriptive data={data.results || data} />;
+      return <ProsConsDescriptive data={data.results || data} isSideBySide={isSideBySide} />;
     case "swot":
-      return <SWOTGridView data={data.results || data} />;
+      return <SWOTGridView data={data.results || data} isSideBySide={isSideBySide} />;
     case "verdict":
       return <VerdictBullets data={data} />;
     default:

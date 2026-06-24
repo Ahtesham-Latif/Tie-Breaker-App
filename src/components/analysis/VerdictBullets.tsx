@@ -12,7 +12,7 @@ export function VerdictBullets({
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className="max-w-3xl mx-auto bg-accent text-bg-surface p-12 rounded-[3rem] shadow-2xl relative overflow-hidden"
+      className="max-w-3xl mx-auto bg-accent text-bg-surface p-5 md:p-12 rounded-3xl md:rounded-[3rem] shadow-2xl relative overflow-hidden"
     >
       <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
         <Zap size={160} />
@@ -23,7 +23,7 @@ export function VerdictBullets({
           <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-60">
             The Winning Choice
           </span>
-          <h2 className="text-6xl font-black tracking-tighter uppercase leading-none">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
             {data.winner}
           </h2>
         </div>

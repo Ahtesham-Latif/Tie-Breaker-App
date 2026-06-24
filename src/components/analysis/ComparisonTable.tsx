@@ -1,52 +1,44 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
+import { cn } from "../../lib/utils";
+
 export function ComparisonTable({
   data,
+  isSideBySide,
 }: {
   data: { factors: string[]; comparison: any[] };
+  isSideBySide?: boolean;
 }) {
   return (
-    <div className="overflow-x-auto rounded-4xl border-4 border-accent shadow-2xl bg-bg-panel overflow-hidden">
-      <table className="w-full text-left border-collapse table-auto min-w-150">
-        <thead>
-          <tr className="bg-accent text-bg-surface">
-            <th className="p-8 font-black uppercase tracking-[0.2em] text-[12px] border-b-4 border-accent">
-              Factor / Metric
-            </th>
-            {data.comparison.map((opt, i) => (
-              <th
-                key={i}
-                className="p-8 font-black uppercase tracking-[0.2em] text-[12px] border-b-4 border-b-accent border-l-4 border-l-bg-surface/10 text-center"
-              >
-                {opt.optionName}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y-4 divide-accent/10">
-          {data.factors.map((factor, fIdx) => (
-            <tr
-              key={fIdx}
-              className="hover:bg-accent-muted/10 transition-colors"
-            >
-              <td className="p-8 font-black text-accent text-sm bg-accent-muted/5 border-r-4 border-accent/10">
-                {factor}
-              </td>
-              {data.comparison.map((opt, oIdx) => (
-                <td
-                  key={oIdx}
-                  className="p-8 align-middle border-l-4 border-accent/5 font-bold text-text-main text-sm text-center"
-                >
+    <div className="space-y-6 md:space-y-8">
+      {data.factors.map((factor, fIdx) => (
+        <div key={fIdx} className={cn(
+          "bg-bg-panel border-2 md:border-4 border-accent/20 shadow-lg hover:border-accent/40 transition-colors",
+          isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-[2rem] p-4 md:p-6"
+        )}>
+          <h3 className="text-sm font-black text-accent uppercase tracking-[0.2em] mb-4 pb-2 border-b-2 border-accent/10">
+            {factor}
+          </h3>
+          <div className={cn("flex", isSideBySide ? "flex-row gap-1 md:gap-2" : "flex-col md:flex-row gap-3 md:gap-6")}>
+            {data.comparison.map((opt, oIdx) => (
+              <div key={oIdx} className={cn(
+                "flex-1 bg-bg-surface border-2 border-accent/5 shadow-sm",
+                isSideBySide ? "rounded-lg p-1" : "rounded-xl md:rounded-2xl p-3 md:p-5"
+              )}>
+                <span className="text-[10px] font-black uppercase text-text-dim/70 mb-2 block tracking-wider">
+                  {opt.optionName}
+                </span>
+                <div className="text-sm font-bold text-text-main leading-snug">
                   <ReactMarkdown components={{ p: "span" }}>
                     {opt.values[fIdx]}
                   </ReactMarkdown>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
