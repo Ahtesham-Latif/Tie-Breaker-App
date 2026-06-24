@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   XCircle,
   Columns,
+  Rows,
   Zap,
   ArrowRight,
   Loader2,
@@ -170,6 +171,7 @@ export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [selectedType, setSelectedType] = useState<AnalysisType>("pros-cons");
   const [copied, setCopied] = useState(false);
+  const [isSideBySide, setIsSideBySide] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastRequestTime, setLastRequestTime] = useState<number>(0);
@@ -241,11 +243,6 @@ export default function App() {
     const trimmedB = optionB.trim();
     const validFactors = options.filter((o) => o.trim()).map(f => f.toLowerCase()).sort();
 
-    if (usageCount >= 3) {
-      setShowAuthWall(true);
-      return;
-    }
-
     if (!trimmedA || !trimmedB) {
       setValidationError("Please enter both options to break the tie.");
       return;
@@ -270,6 +267,11 @@ export default function App() {
         const { [cacheKey]: hit, ...rest } = prev;
         return { ...rest, [cacheKey]: hit };
       });
+      return;
+    }
+
+    if (usageCount >= 3) {
+      setShowAuthWall(true);
       return;
     }
 
@@ -374,7 +376,7 @@ export default function App() {
     setOptions(["", ""]);
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     const validFactors = options.filter((o) => o.trim()).map((f) => f.toLowerCase()).sort();
     const canonicalDecision = `${optionA.trim()} vs ${optionB.trim()}`
       .toLowerCase()
@@ -386,9 +388,31 @@ export default function App() {
     const currentResult = analysisCache[currentCacheKey];
     if (currentResult) {
       const textToCopy = formatForClipboard(currentResult);
-      navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textToCopy);
+        } else {
+          // Fallback for non-HTTPS local network testing (e.g., 192.168.x.x)
+          const textArea = document.createElement("textarea");
+          textArea.value = textToCopy;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          try {
+            document.execCommand('copy');
+          } catch (err) {
+            console.error('Fallback copy failed', err);
+          }
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+      }
     }
   };
   
@@ -420,7 +444,7 @@ export default function App() {
       {/* Sidebar - Inputs */}
       <aside className={cn(
         "w-full md:w-1/3 lg:max-w-[450px] bg-bg-surface border-b md:border-b-0 md:border-r border-border-dim flex flex-col p-6 shrink-0 shadow-sm z-20 relative transition-all duration-300",
-        hasStarted && "md:hidden" // Hide sidebar on desktop when result appears
+        hasStarted && "hidden md:flex" // Hide sidebar on mobile when result appears
       )}>
         <div className="flex items-center justify-between mb-10">
           <div
@@ -602,7 +626,11 @@ export default function App() {
       </div>
 
       {/* Main Content - Results */}
-      <main className="flex-1 flex flex-col min-w-0 bg-bg-base md:overflow-hidden relative z-10">
+      <main className={cn(
+        "flex-1 flex flex-col min-w-0 bg-bg-base relative z-10",
+        !hasStarted && "hidden md:flex", // On mobile, hide results area until started
+        "md:overflow-hidden"
+      )}>
         <AnimatePresence mode="wait">
           {!hasStarted ? (
             <motion.div
@@ -663,7 +691,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="flex-1 flex flex-col p-6 md:p-10 h-full bg-bg-base"
+              className="flex-1 flex flex-col p-3 md:p-10 h-full bg-bg-base"
             >
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-10">
                 <div className="space-y-3">
@@ -708,24 +736,63 @@ export default function App() {
               </div>
 
               <div className="flex-1 bg-bg-surface rounded-3xl border-2 border-accent/10 overflow-hidden flex flex-col relative shadow-[0_20px_50px_rgba(117,81,57,0.1)]">
-                <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 flex gap-2">
-                  <button
-                    onClick={handleCopy}
-                    className="p-3 rounded-xl bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-2 group shadow-lg shadow-accent/20"
-                    title="Copy analysis"
-                  >
-                    {copied ? (
-                      <Check size={18} />
-                    ) : (
-                      <Copy
-                        size={18}
-                        className="group-hover:scale-110 transition-transform"
-                      />
-                    )}
-                  </button>
+                <div className="flex justify-between items-center p-2 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
+                  <div className="pl-1 pr-2 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                    {selectedType === "pros-cons" && "Pros & Cons"}
+                    {selectedType === "comparison" && "Comparison"}
+                    {selectedType === "swot" && "SWOT"}
+                    {selectedType === "verdict" && "Verdict"}
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={toggleTheme}
+                      className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center gap-1 shadow-sm"
+                      title="Toggle Theme"
+                    >
+                      {theme === "light" ? <Moon size={12} /> : <Sun size={12} />}
+                      <span className="text-[8px] font-black uppercase tracking-widest">
+                        {theme === "light" ? "Dark" : "Light"}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setIsSideBySide(!isSideBySide)}
+                      className={cn(
+                        "px-1.5 py-1 rounded-md border transition-all flex items-center gap-1 shadow-sm",
+                        isSideBySide 
+                          ? "bg-accent text-bg-surface border-accent/20" 
+                          : "bg-bg-panel text-accent border-accent/20 hover:bg-accent/10"
+                      )}
+                      title={isSideBySide ? "Show items stacked" : "Show items side by side"}
+                    >
+                      {isSideBySide ? <Rows size={12} /> : <Columns size={12} />}
+                      <span className="text-[8px] font-black uppercase tracking-widest">
+                        {isSideBySide ? "Stack" : "Split"}
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleCopy}
+                      className="px-1.5 py-1 rounded-md bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-1 group shadow-sm"
+                      title="Copy to clipboard"
+                    >
+                      {copied ? (
+                        <>
+                          <Check size={12} />
+                          <span className="text-[8px] font-black uppercase tracking-widest">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={12} className="group-hover:scale-110 transition-transform" />
+                          <span className="text-[8px] font-black uppercase tracking-widest">Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar">
+                <div className={cn(
+                  "flex-1 overflow-y-auto custom-scrollbar",
+                  isSideBySide ? "p-1 md:p-4" : "p-4 md:p-12"
+                )}>
                   {isCurrentTypeLoading && !currentResult && (
                     <div className="absolute inset-0 bg-bg-surface/95 backdrop-blur-md z-30 flex items-center justify-center flex-col gap-6">
                       <div className="relative">
@@ -751,6 +818,7 @@ export default function App() {
                         <AnalysisDisplay
                           type={currentResult.type}
                           data={currentResult.structuredData}
+                          isSideBySide={isSideBySide}
                         />
                       ) : (
                         <div className="markdown-body">

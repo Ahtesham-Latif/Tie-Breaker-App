@@ -9,6 +9,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Initialize a simple in-memory cache
+const analysisCache = new Map();
+
 // Ensure the endpoint is defined
 const foundryEndpoint = process.env.FOUNDRY_ENDPOINT;
 if (!foundryEndpoint) {
@@ -16,6 +19,9 @@ if (!foundryEndpoint) {
 }
 
 app.use(express.json());
+
+// Trust the Azure Load Balancer to provide correct IP addresses for the rate limiter
+app.set('trust proxy', 1);
 
 // Rate limiting configuration: 50 requests per 15 minutes
 const limiter = rateLimit({
@@ -45,6 +51,15 @@ app.post('/api/analyze', async (req, res) => {
       return res.status(500).json({ error: 'My connection to the AI engine is temporarily unavailable. Please try again later. (Error Code: ERR-02)' });
     }
 
+    // Cache key based on input
+    const cacheKey = JSON.stringify({ decision, type, factors, useWebSearch, contextData, myCase });
+    
+    const cachedResponse = analysisCache.get(cacheKey);
+    if (cachedResponse) {
+      console.log('Serving from cache for:', decision);
+      return res.json(cachedResponse);
+    }
+
     // 1. Authenticate using Azure's Default Credentials (supports Managed Identity in App Service and Azure CLI locally)
     const { DefaultAzureCredential } = await import("@azure/identity");
     const credential = new DefaultAzureCredential();
@@ -59,6 +74,13 @@ app.post('/api/analyze', async (req, res) => {
     // 3. Build the prompt input
     let messageContent = `Decision: ${decision}\nMode: ${type}`;
     
+    // Explicitly command the agent on whether to use the web search tool
+    if (useWebSearch) {
+      messageContent += `\n[CRITICAL INSTRUCTION]: Deep Research is ON. You MUST use your Web Search tool to find the most accurate, real-time data and pricing before answering.`;
+    } else {
+      messageContent += `\n[CRITICAL INSTRUCTION]: Deep Research is OFF. Do NOT use your Web Search tool. Rely strictly on your internal knowledge base.`;
+    }
+
     if (factors && factors.length > 0) {
       messageContent += `\nFactors: ${factors.join(", ")}`;
     }
@@ -154,7 +176,16 @@ app.post('/api/analyze', async (req, res) => {
     // Make sure it's valid JSON before sending to UI
     try {
       const result = JSON.parse(sanitized);
-      return res.json({ content: JSON.stringify(result) });
+      const responsePayload = { content: JSON.stringify(result) };
+      
+      // Save to cache
+      analysisCache.set(cacheKey, responsePayload);
+      if (analysisCache.size > 100) {
+        const firstKey = analysisCache.keys().next().value;
+        analysisCache.delete(firstKey);
+      }
+
+      return res.json(responsePayload);
     } catch (parseError) {
       console.error("Failed to parse agent JSON:", sanitized);
       throw new Error("I had trouble formatting the AI's response. Please try clicking Analyze again! (Error Code: ERR-06)");

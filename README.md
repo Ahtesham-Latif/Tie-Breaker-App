@@ -1,102 +1,73 @@
 # 🧠 The TieBreaker
 
-> **Stop guessing. Start deciding.** The mathematical AI engine for resolving your toughest "A vs B" dilemmas.
+> **Stop guessing. Start deciding.** A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.
 
 ![React 19](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![Google Gemini CLI](https://img.shields.io/badge/Google%20Gemini%20CLI-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)
 ![Azure AI Foundry](https://img.shields.io/badge/Azure%20AI%20Foundry-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
 
 ---
 
 ## 🚀 Overview
 
-**The Problem:** When you ask ChatGPT or standard AI to choose between two things (like "MacBook vs iPad"), it usually spits out a huge, vague wall of text that says "it depends on your needs." That doesn't help you make a real decision! 
+### The Problem
+When users ask general-purpose AI to choose between two options—for example, *“MacBook Air vs iPad Pro”*—the response is typically an open-ended, markdown-heavy wall of text concluding with *"it depends on your needs."* While comprehensive, it fails to deliver a structured, actionable decision framework.
 
-**Our Solution:** The TieBreaker forces an Azure AI Agent through a super strict pipeline. Instead of essays, it gives you exact math, structured comparison tables, pros/cons, and a final definitive winner based on your actual lifestyle and context.
+### The Solution
+**The TieBreaker** operates on the opposite philosophy: **deterministic structure over free-form AI conversation**. 
 
----
-
-## 📸 App Previews
-
-### WelcomeModal
-![WelcomeModal](Pictures/WelcomeModal.png)
-*A clean welcome screen explaining how the 3-step decision process works.*
-
-### Tiebreaker (2nd impression)
-![Tiebreaker](Pictures/TieBreaker.png)
-*Enter your two contenders and drop in your personal context so the AI knows exactly what you care about.*
-
-### theme change pic
-![Theme Change](Pictures/TieBreakerTheme(Changed).png)
-*Toggle between light and dark modes because every great dev tool needs a gorgeous dark theme.*
-
-### verdict
-![Verdict](Pictures/Verdict.png)
-*No more "it depends"—you get a clear winner and the key takeaways.*
-
-### free limit reached
-![Free Limit Reached](Pictures/FreeLimitReachedModal.png)
-*A beautiful paywall that blocks users and prompts them to create an account after 3 free decisions.*
+Instead of a chat interface, it enforces a strict backend execution pipeline. Users submit two contenders along with optional personal constraints and evaluation factors. The system processes the input through a schema-driven AI engine, rendering a multi-tab analytical dashboard featuring objective comparison matrices, SWOT profiles, and a definitive, context-grounded winner.
 
 ---
 
-## ✨ What Makes This Different? (USPs)
-
-Instead of a standard chat box, the TieBreaker is highly structured:
-* **No Chatbots:** You don't talk to the AI. You fill out a form, and it generates a dashboard.
-* **Objective Comparisons:** It creates a rigid table comparing both options across the exact same factors.
-* **Mathematical Padding:** If you only provide 1 comparison factor, the backend automatically calculates how many more it needs and injects smart defaults.
-* **The "My Case" Context:** The AI doesn't give generic advice. It uses your specific constraints (like "I have a $1000 budget and I travel a lot").
-
----
-
-## 🏗️ Architecture
+## 🏗️ System Architecture & Data Flow
 
 ```mermaid
 flowchart LR
     User([User])
-    User -->|"Option A vs B + Context"| React["React Frontend"]
-    React -->|"Check Local Storage Usage"| AuthWall{"Usage < 3?"}
+    User -->|"Option A vs B + Context + Factors"| React["React Frontend"]
+    React -->|"Check Local Storage Usage"| AuthWall{"Anonymous Limit < 3?"}
     AuthWall -- No --> Block["Show Auth Wall Modal"]
     AuthWall -- Yes --> Express["Express Backend"]
     Express -->|"Rate Limit Check"| BRL["Backend Rate Limiter"]
-    BRL -->|"Passed"| Payload["Dynamic Payload Assembly"]
-    Payload -->|"REST Fetch"| Melinda["Melinda Agent (Azure Foundry)"]
-    Melinda -->|"Strict JSON Response"| Validation["Express JSON Parsing"]
-    Validation -->|"Validated Matrix"| React
+    BRL -->|"Passed"| Payload["Dynamic Payload Assembly & Factor Padding"]
+    Payload -->|"REST Fetch"| Melinda["Melinda Agent (Azure AI Foundry)"]
+    Melinda -->|"Strict JSON Response"| Validation["Express JSON Parsing & Regex Sanitization"]
+    Validation -->|"Validated Matrix Data"| React
 ```
+
+### Staged Processing Pipeline
+1. **Ingestion & Normalization:** Captures inputs, enforces length boundaries (`maxLength`), and normalizes strings.
+2. **Deterministic Fallback Padding:** Analyzes requested factors and automatically injects universal baseline dimensions if data is sparse.
+3. **Structured Orchestration:** Dispatches a structured schema instruction set via REST to the hosted Azure AI Agent.
+4. **Sanitization Interceptor:** Sanitizes raw LLM output strings via RegEx, parses the JSON payload, and validates it against the expected UI schema before returning it to the client.
 
 ---
 
-## 🤖 Why Azure AI Foundry Agents?
+## 🤖 Architectural Decisions: Why Azure AI Foundry?
 
-Why not just use a simple OpenAI API key? Because we needed absolute reliability. Azure AI Foundry Agents let us lock down the AI's behavior. We don't want it to be "creative" or write markdown text. We need it to return a perfect JSON object every single time, without fail. Azure AI Foundry ensures the agent strictly obeys our system instructions.
+Building a structured data application around a probabilistic LLM requires strict behavioral guardrails. The TieBreaker rejects typical chat paradigms in favor of a production-style AI subsystem engineered for reliability.
+
+* **Strict Contract Compliance:** Standard completions APIs are prone to markdown bleed and formatting hallucinations. Azure AI Foundry Agents allow us to lock down system-level constraints, ensuring the engine behaves like a structured API rather than a conversational chatbot.
+* **Predictable Component Rendering:** The frontend relies entirely on matching array shapes and object keys to prevent UI layout shifts or broken table columns. By leveraging structured output expectations at the agent level, the application maintains absolute presentation stability.
+* **Contextual Grounding:** It allows clean separation between system instructions, schema expectations, and dynamic user payloads, maximizing prompt execution accuracy.
 
 ---
 
 ## 🧠 Meet Melinda: The Decision Intelligence Engine
 
-Melinda is the brain behind the TieBreaker, hosted entirely on Azure AI Foundry as an Agent.
+The backend brain of TieBreaker is **Melinda**, an isolated agent hosted on Azure AI Foundry. Her single responsibility is converting unstructured human dilemmas into a strictly typed data artifact.
 
-**Melinda in Azure AI Foundry:**  
-![Melinda Preview](Pictures/Melinda.png)  
-*(Azure agent setup preview)*
+### Expected JSON Output Contract
+Every response must strictly match this schema layout to satisfy the frontend parser:
 
-### How Melinda works:
-1. **Reads your setup:** She takes "Option A" and "Option B".
-2. **Weighs your context:** She applies your "My Case" rules.
-3. **Generates the JSON:** She outputs the data in a strict contract.
-4. **Cascades context:** When generating the final verdict, she only looks at the data from the previous tabs to ensure she doesn't hallucinate new facts!
-
-### Her Output Structure
-This is the strict JSON contract Melinda must follow:
 ```json
 {
   "entities": ["MacBook Air M3", "iPad Pro M4"],
-  "analyticalReasoning": "Given the user's focus on heavy video editing and multitasking, the MacBook offers a true desktop OS while the iPad is limited by iPadOS.",
-  "factors": ["Usability", "Cost", "Performance", "Ecosystem"], 
+  "analyticalReasoning": "Given the user's focus on heavy video editing and multitasking, the MacBook offers a true desktop OS while the iPad is limited by iPadOS workflows.",
+  "factors": ["Usability", "Cost", "Performance", "Ecosystem"],
   "comparison": [
     {
       "optionName": "MacBook Air M3",
@@ -120,88 +91,98 @@ This is the strict JSON contract Melinda must follow:
 }
 ```
 
-### Validation Benefits
-* Prevents UI layout shifts
-* Eliminates incomplete table columns
-* Reduces hallucinated pricing and specs
-* Ensures predictable component rendering
+---
+
+## 🧩 Technical Challenges Solved
+
+### 1. Constraining LLM Output for Structured Interfaces
+**Challenge:** LLMs often output leading/trailing markdown prose (e.g., ```json ... ```) or subtle structural errors that break `JSON.parse()`.
+**Solution:** Implemented a robust Express backend sanitization interceptor utilizing regex matching patterns combined with catch-and-repair fallback logic to guarantee predictable frontend payload delivery.
+
+### 2. Preserving UI Matrix Completeness (Mathematical Factor Padding)
+**Challenge:** If a user provides only one comparison factor, standard comparisons fail or look broken in a multi-column data grid.
+**Solution:** The Node.js layer computes the data deficit and dynamically injects universal baseline dimensions (e.g., *Usability*, *Cost*, *Performance*) to round out the grid, ensuring a full dashboard presentation regardless of input depth.
+
+### 3. Context Cascading & Hallucination Prevention
+**Challenge:** Generating final verdicts directly from a raw prompt can result in the AI introducing new, unverified facts not covered in the original comparison blocks.
+**Solution:** Implemented an architectural pipeline where the final verdict layer strictly harvests and consumes previously established matrices from the payload, preventing the model from generating disconnected assumptions.
+
+### 4. Cache-Aware Usage Gating
+**Challenge:** Users were getting blocked by the "Auth Wall" usage limit when simply trying to re-read analyses they had already generated.
+**Solution:** Built an intelligent server/client LRU cache that evaluates memory state *before* pinging the rate limiter. This decoupling guarantees users can endlessly toggle through their historical session tabs without triggering new API deductions.
 
 ---
 
-## 🎯 Key Features
+## ✨ Key Product Features
 
-### Mathematical Factor Padding
-If a user provides only 1 comparison factor, the backend dynamically calculates the deficit and injects universal baseline dimensions to complete the UI grid.
-
-### "My Case" Context Engine
-Allows users to input up to 500 words of specific constraints (budget, use case, lifestyle). Melinda uses this data to break ties definitively, ensuring the "Verdict" isn't generic, but hyper-personalized to the user's situation.
-
-### Context Cascading
-The Final Verdict isn't generated in a vacuum. The frontend harvests previously generated matrices and injects them back into the backend payload so Melinda synthesizes a decision based *only* on prior factual data.
+* **No Chatbot UX:** Replaces conversational fatigue with form-driven data dashboard components.
+* **"My Case" Context Engine:** Processes up to 500 words of specific lifestyle constraints (e.g., budget, travel metrics) to derive hyper-personalized choices rather than generic data sheets.
+* **Multi-Lens Analytical Views:** Splits a single resolution workflow into clear, distinct visual tabs: *Pros & Cons*, *Comparison Matrix*, *SWOT Analysis*, and *Final Verdict*.
+* **Live Web Grounding (Optional Toggle):** Supplements the static agent knowledge base with external search execution to account for volatile real-time variables like pricing updates.
+* **Zero-Scroll Mobile Engine:** Fluid side-by-side data grids powered by sub-millimeter padding and a fixed micro-toolbar, ensuring a premium native-app feel on mobile devices.
+* **Lightning Cache:** In-memory LRU Maps prevent duplicate AI API requests, granting instantaneous cross-tab rendering.
 
 ---
 
-## 🔒 Security & Reliability
+## 📸 App Previews
 
-| Concern | Protection |
-| --- | --- |
-| Excessive API Costs | Input `maxLength` enforcement & 500-word constraint on Context |
-| Rate Limit Exhaustion | Express rate limiter (`express-rate-limit`) |
-| Broken Tables/UI | JSON parsing interceptors & regex sanitization |
-| Outdated Data | Live Web Grounding (Optional Toggle) |
+### WelcomeModal
+![WelcomeModal](Pictures/WelcomeModal.png)
+*An onboarding modal introducing users to the structured decision framework.*
+
+### Tiebreaker Setup
+![Tiebreaker](Pictures/TieBreaker.png)
+*Dual-input fields alongside the 500-word constraint personalized context input engine.*
+
+### Theme Adaptability
+![Theme Change](Pictures/TieBreakerTheme(Changed).png)
+*Full dark/light structural synchronization across all customized components.*
+
+### The Final Verdict
+![Verdict](Pictures/Verdict.png)
+*Definitive conclusion screen driven strictly by context-cascaded data blocks.*
+
+### Premium Gating
+![Free Limit Reached](Pictures/FreeLimitReachedModal.png)
+*A local storage-tracked client block prompting account initialization after 3 free inquiries.*
+
+---
+
+## 🔒 Security, Guardrails & Reliability
+
+| Identified Risk | Mitigation Vector | Implementation Layer |
+| :--- | :--- | :--- |
+| **Excessive API Compute Costs** | String length boundaries & 500-word payload enforcement | Frontend Input & Express Router |
+| **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
+| **Broken UI / Layout Collapse** | Regex structural parsing interceptors & schema key validations | Express Response Pipe |
+| **Stale Evaluation Data** | Optional dynamic Live Web Grounding routing toggle | Azure Agent Integration |
 
 ---
 
 ## ⚙️ Technology Stack
 
-| Layer | Technology |
-| --- | --- |
-| **Frontend** | React 19, Vite, Tailwind CSS v4, Framer Motion |
-| **Backend** | Node.js, Express |
-| **AI Platform** | Azure AI Foundry |
-| **Agent Auth** | `@azure/identity` (`AzureCliCredential`) |
-| **Language** | TypeScript / JavaScript |
+* **Frontend:** React 19, Vite, Tailwind CSS v4, Framer Motion
+* **Backend Runtime:** Node.js, Express
+* **AI Ecosystem:** Azure AI Foundry, `@azure/identity` (`AzureCliCredential`)
+* **Languages:** TypeScript, JavaScript (ES6+)
+* **Testing Engine:** Vitest, automated execution verification suites
 
 ---
 
-## 🧪 Test Results
+## 🧪 Test Coverage
 
-We wrote an automated test suite to make sure the app never breaks. We have 9/9 passing tests checking everything from dark mode toggling to AI API error handling!
+The codebase includes an automated suite proving behavioral state persistence, interface stability, and error mitigation vectors.
 
+```bash
+✓ src/tests/ThemeToggle.test.tsx (1)
+✓ src/tests/UsageWallGate.test.tsx (2)
+✓ src/tests/ApiResponseValidation.test.tsx (4)
+✓ src/tests/UIComponentRender.test.tsx (2)
+
+Test Files  5 passed (5)
+Tests       9 passed (9)
+```
 ![Vitest Results](TestResults.png)
-
----
-
-## 🚀 Quick Start
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/Ahtesham-Latif/Tie-Breaker-App.git
-cd Tie-Breaker-App
-```
-
-### 2. Install Dependencies
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory:
-```env
-FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-05-15-preview
-Melinda_Agent=your-agent-identifier
-```
-
-### 4. Authenticate with Azure
-```bash
-az login
-```
-
-### 5. Start Development Server
-Run the Vite frontend and Express server concurrently:
-```bash
-npm run dev:full
-```
 
 ---
 
@@ -209,64 +190,88 @@ npm run dev:full
 
 ```text
 root/
-├── server.js            # Express API, REST proxy, JSON Sanitization
-├── TieBreaker_Agent_Prompt.md # System Prompt & JSON schemas
-├── package.json         # Concurrently, Vite, Tailwind
+├── server.js                  # Express API, REST orchestration, JSON sanitization interceptors
+├── TieBreaker_Agent_Prompt.md # Isolated system persona prompt & production JSON schemas
+├── package.json               # Development scripts (concurrent execution, vite, tailwind)
 ├── src/
-│   ├── App.tsx          # Dual-input UI, Context Cascading, and LRU Cache
-│   ├── main.tsx         # React entry point
-│   ├── index.css        # Tailwind directives
+│   ├── App.tsx                # Context cascading, global application state, and cache routing
+│   ├── main.tsx               # React application mounting node
+│   ├── index.css              # PostCSS Tailwind architecture configurations
 │   └── lib/
-│       └── utils.ts     # Class merging utilities
-├── Pictures/
-├── .env.example
-└── README.md
+│       └── utils.ts           # Class merging utilities
+├── Pictures/                  # Architectural documentation images
+├── .env.example               # Environment template keys
+└── README.md                  # System core engineering documentation
 ```
 
 ---
 
-## 🏆 Google Gemini CLI Usage
+## 🚀 Quick Start
 
-The Google Gemini CLI (Agent) was used throughout development to accelerate engineering workflows and architect robust system components.
+### 1. Clone & Navigate
+```bash
+git clone https://github.com/Ahtesham-Latif/Tie-Breaker-App.git
+cd Tie-Breaker-App
+```
 
-### Contributions
-* Component scaffolding and dynamic React state management
-* Tailwind CSS UI/UX implementation
-* Express middleware and direct REST API orchestration
-* Robust RegEx sanitization pipelines for LLM JSON outputs
-* Azure Identity SDK (`@azure/identity`) integration support
+### 2. Provision Dependencies
+```bash
+npm install
+```
 
-### Verified Achievement
+### 3. Environment Environment Variables
+Instantiate a `.env` deployment file inside the system root:
+```env
+FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-05-15-preview
+Melinda_Agent=your-agent-identifier
+```
+
+### 4. Authenticate Infrastructure
+```bash
+az login
+```
+
+### 5. Launch Local Dev Node
+Execute frontend and backend tasks concurrently:
+```bash
+npm run dev:full
+```
+
+---
+
+## 🏆 Google Gemini CLI Workflows
+
+The **Google Gemini CLI** was utilized as an engineering accelerator throughout development to bootstrap system components and refine backend safety configurations.
+
+### Key Workflows Assisted:
+* Creating early Node.js express proxy routes and integration patterns.
+* Implementing strict regex sanitizers to parse corrupted JSON output blocks cleanly.
+* Structuring automated UI and integration testing patterns inside Vitest.
+
+### Verified Badges
 **Build AI Agents with Gemini**
 [![Build AI Agents with Gemini](https://img.shields.io/badge/Google_Cloud-Build_AI_Agents-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://developers.google.com/profile/badges/events/cloud/five-day-ai-agents)
 
 ---
 
-## 🔮 Future Enhancements
-* User Authentication and Database implementation via Supabase
-* Persistent knowledge/decision history
-* PDF export for Decision Matrices
-* Social sharing for specific dilemmas
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome. Please ensure that any prompt engineering modifications adhere strictly to the philosophy of **"Deterministic structure over free-form AI output"** and respect the negative constraints in `server.js`.
+## 🔮 Roadmap & Next Milestones
+* Integrate **Supabase** for full user authentication and secure multi-tenant data structures.
+* Implement persistent cloud database storage for historical evaluation tracking.
+* Develop a backend layout engine to support **PDF Export** for completed decision matrices.
+* Introduce cryptographically unique shareable links for cross-user scenario exploration.
 
 ---
 
 ## 📄 License
 
-MIT License
+Distributed under the MIT License.
 
 ---
 
-## 👨💻 Author
+## 👨‍💻 Author
 
-**Ahtesham Latif**
-Business & IT Student
-University of the Punjab (IBIT)
-[LinkedIn](https://www.linkedin.com/in/ahtesham-latif) | [Google Developer Profile](https://me.developers.google.com/u/me)
+**Ahtesham Latif**  
+*Business & IT Scholar — University of the Punjab (IBIT)*  
+[LinkedIn](https://www.linkedin.com/in/ahtesham-latif) | [Google Developer Profile](https://me.developers.google.com/u/me)  
 
-*"Turning subjective dilemmas into objective, fact-driven decisions."*
+*"Turning subjective dilemmas into objective, fact-driven choices through deterministic software architecture."*

@@ -1,9 +1,10 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { cn } from "../../lib/utils";
 
-export function SWOTGridView({ data }: { data: any[] }) {
+export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide?: boolean }) {
   return (
-    <div className="space-y-16">
+    <div className={cn("grid", isSideBySide ? "grid-cols-2 gap-1 md:gap-2" : "grid-cols-1 gap-8 md:gap-16")}>
       {data.map((opt, i) => (
         <div key={i} className="space-y-8">
           <div className="flex items-center gap-4">
@@ -13,8 +14,11 @@ export function SWOTGridView({ data }: { data: any[] }) {
             <div className="flex-1 h-1 bg-accent/10 rounded-full" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-bg-panel border-4 border-accent p-8 rounded-4xl shadow-xl hover:scale-[1.02] transition-transform">
+          <div className={cn("grid", isSideBySide ? "grid-cols-1 gap-1 md:gap-2" : "grid-cols-1 md:grid-cols-2 gap-3 md:gap-4")}>
+            <div className={cn(
+              "bg-bg-panel border-2 md:border-4 border-accent shadow-xl hover:scale-[1.02] transition-transform",
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+            )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
                   Strengths
@@ -35,7 +39,10 @@ export function SWOTGridView({ data }: { data: any[] }) {
               </ul>
             </div>
 
-            <div className="bg-bg-panel border-4 border-danger p-8 rounded-4xl shadow-xl hover:scale-[1.02] transition-transform">
+            <div className={cn(
+              "bg-bg-panel border-2 md:border-4 border-danger shadow-xl hover:scale-[1.02] transition-transform",
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+            )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
                   Weaknesses
@@ -56,7 +63,10 @@ export function SWOTGridView({ data }: { data: any[] }) {
               </ul>
             </div>
 
-            <div className="bg-bg-panel border-4 border-accent p-8 rounded-4xl shadow-xl hover:scale-[1.02] transition-transform">
+            <div className={cn(
+              "bg-bg-panel border-2 md:border-4 border-accent shadow-xl hover:scale-[1.02] transition-transform",
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+            )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
                   Opportunities
@@ -76,8 +86,10 @@ export function SWOTGridView({ data }: { data: any[] }) {
                 ))}
               </ul>
             </div>
-
-            <div className="bg-bg-panel border-4 border-danger p-8 rounded-4xl shadow-xl hover:scale-[1.02] transition-transform">
+            <div className={cn(
+              "bg-bg-panel border-2 md:border-4 border-danger shadow-xl hover:scale-[1.02] transition-transform",
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+            )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
                   Threats
