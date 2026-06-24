@@ -15,7 +15,7 @@ export function ComparisonTable({
       {data.factors.map((factor, fIdx) => (
         <div key={fIdx} className={cn(
           "bg-bg-panel border-2 md:border-4 border-accent/20 shadow-lg hover:border-accent/40 transition-colors",
-          isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-[2rem] p-4 md:p-6"
+          isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
         )}>
           <h3 className="text-sm font-black text-accent uppercase tracking-[0.2em] mb-4 pb-2 border-b-2 border-accent/10">
             {factor}
@@ -24,7 +24,7 @@ export function ComparisonTable({
             {data.comparison.map((opt, oIdx) => (
               <div key={oIdx} className={cn(
                 "flex-1 bg-bg-surface border-2 border-accent/5 shadow-sm",
-                isSideBySide ? "rounded-lg p-1" : "rounded-xl md:rounded-2xl p-3 md:p-5"
+                isSideBySide ? "rounded-lg p-1" : "rounded-lg md:rounded-xl p-2 md:p-3"
               )}>
                 <span className="text-[10px] font-black uppercase text-text-dim/70 mb-2 block tracking-wider">
                   {opt.optionName}

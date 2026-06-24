@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Scale,
-  CheckCircle2,
-  XCircle,
-  Columns,
-  Rows,
-  Zap,
-  ArrowRight,
-  Loader2,
-  Scale as ScaleIcon,
-  RefreshCcw,
-  Plus,
-  Trash2,
-  Copy,
-  Check,
-  Moon,
-  Sun,
-  ChevronDown,
+import { 
+  CheckCircle2, 
+  XCircle, 
+  ArrowRight, 
+  Zap, 
+  Loader2, 
+  RefreshCcw, 
+  Columns, 
+  Trash2, 
+  Plus, 
+  Sun, 
+  Moon, 
+  Scale as ScaleIcon, 
+  Rows, 
+  Copy, 
+  Check, 
+  PanelLeft 
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
@@ -183,6 +182,16 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [usageCount, setUsageCount] = useState<number>(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const welcomed = localStorage.getItem("tiebreaker_welcomed");
@@ -238,7 +247,29 @@ export default function App() {
     setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 4000);
   };
 
+  // --- TOUCH SWIPE LOGIC ---
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX === null || !isMobile || !isSidebarOpen) return;
+    const currentTouchX = e.targetTouches[0].clientX;
+    const diff = touchStartX - currentTouchX;
+
+    // If user swipes left by more than 50px, close the drawer
+    if (diff > 50) {
+      setIsSidebarOpen(false);
+      setTouchStartX(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStartX(null);
+  };
+
   const handleAnalyze = async (type: AnalysisType = selectedType) => {
+    setIsSidebarOpen(false);
     const trimmedA = optionA.trim();
     const trimmedB = optionB.trim();
     const validFactors = options.filter((o) => o.trim()).map(f => f.toLowerCase()).sort();
@@ -441,12 +472,49 @@ export default function App() {
         {showAuthWall && <AuthWallModal onClose={() => setShowAuthWall(false)} />}
       </AnimatePresence>
 
+      {/* Mobile Drawer Overlay */}
+      {isMobile && isSidebarOpen && hasStarted && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Edge Handle (Swipe affordance) */}
+      {isMobile && !isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-bg-surface border-y border-r border-border-dim rounded-r-xl z-40 flex items-center justify-center cursor-pointer shadow-lg group hover:w-8 transition-all duration-300 flex-col gap-1"
+          title="Open Inputs"
+        >
+          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
+          <div className="w-1 h-3 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
+          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
+        </div>
+      )}
+
       {/* Sidebar - Inputs */}
       <aside className={cn(
-        "w-full md:w-1/3 lg:max-w-[450px] bg-bg-surface border-b md:border-b-0 md:border-r border-border-dim flex flex-col p-6 shrink-0 shadow-sm z-20 relative transition-all duration-300",
-        hasStarted && "hidden md:flex" // Hide sidebar on mobile when result appears
-      )}>
-        <div className="flex items-center justify-between mb-10">
+        "bg-bg-surface border-border-dim flex flex-col shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-50",
+        
+        // --- MOBILE LOGIC ---
+        isMobile && !hasStarted && "relative w-full border-b", // Landing page stacks vertically
+        isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-[60]", // Fixed to viewport so it doesn't scroll away
+        isMobile && isSidebarOpen && hasStarted && "w-full sm:w-[400px] p-4 sm:p-6 opacity-100 translate-x-0 border-r",
+        isMobile && isSidebarOpen && !hasStarted && "w-full p-4 sm:p-6 opacity-100",
+        isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0 -translate-x-full",
+
+        // --- LAPTOP LOGIC ---
+        !isMobile && "relative h-full border-r shadow-sm", // Always a side-by-side panel
+        !isMobile && isSidebarOpen && "w-1/3 lg:max-w-[450px] p-6 opacity-100",
+        !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
+      )}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      >
+        <div className="w-full h-full flex flex-col">
+          <div className="flex items-center justify-between mb-10">
           <div
             className="flex items-center gap-2 cursor-pointer group"
             onClick={reset}
@@ -603,6 +671,7 @@ export default function App() {
           )}
           Calculate Analysis
         </button>
+        </div>
       </aside>
 
       {/* Floating Notifications */}
@@ -628,8 +697,8 @@ export default function App() {
       {/* Main Content - Results */}
       <main className={cn(
         "flex-1 flex flex-col min-w-0 bg-bg-base relative z-10",
-        !hasStarted && "hidden md:flex", // On mobile, hide results area until started
-        "md:overflow-hidden"
+        isMobile && !hasStarted && "hidden", // On mobile, hide results area until started
+        !isMobile && "overflow-hidden"
       )}>
         <AnimatePresence mode="wait">
           {!hasStarted ? (
@@ -691,7 +760,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="flex-1 flex flex-col p-3 md:p-10 h-full bg-bg-base"
+              className="flex-1 flex flex-col p-3 md:p-4 h-full bg-bg-base"
             >
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-10">
                 <div className="space-y-3">
@@ -744,6 +813,16 @@ export default function App() {
                     {selectedType === "verdict" && "Verdict"}
                   </div>
                   <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                      className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center justify-center gap-1 shadow-sm"
+                      title="Toggle Input Drawer"
+                    >
+                      <PanelLeft size={12} className={cn("transition-transform duration-300", !isSidebarOpen && "rotate-180")} />
+                      <span className="text-[8px] font-black uppercase tracking-widest">
+                        {isSidebarOpen ? "Hide" : "Input"}
+                      </span>
+                    </button>
                     <button
                       onClick={toggleTheme}
                       className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center gap-1 shadow-sm"

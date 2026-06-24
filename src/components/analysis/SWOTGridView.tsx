@@ -17,7 +17,7 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
           <div className={cn("grid", isSideBySide ? "grid-cols-1 gap-1 md:gap-2" : "grid-cols-1 md:grid-cols-2 gap-3 md:gap-4")}>
             <div className={cn(
               "bg-bg-panel border-2 md:border-4 border-accent shadow-xl hover:scale-[1.02] transition-transform",
-              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
             )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
@@ -41,7 +41,7 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
 
             <div className={cn(
               "bg-bg-panel border-2 md:border-4 border-danger shadow-xl hover:scale-[1.02] transition-transform",
-              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
             )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
@@ -65,7 +65,7 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
 
             <div className={cn(
               "bg-bg-panel border-2 md:border-4 border-accent shadow-xl hover:scale-[1.02] transition-transform",
-              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
             )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
@@ -88,7 +88,7 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
             </div>
             <div className={cn(
               "bg-bg-panel border-2 md:border-4 border-danger shadow-xl hover:scale-[1.02] transition-transform",
-              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-2xl md:rounded-4xl p-4 md:p-8"
+              isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
             )}>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-danger">
