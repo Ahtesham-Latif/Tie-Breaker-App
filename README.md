@@ -107,6 +107,10 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 **Challenge:** Generating final verdicts directly from a raw prompt can result in the AI introducing new, unverified facts not covered in the original comparison blocks.
 **Solution:** Implemented an architectural pipeline where the final verdict layer strictly harvests and consumes previously established matrices from the payload, preventing the model from generating disconnected assumptions.
 
+### 4. Cache-Aware Usage Gating
+**Challenge:** Users were getting blocked by the "Auth Wall" usage limit when simply trying to re-read analyses they had already generated.
+**Solution:** Built an intelligent server/client LRU cache that evaluates memory state *before* pinging the rate limiter. This decoupling guarantees users can endlessly toggle through their historical session tabs without triggering new API deductions.
+
 ---
 
 ## ✨ Key Product Features
@@ -115,6 +119,8 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 * **"My Case" Context Engine:** Processes up to 500 words of specific lifestyle constraints (e.g., budget, travel metrics) to derive hyper-personalized choices rather than generic data sheets.
 * **Multi-Lens Analytical Views:** Splits a single resolution workflow into clear, distinct visual tabs: *Pros & Cons*, *Comparison Matrix*, *SWOT Analysis*, and *Final Verdict*.
 * **Live Web Grounding (Optional Toggle):** Supplements the static agent knowledge base with external search execution to account for volatile real-time variables like pricing updates.
+* **Zero-Scroll Mobile Engine:** Fluid side-by-side data grids powered by sub-millimeter padding and a fixed micro-toolbar, ensuring a premium native-app feel on mobile devices.
+* **Lightning Cache:** In-memory LRU Maps prevent duplicate AI API requests, granting instantaneous cross-tab rendering.
 
 ---
 
