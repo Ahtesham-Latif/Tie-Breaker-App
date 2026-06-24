@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Zap } from "lucide-react";
 
-export function AuthWallModal({ onClose }: { onClose: () => void }) {
+export function AuthWallModal({ onClose, onAuthenticate }: { onClose: () => void; onAuthenticate: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -33,6 +33,7 @@ export function AuthWallModal({ onClose }: { onClose: () => void }) {
 
         <div className="space-y-4">
           <motion.button
+            onClick={onAuthenticate}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-full py-4 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group"

@@ -9,4 +9,4 @@ coverage/
 .env
 .vscode/
 AI_Context.md
-.agents/skills/gourmet_engineering/
+.agents/
