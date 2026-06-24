@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js", 
+    "start": "node server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run start\"",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@azure/ai-projects": "latest",
     "@azure/identity": "latest",
+    "@supabase/supabase-js": "^2.108.2",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -31,10 +32,10 @@
     "@tailwindcss/vite": "^4.0.7",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "concurrently": "^9.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.1.2",
     "jsdom": "^29.0.2",
     "tailwindcss": "^4.0.7",
     "typescript": "~5.8.2",

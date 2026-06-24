@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   CheckCircle2, 
@@ -16,7 +16,8 @@ import {
   Rows, 
   Copy, 
   Check, 
-  PanelLeft 
+  PanelLeft,
+  ChevronRight
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
@@ -25,9 +26,14 @@ import {
   AnalysisDisplay, 
   TypeTab, 
   AnalysisButton, 
-  WelcomeModal, 
-  AuthWallModal 
+  WelcomeModal,
+  SidebarHistory,
+  AuthWallModal
 } from "./components";
+import { AuthModal } from "./components/modals/AuthModal";
+import { useAuth } from "./context/AuthContext";
+import { supabase } from "./db/supabase";
+import { User as UserIcon, LogOut, Clock, ArrowLeft } from "lucide-react";
 
 
 // --- AI Service ---
@@ -161,6 +167,7 @@ function formatForClipboard(result: AnalysisResult): string {
 // --- Components ---
 
 export default function App() {
+  const { user, signOut } = useAuth();
   const [optionA, setOptionA] = useState("");
   const [optionB, setOptionB] = useState("");
   const [myCase, setMyCase] = useState("");
@@ -181,10 +188,13 @@ export default function App() {
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [showAuthWall, setShowAuthWall] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showHistoryView, setShowHistoryView] = useState(false);
   const [usageCount, setUsageCount] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -301,7 +311,7 @@ export default function App() {
       return;
     }
 
-    if (usageCount >= 3) {
+    if (!user && usageCount >= 3) {
       setShowAuthWall(true);
       return;
     }
@@ -310,6 +320,38 @@ export default function App() {
       setSelectedType(type);
       setHasStarted(true);
       return;
+    }
+
+    // 2. Supabase DB Cache Check
+    if (user) {
+      try {
+        const columnName = `${type.replace('-', '_')}_data`;
+        const { data: dbData } = await supabase
+          .from('decisions')
+          .select(columnName)
+          .eq('user_id', user.id)
+          .eq('query', decisionQuery)
+          .single();
+          
+        const dataRecord = dbData as Record<string, any>;
+        if (dataRecord && dataRecord[columnName]) {
+          const structuredData = dataRecord[columnName];
+          const newResult = {
+            type,
+            content: "Loaded from your history.",
+            structuredData,
+            factors: validFactors,
+          };
+          
+          setAnalysisCache((prev) => ({ ...prev, [cacheKey]: newResult }));
+          setSelectedType(type);
+          setHasStarted(true);
+          setValidationError(null);
+          return;
+        }
+      } catch (e) {
+        console.warn("DB Cache check failed", e);
+      }
     }
 
     const now = Date.now();
@@ -359,6 +401,33 @@ export default function App() {
         factors: validFactors,
       };
 
+      // 3. Save to Supabase DB in the background
+      if (user && structuredData) {
+        const columnName = `${type.replace('-', '_')}_data`;
+        supabase.from('decisions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('query', decisionQuery)
+          .single()
+          .then(({ data }) => {
+            if (data?.id) {
+              supabase.from('decisions').update({
+                [columnName]: structuredData,
+                factors: validFactors,
+                my_case: myCase
+              }).eq('id', data.id).then();
+            } else {
+              supabase.from('decisions').insert({
+                user_id: user.id,
+                query: decisionQuery,
+                factors: validFactors,
+                my_case: myCase,
+                [columnName]: structuredData
+              }).then();
+            }
+          });
+      }
+
       setAnalysisCache((prev) => {
         // Implementation of LRU via Map-like object behavior
         const next = { ...prev };
@@ -379,6 +448,14 @@ export default function App() {
         localStorage.setItem("tiebreaker_usage_count", next.toString());
         return next;
       });
+      
+      setHasStarted(true);
+      
+      // Auto-scroll to results on mobile after calculate
+      if (isMobile) {
+        setTimeout(() => setIsSidebarOpen(false), 100);
+      }
+
     } catch (error: any) {
       console.error(error);
       const errorMessage = error?.message || "";
@@ -448,6 +525,35 @@ export default function App() {
   };
   
 
+  const handleLoadDecision = (dbDecision: any) => {
+    const [a, b] = dbDecision.query.split(" vs ");
+    setOptionA(a || "");
+    setOptionB(b || "");
+    setOptions(dbDecision.factors?.length ? [...dbDecision.factors, ""] : ["", ""]);
+    setMyCase(dbDecision.my_case || "");
+
+    const validFactors = dbDecision.factors || [];
+    const canonicalDecision = dbDecision.query
+      .toLowerCase()
+      .replace(/\b(vs|and|or)\b|&/g, " ")
+      .split(/\s+/)
+      .sort()
+      .join(" ");
+
+    // Pre-populate the local cache with the DB data
+    setAnalysisCache(prev => ({
+      ...prev,
+      [`comparison-${canonicalDecision}-${validFactors.join("|")}`]: { type: "comparison", content: "", structuredData: dbDecision.comparison_data, factors: validFactors },
+      [`pros-cons-${canonicalDecision}-${validFactors.join("|")}`]: { type: "pros-cons", content: "", structuredData: dbDecision.pros_cons_data, factors: validFactors },
+      [`swot-${canonicalDecision}-${validFactors.join("|")}`]: { type: "swot", content: "", structuredData: dbDecision.swot_data, factors: validFactors },
+      [`verdict-${canonicalDecision}-${validFactors.join("|")}`]: { type: "verdict", content: "", structuredData: dbDecision.verdict_data, factors: validFactors },
+    }));
+
+    setSelectedType("pros-cons");
+    setHasStarted(true);
+    setIsSidebarOpen(false);
+  };
+  
   const validFactorsForSearch = options.filter((o) => o.trim()).map((f) => f.toLowerCase()).sort();
   const canonicalSearchDecision = `${optionA.trim()} vs ${optionB.trim()}`
     .toLowerCase()
@@ -463,22 +569,43 @@ export default function App() {
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row min-h-screen bg-bg-base text-text-main font-sans selection:bg-accent selection:text-white transition-colors duration-300",
-        "md:h-screen md:overflow-hidden", // Locked height only on desktop
+        "flex h-dvh w-full overflow-hidden transition-colors duration-500 text-text-main bg-bg-base font-sans selection:bg-accent/20 selection:text-accent",
+        theme === "dark" ? "dark bg-bg-base" : "bg-bg-base",
+        !isMobile && "md:h-screen md:overflow-hidden", // Locked height only on desktop
       )}
     >
       <AnimatePresence>
         {showWelcome && <WelcomeModal onClose={handleCloseWelcome} />}
-        {showAuthWall && <AuthWallModal onClose={() => setShowAuthWall(false)} />}
+        {showAuthWall && (
+          <AuthWallModal 
+            onClose={() => setShowAuthWall(false)} 
+            onAuthenticate={() => {
+              setShowAuthWall(false);
+              setShowAuthModal(true);
+            }} 
+          />
+        )}
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+          onSuccess={() => setShowAuthModal(false)} 
+        />
       </AnimatePresence>
 
+
+
       {/* Mobile Drawer Overlay */}
-      {isMobile && isSidebarOpen && hasStarted && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isMobile && isSidebarOpen && hasStarted && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Edge Handle (Swipe affordance) */}
       {isMobile && !isSidebarOpen && (
@@ -493,28 +620,34 @@ export default function App() {
         </div>
       )}
 
-      {/* Sidebar - Inputs */}
-      <aside className={cn(
-        "bg-bg-surface border-border-dim flex flex-col shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-50",
-        
-        // --- MOBILE LOGIC ---
-        isMobile && !hasStarted && "relative w-full border-b", // Landing page stacks vertically
-        isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-[60]", // Fixed to viewport so it doesn't scroll away
-        isMobile && isSidebarOpen && hasStarted && "w-full sm:w-[400px] p-4 sm:p-6 opacity-100 translate-x-0 border-r",
-        isMobile && isSidebarOpen && !hasStarted && "w-full p-4 sm:p-6 opacity-100",
-        isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0 -translate-x-full",
+      {/* Main Container */}
+      <div className="flex h-full w-full relative">
 
-        // --- LAPTOP LOGIC ---
-        !isMobile && "relative h-full border-r shadow-sm", // Always a side-by-side panel
-        !isMobile && isSidebarOpen && "w-1/3 lg:max-w-[450px] p-6 opacity-100",
-        !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
-      )}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      {/* Sidebar - Inputs */}
+      <motion.aside 
+        className={cn(
+          "bg-bg-surface border-border-dim flex flex-col shrink-0 z-50",
+          
+          // --- MOBILE LOGIC ---
+          isMobile && !hasStarted && "relative w-full border-b p-4 sm:p-6",
+          isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-60 h-dvh w-[85vw] max-w-100 border-r p-4 sm:p-6",
+          
+          // --- LAPTOP LOGIC ---
+          !isMobile && "relative h-full border-r shadow-sm",
+          !isMobile && isSidebarOpen && "w-1/3 lg:max-w-[450px] p-6 opacity-100",
+          !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
+        )}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        initial={false}
+        animate={{
+          x: isMobile && hasStarted ? (isSidebarOpen ? "0%" : "-100%") : "0%"
+        }}
+        transition={{ type: "spring", stiffness: 350, damping: 30 }}
       >
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-4">
           <div
             className="flex items-center gap-2 cursor-pointer group"
             onClick={reset}
@@ -527,152 +660,191 @@ export default function App() {
             </span>
           </div>
 
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
-            title="Toggle Theme"
-          >
-            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
+          <div className="flex items-center gap-3">
+            {isMobile && hasStarted && (
+              <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-[10px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-bg-surface transition-all"
+              >
+                Results <ChevronRight size={14} />
+              </button>
+            )}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+              title="Toggle Theme"
+            >
+              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
-          {/* Validation Feedback */}
-          <AnimatePresence>
-            {validationError && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-danger/10 border-2 border-danger/20 p-4 rounded-xl mb-4"
-              >
-                <p className="text-[11px] font-black text-danger uppercase tracking-wider flex items-center gap-2">
-                  <XCircle size={14} /> {validationError}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {!showHistoryView ? (
+          <>
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+              {/* Validation Feedback */}
+              <AnimatePresence>
+                {validationError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-danger/10 border-2 border-danger/20 p-4 rounded-xl mb-4"
+                  >
+                    <p className="text-[11px] font-black text-danger uppercase tracking-wider flex items-center gap-2">
+                      <XCircle size={14} /> {validationError}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          <div className="space-y-3">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-accent block">
-              The Contenders
-            </label>
-            <div className="flex flex-col gap-3">
-              <textarea
-                value={optionA}
-                onChange={(e) => setOptionA(e.target.value)}
-                maxLength={100}
-                placeholder="Option A (e.g. iPhone 15 Pro Max)"
-                rows={2}
-                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
-              />
-              <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
-                VS
-              </div>
-              <textarea
-                value={optionB}
-                onChange={(e) => setOptionB(e.target.value)}
-                maxLength={100}
-                placeholder="Option B (e.g. Galaxy S24 Ultra)"
-                rows={2}
-                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
-              />
-            </div>
-            
-            <div className="mt-4">
               <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
-                My Case / Context
-                <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
-                  Optional (Max 500 words)
+                The Contenders
+              </label>
+              <div className="flex flex-col gap-3">
+                <textarea
+                  value={optionA}
+                  onChange={(e) => setOptionA(e.target.value)}
+                  maxLength={100}
+                  placeholder="Option A (e.g. iPhone 15 Pro Max)"
+                  rows={1}
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-10"
+                />
+                <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
+                  VS
+                </div>
+                <textarea
+                  value={optionB}
+                  onChange={(e) => setOptionB(e.target.value)}
+                  maxLength={100}
+                  placeholder="Option B (e.g. Galaxy S24 Ultra)"
+                  rows={1}
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-10"
+                />
+              </div>
+              
+              <div className="mt-4">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
+                  My Case / Context
+                  <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
+                    Optional (Max 500 words)
+                  </span>
+                </label>
+                <textarea
+                  value={myCase}
+                  maxLength={3000}
+                  onChange={(e) => {
+                    // Limit to ~500 words simply by counting spaces
+                    const words = e.target.value.trim().split(/\s+/).length;
+                    if (words <= 500 || e.target.value.length < myCase.length) {
+                      setMyCase(e.target.value);
+                    }
+                  }}
+                  placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                  rows={2}
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
+                />
+              </div>
+              
+              <label className="flex items-center gap-2 cursor-pointer mt-3 group w-fit">
+                <input 
+                  type="checkbox" 
+                  checked={useWebSearch} 
+                  onChange={(e) => setUseWebSearch(e.target.checked)}
+                  className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
+                />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-main opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
+                  🌐 Deep Web Search 
+                  <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border border-accent/20">SLOWER</span>
                 </span>
               </label>
-              <textarea
-                value={myCase}
-                maxLength={3000}
-                onChange={(e) => {
-                  // Limit to ~500 words simply by counting spaces
-                  const words = e.target.value.trim().split(/\s+/).length;
-                  if (words <= 500 || e.target.value.length < myCase.length) {
-                    setMyCase(e.target.value);
-                  }
-                }}
-                placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
-                rows={3}
-                className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[80px]"
-              />
-            </div>
-            
-            <label className="flex items-center gap-2 cursor-pointer mt-3 group w-fit">
-              <input 
-                type="checkbox" 
-                checked={useWebSearch} 
-                onChange={(e) => setUseWebSearch(e.target.checked)}
-                className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent cursor-pointer"
-              />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-text-main opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
-                🌐 Deep Web Search 
-                <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border border-accent/20">SLOWER</span>
-              </span>
-            </label>
-          </div>
 
-          <div className="space-y-4">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between">
-              Analysis Factors
-              <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
-                Optional
-              </span>
-            </label>
-            <p className="text-[9px] font-bold text-text-dim uppercase tracking-wider -mt-2 opacity-60 italic leading-tight">
-              Add factors like "Cost" or "Health" to guide the comparison
-            </p>
-            <div className="space-y-3">
-              {options.map((opt, idx) => (
-                <div key={idx} className="relative group/opt">
-                  <input
-                    value={opt}
-                    onChange={(e) => handleOptionChange(idx, e.target.value)}
-                    maxLength={25}
-                    placeholder={`Factor ${idx + 1} (e.g. Cost)`}
-                    className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
-                  />
-                  {options.length > 2 && (
+              <div className="space-y-4">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between">
+                  Analysis Factors
+                  <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
+                    Optional
+                  </span>
+                </label>
+                <p className="text-[9px] font-bold text-text-dim uppercase tracking-wider -mt-2 opacity-60 italic leading-tight">
+                  Add factors like "Cost" or "Health" to guide the comparison
+                </p>
+                <div className="space-y-3">
+                  {options.map((opt, idx) => (
+                    <div key={idx} className="relative group/opt">
+                      <input
+                        value={opt}
+                        onChange={(e) => handleOptionChange(idx, e.target.value)}
+                        maxLength={25}
+                        placeholder={`Factor ${idx + 1} (e.g. Cost)`}
+                        className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
+                      />
+                      {options.length > 2 && (
+                        <button
+                          onClick={() => handleRemoveOption(idx)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {options.length < 6 && (
                     <button
-                      onClick={() => handleRemoveOption(idx)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
+                      onClick={handleAddFactor}
+                      className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
                     >
-                      <Trash2 size={14} />
+                      <Plus size={16} className="mr-2" />
+                      Add Option
                     </button>
                   )}
                 </div>
-              ))}
-              {options.length < 6 && (
-                <button
-                  onClick={handleAddFactor}
-                  className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
+              </div>
+            </div>
+
+            <div className="pt-4 shrink-0 mt-auto">
+              <button
+                onClick={() => handleAnalyze(selectedType)}
+                disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
+                className="w-full py-3.5 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
+              >
+                {isAnyLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <RefreshCcw size={16} />
+                )}
+                Calculate Analysis
+              </button>
+              
+              {user && (
+                <button 
+                  onClick={() => setShowHistoryView(true)}
+                  className="mt-3 w-full py-3 bg-bg-panel border border-border-dim text-accent rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 transition-colors flex justify-center items-center gap-2 shadow-sm"
                 >
-                  <Plus size={16} className="mr-2" />
-                  Add Option
+                  <Clock size={16} /> My History
                 </button>
               )}
             </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col min-h-0">
+            <button 
+              onClick={() => setShowHistoryView(false)}
+              className="mb-4 w-full py-3 bg-bg-panel border border-border-dim text-text-main rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 hover:text-accent transition-colors flex justify-center items-center gap-2 shrink-0 shadow-sm"
+            >
+              <ArrowLeft size={16} /> Back to Inputs
+            </button>
+            <SidebarHistory 
+              onLoadDecision={(decision) => {
+                handleLoadDecision(decision);
+                setShowHistoryView(false);
+              }} 
+              onShowAuth={() => setShowAuthModal(true)} 
+            />
           </div>
+        )}
         </div>
-
-        <button
-          onClick={() => handleAnalyze(selectedType)}
-          disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
-          className="mt-6 w-full py-4 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
-        >
-          {isAnyLoading ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <RefreshCcw size={16} />
-          )}
-          Calculate Analysis
-        </button>
-        </div>
-      </aside>
+      </motion.aside>
 
       {/* Floating Notifications */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-100 flex flex-col gap-2 pointer-events-none">
@@ -700,6 +872,38 @@ export default function App() {
         isMobile && !hasStarted && "hidden", // On mobile, hide results area until started
         !isMobile && "overflow-hidden"
       )}>
+
+        {/* Top Right Desktop Auth Button */}
+        {!isMobile && (
+          <div className="hidden md:flex justify-end pt-6 pr-8 w-full z-40 shrink-0">
+            {user ? (
+               <div className="flex items-center gap-4 bg-bg-surface/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-accent/20 shadow-lg shadow-accent/5">
+                 <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                   <UserIcon size={12} />
+                 </div>
+                 <div className="flex flex-col">
+                   <span className="text-[10px] font-black uppercase tracking-widest text-text-bright leading-none">
+                     {user.email?.split('@')[0]}
+                   </span>
+                   <span className="text-[8px] font-bold text-accent uppercase tracking-widest mt-0.5">Pro Member</span>
+                 </div>
+                 <button 
+                   onClick={signOut}
+                   className="ml-2 p-1.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
+                 >
+                   <LogOut size={12} />
+                 </button>
+               </div>
+            ) : (
+               <button 
+                 onClick={() => setShowAuthModal(true)}
+                 className="px-6 py-2.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-accent-muted"
+               >
+                 <UserIcon size={14} /> Log In / Sign Up
+               </button>
+            )}
+          </div>
+        )}
         <AnimatePresence mode="wait">
           {!hasStarted ? (
             <motion.div
@@ -709,23 +913,23 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               className="flex-1 flex items-center justify-center p-6 md:p-12"
             >
-              <div className="max-w-2xl text-center space-y-8">
-                <div className="inline-block px-4 py-1.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest leading-none mb-4 shadow-lg shadow-accent/20">
+              <div className="max-w-2xl text-center flex flex-col items-center">
+                <div className="inline-block px-4 py-1.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest leading-none mb-6 shadow-lg shadow-accent/20">
                   AI Decision Engine
                 </div>
-                <h1 className="text-5xl md:text-7xl font-black text-text-bright tracking-tighter leading-[0.85] uppercase">
+                <h1 className="text-5xl md:text-7xl font-black text-text-bright tracking-tighter leading-[0.85] uppercase mb-6">
                   Break The <br />
                   <span className="text-accent underline decoration-8 underline-offset-8 decoration-accent/20">
                     Tie
                   </span>{" "}
                   Today 🥴
                 </h1>
-                <p className="text-lg md:text-xl text-text-main font-semibold leading-relaxed opacity-70">
+                <p className="text-lg md:text-xl text-text-main font-semibold leading-relaxed opacity-70 mb-8">
                   Stuck between two options? Let our AI analyze the pros, cons,
                   and key factors to help you make the best choice with
                   confidence.
                 </p>
-                <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl">
                   <AnalysisButton
                     title="Pros & Cons"
                     icon={<CheckCircle2 size={18} />}
@@ -757,9 +961,9 @@ export default function App() {
           ) : (
             <motion.div
               key="result"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 1.05 }}
+              exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col p-3 md:p-4 h-full bg-bg-base"
             >
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-10">
@@ -916,6 +1120,7 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+      </div>
     </div>
   );
 }
