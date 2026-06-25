@@ -89,7 +89,8 @@ describe('The Tie Breaker App - Production Test Suite', () => {
     test('should toggle theme between light and dark mode when theme button is clicked', () => {
       // Arrange
       renderApp();
-      const themeBtn = screen.getByTitle(/Toggle Theme/i);
+      // Use getByRole or getByLabelText since the title attribute was moved to custom Tooltip
+      const themeBtn = screen.getAllByLabelText(/Toggle Theme/i)[0];
       
       // Act: Toggle to dark mode
       fireEvent.click(themeBtn);
@@ -176,9 +177,8 @@ describe('The Tie Breaker App - Production Test Suite', () => {
       fireEvent.click(analyzeButton);
 
       // Assert
-      const errorTitle = await screen.findByText(/Quota Exceeded/i);
+      const errorTitle = await screen.findByText(/You're moving too fast!/i);
       expect(errorTitle).toBeInTheDocument();
-      expect(screen.getByText(/The AI service is currently at its limit/i)).toBeInTheDocument();
     });
 
     test('should display generic server error when server responds with 500 status', async () => {
@@ -201,9 +201,8 @@ describe('The Tie Breaker App - Production Test Suite', () => {
       fireEvent.click(analyzeButton);
 
       // Assert
-      const errorTitle = await screen.findByText(/Connection Error/i);
-      expect(errorTitle).toBeInTheDocument();
-      expect(screen.getByText(/The AI engine encountered an internal error. \(Status: 500\)/i)).toBeInTheDocument();
+      const errorMessage = await screen.findByText(/The AI engine encountered an internal error./i);
+      expect(errorMessage).toBeInTheDocument();
     });
   });
 

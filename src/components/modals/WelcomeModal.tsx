@@ -31,10 +31,10 @@ export function WelcomeModal({ onClose }: { onClose: () => void }) {
 
           <div className="space-y-2">
             <h2 className="text-3xl font-black uppercase tracking-tighter text-text-bright">
-              Welcome to <br/><span className="text-accent underline decoration-4 underline-offset-4 decoration-accent/30">The TieBreaker</span>
+              Thanks for Joining <br/><span className="text-accent underline decoration-4 underline-offset-4 decoration-accent/30">The TieBreaker</span>
             </h2>
             <p className="text-text-main font-semibold opacity-80">
-              Stop guessing. Start deciding. The mathematical engine for resolving complex dilemmas.
+              Your account is successfully created! Stop guessing and start deciding with our powerful mathematical engine.
             </p>
           </div>
 

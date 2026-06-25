@@ -29,12 +29,13 @@ import {
   WelcomeModal,
   SidebarHistory,
   AuthWallModal,
-  LoaderSkeleton
+  LoaderSkeleton,
+  Tooltip
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./db/supabase";
-import { User as UserIcon, LogOut, Clock, ArrowLeft } from "lucide-react";
+import { User as UserIcon, LogOut, Clock, ArrowLeft, Lock } from "lucide-react";
 
 
 // --- AI Service ---
@@ -48,11 +49,17 @@ async function analyzeDecision(
   factors: string[],
   useWebSearch: boolean,
   contextData?: any,
-  myCase?: string
+  myCase?: string,
+  token?: string
 ): Promise<{ content: string; structuredData?: any }> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch('/api/analyze', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ decision, type, factors, useWebSearch, contextData, myCase }),
   });
 
@@ -399,13 +406,17 @@ export default function App() {
         };
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const { content, structuredData } = await analyzeDecision(
         decisionQuery,
         type,
         validFactors,
         useWebSearch,
         contextData,
-        myCase
+        myCase,
+        token
       );
 
       if (structuredData?.entities?.length < 2 && (type === "comparison" || type === "verdict")) {
@@ -430,9 +441,7 @@ export default function App() {
           .then(({ data }) => {
             if (data?.id) {
               supabase.from('decisions').update({
-                [columnName]: structuredData,
-                factors: validFactors,
-                my_case: myCase
+                [columnName]: structuredData
               }).eq('id', data.id).then();
             } else {
               supabase.from('decisions').insert({
@@ -478,12 +487,14 @@ export default function App() {
       console.error(error);
       const errorMessage = error?.message || "";
       
-      if (errorMessage.includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
-        setValidationError("Our AI engine is currently catching its breath due to high demand. Please give it a few moments and try again! (Err: API-429-01)");
-      } else if (errorMessage.includes("Too many requests")) {
+      if (errorMessage.includes("Error Code: QUOTA-") || errorMessage.includes("Error Code: AUTH-")) {
+        setValidationError(errorMessage.split(" (Status:")[0]);
+      } else if (errorMessage.includes("Too many requests") || errorMessage.includes("VAL-RATE")) {
         setValidationError("You're moving too fast! Please slow down and try again shortly. (Err: API-RATE-01)");
+      } else if (errorMessage.toLowerCase().includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+        setValidationError("Our AI engine is currently catching its breath due to high demand. Please give it a few moments and try again! (Err: API-429-01)");
       } else {
-        setValidationError("We ran into a connection issue with the analysis server. Please check your network and try again. (Err: API-NET-01)");
+        setValidationError(errorMessage.split(" (Status:")[0] || "We ran into a connection issue with the analysis server. Please check your network and try again. (Err: API-NET-01)");
       }
       
       // If we don't have a cached result for this exact query, reset the layout 
@@ -511,6 +522,7 @@ export default function App() {
 
   const reset = () => {
     setHasStarted(false);
+    setIsSidebarOpen(true);
     setAnalysisCache({});
     setLoadingTypes({});
     setOptionA("");
@@ -561,7 +573,10 @@ export default function App() {
   
 
   const handleLoadDecision = (dbDecision: any) => {
-    const [a, b] = dbDecision.query.split(" vs ");
+    const lastVsIndex = dbDecision.query.lastIndexOf(" vs ");
+    const a = lastVsIndex !== -1 ? dbDecision.query.substring(0, lastVsIndex) : dbDecision.query;
+    const b = lastVsIndex !== -1 ? dbDecision.query.substring(lastVsIndex + 4) : "";
+    
     setOptionA(a || "");
     setOptionB(b || "");
     setOptions(dbDecision.factors?.length ? [...dbDecision.factors, ""] : ["", ""]);
@@ -636,10 +651,15 @@ export default function App() {
             }} 
           />
         )}
-        <AuthModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
-          onSuccess={() => setShowAuthModal(false)} 
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={(isSignUp) => {
+            if (isSignUp) {
+              setShowWelcome(true);
+            }
+            setShowAuthModal(false);
+          }}
         />
       </AnimatePresence>
 
@@ -714,19 +734,22 @@ export default function App() {
           <div className="flex items-center gap-3">
             {isMobile && hasStarted && (
               <button 
+                title="Show Analysis Results"
                 onClick={() => setIsSidebarOpen(false)}
                 className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-[10px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-bg-surface transition-all"
               >
                 Results <ChevronRight size={14} />
               </button>
             )}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
-              title="Toggle Theme"
-            >
-              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
+            <Tooltip content="Toggle Theme" position="bottom">
+              <button
+                aria-label="Toggle Theme"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+              >
+                {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+              </button>
+            </Tooltip>
           </div>
         </div>
 
@@ -754,6 +777,7 @@ export default function App() {
               </label>
               <div className="flex flex-col gap-3">
                 <textarea
+                  title="Enter your first option (Option A)"
                   value={optionA}
                   onChange={(e) => setOptionA(e.target.value)}
                   maxLength={100}
@@ -765,6 +789,7 @@ export default function App() {
                   VS
                 </div>
                 <textarea
+                  title="Enter your second option (Option B)"
                   value={optionB}
                   onChange={(e) => setOptionB(e.target.value)}
                   maxLength={100}
@@ -774,31 +799,60 @@ export default function App() {
                 />
               </div>
               
-              <div className="mt-4">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
-                  My Case / Context
-                  <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
-                    Optional (Max 500 words)
-                  </span>
-                </label>
-                <textarea
-                  value={myCase}
-                  maxLength={3000}
-                  onChange={(e) => {
-                    // Limit to ~500 words simply by counting spaces
-                    const words = e.target.value.trim().split(/\s+/).length;
-                    if (words <= 500 || e.target.value.length < myCase.length) {
-                      setMyCase(e.target.value);
-                    }
-                  }}
-                  placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
-                  rows={2}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
-                />
-              </div>
+              {user ? (
+                <div className="mt-4">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
+                    My Case / Context
+                    <span className="opacity-40 lowercase font-medium text-[9px] tracking-normal">
+                      Optional (Max 500 words)
+                    </span>
+                  </label>
+                  <textarea
+                    title="Enter personalized context for the AI (My Case)"
+                    value={myCase}
+                    maxLength={3000}
+                    onChange={(e) => {
+                      // Limit to ~500 words simply by counting spaces
+                      const words = e.target.value.trim().split(/\s+/).length;
+                      if (words <= 500 || e.target.value.length < myCase.length) {
+                        setMyCase(e.target.value);
+                      }
+                    }}
+                    placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                    rows={2}
+                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
+                  />
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
+                    My Case / Context
+                    <span className="opacity-60 font-black text-[9px] tracking-wider text-accent flex items-center gap-1 uppercase bg-accent/10 px-2 py-0.5 rounded-md">
+                      <Lock size={10} /> Member Only
+                    </span>
+                  </label>
+                  <div 
+                    className="relative group cursor-pointer" 
+                    onClick={() => setShowAuthModal(true)}
+                  >
+                    <textarea
+                      disabled
+                      placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                      rows={2}
+                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2 text-sm text-text-main font-semibold shadow-inner resize-none min-h-15 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-bg-surface/20 backdrop-blur-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="bg-accent text-bg-surface px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+                        <UserIcon size={12} /> Log In to Unlock
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <label className="flex items-center gap-2 cursor-pointer mt-3 group w-fit">
                 <input 
+                  title="Enable Deep Web Search for real-time data"
                   type="checkbox" 
                   checked={useWebSearch} 
                   onChange={(e) => setUseWebSearch(e.target.checked)}
@@ -824,6 +878,7 @@ export default function App() {
                   {options.map((opt, idx) => (
                     <div key={idx} className="relative group/opt">
                       <input
+                        title={`Comparison Factor ${idx + 1}`}
                         value={opt}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
                         maxLength={25}
@@ -831,17 +886,20 @@ export default function App() {
                         className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                       />
                       {options.length > 2 && (
-                        <button
-                          onClick={() => handleRemoveOption(idx)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <Tooltip content="Remove this factor" position="top">
+                          <button
+                            onClick={() => handleRemoveOption(idx)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </Tooltip>
                       )}
                     </div>
                   ))}
                   {options.length < 6 && (
                     <button
+                      title="Add another comparison factor"
                       onClick={handleAddFactor}
                       className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
                     >
@@ -855,6 +913,7 @@ export default function App() {
 
             <div className="pt-4 shrink-0 mt-auto">
               <button
+                title="Calculate Decision Analysis"
                 onClick={() => handleAnalyze(selectedType)}
                 disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
                 className="w-full py-3.5 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
@@ -869,6 +928,7 @@ export default function App() {
               
               {user && (
                 <button 
+                  title="View your saved history"
                   onClick={() => setShowHistoryView(true)}
                   className="mt-3 w-full py-3 bg-bg-panel border border-border-dim text-accent rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 transition-colors flex justify-center items-center gap-2 shadow-sm"
                 >
@@ -880,6 +940,7 @@ export default function App() {
         ) : (
           <div className="flex-1 flex flex-col min-h-0">
             <button 
+              title="Return to input form"
               onClick={() => setShowHistoryView(false)}
               className="mb-4 w-full py-3 bg-bg-panel border border-border-dim text-text-main rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 hover:text-accent transition-colors flex justify-center items-center gap-2 shrink-0 shadow-sm"
             >
@@ -936,17 +997,20 @@ export default function App() {
                    <span className="text-[10px] font-black uppercase tracking-widest text-text-bright leading-none">
                      {user.email?.split('@')[0]}
                    </span>
-                   <span className="text-[8px] font-bold text-accent uppercase tracking-widest mt-0.5">Pro Member</span>
+                   <span className="text-[8px] font-bold text-accent uppercase tracking-widest mt-0.5">Member Only</span>
                  </div>
-                 <button 
-                   onClick={signOut}
-                   className="ml-2 p-1.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
-                 >
-                   <LogOut size={12} />
-                 </button>
+                 <Tooltip content="Log Out" position="bottom">
+                   <button 
+                     onClick={signOut}
+                     className="ml-2 p-1.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
+                   >
+                     <LogOut size={12} />
+                   </button>
+                 </Tooltip>
                </div>
             ) : (
                <button 
+                 title="Log In or Create an Account"
                  onClick={() => setShowAuthModal(true)}
                  className="px-6 py-2.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-accent-muted"
                >
@@ -1020,10 +1084,20 @@ export default function App() {
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-10">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
+                    <Tooltip content="Toggle Theme" position="bottom">
+                      <button
+                        aria-label="Toggle Theme"
+                        onClick={toggleTheme}
+                        className="p-1 rounded-md bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+                      >
+                        {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+                      </button>
+                    </Tooltip>
                     <span className="px-3 py-1 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
                       {selectedType.replace("-", " ")} Mode
                     </span>
                     <button
+                      title="Start a new blank decision"
                       onClick={reset}
                       className="text-[10px] font-bold uppercase tracking-widest text-accent hover:underline transition-all"
                     >
@@ -1068,58 +1142,53 @@ export default function App() {
                     {selectedType === "verdict" && "Verdict"}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button
-                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                      className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center justify-center gap-1 shadow-sm"
-                      title="Toggle Input Drawer"
-                    >
-                      <PanelLeft size={12} className={cn("transition-transform duration-300", !isSidebarOpen && "rotate-180")} />
-                      <span className="text-[8px] font-black uppercase tracking-widest">
-                        {isSidebarOpen ? "Hide" : "Input"}
-                      </span>
-                    </button>
-                    <button
-                      onClick={toggleTheme}
-                      className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center gap-1 shadow-sm"
-                      title="Toggle Theme"
-                    >
-                      {theme === "light" ? <Moon size={12} /> : <Sun size={12} />}
-                      <span className="text-[8px] font-black uppercase tracking-widest">
-                        {theme === "light" ? "Dark" : "Light"}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => setIsSideBySide(!isSideBySide)}
-                      className={cn(
-                        "px-1.5 py-1 rounded-md border transition-all flex items-center gap-1 shadow-sm",
-                        isSideBySide 
-                          ? "bg-accent text-bg-surface border-accent/20" 
-                          : "bg-bg-panel text-accent border-accent/20 hover:bg-accent/10"
-                      )}
-                      title={isSideBySide ? "Show items stacked" : "Show items side by side"}
-                    >
-                      {isSideBySide ? <Rows size={12} /> : <Columns size={12} />}
-                      <span className="text-[8px] font-black uppercase tracking-widest">
-                        {isSideBySide ? "Stack" : "Split"}
-                      </span>
-                    </button>
-                    <button
-                      onClick={handleCopy}
-                      className="px-1.5 py-1 rounded-md bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-1 group shadow-sm"
-                      title="Copy to clipboard"
-                    >
-                      {copied ? (
-                        <>
-                          <Check size={12} />
-                          <span className="text-[8px] font-black uppercase tracking-widest">Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} className="group-hover:scale-110 transition-transform" />
-                          <span className="text-[8px] font-black uppercase tracking-widest">Copy</span>
-                        </>
-                      )}
-                    </button>
+                    <Tooltip content={isSidebarOpen ? "Hide" : "Input"} position="bottom">
+                      <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center justify-center gap-1 shadow-sm"
+                      >
+                        <PanelLeft size={12} className={cn("transition-transform duration-300", !isSidebarOpen && "rotate-180")} />
+                        <span className="text-[8px] font-black uppercase tracking-widest">
+                          {isSidebarOpen ? "Hide" : "Input"}
+                        </span>
+                      </button>
+                    </Tooltip>
+                    
+                    <Tooltip content={isSideBySide ? "Show items stacked" : "Show items side by side"} position="bottom">
+                      <button
+                        onClick={() => setIsSideBySide(!isSideBySide)}
+                        className={cn(
+                          "px-1.5 py-1 rounded-md border transition-all flex items-center gap-1 shadow-sm",
+                          isSideBySide 
+                            ? "bg-accent text-bg-surface border-accent/20" 
+                            : "bg-bg-panel text-accent border-accent/20 hover:bg-accent/10"
+                        )}
+                      >
+                        {isSideBySide ? <Rows size={12} /> : <Columns size={12} />}
+                        <span className="text-[8px] font-black uppercase tracking-widest">
+                          {isSideBySide ? "Stack" : "Split"}
+                        </span>
+                      </button>
+                    </Tooltip>
+                    
+                    <Tooltip content="Copy to clipboard" position="bottom">
+                      <button
+                        onClick={handleCopy}
+                        className="px-1.5 py-1 rounded-md bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-1 group shadow-sm"
+                      >
+                        {copied ? (
+                          <>
+                            <Check size={12} />
+                            <span className="text-[8px] font-black uppercase tracking-widest">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-[8px] font-black uppercase tracking-widest">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
 

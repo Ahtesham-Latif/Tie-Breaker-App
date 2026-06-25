@@ -6,7 +6,7 @@ import { supabase } from '../../db/supabase';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (isSignUp: boolean) => void;
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
@@ -95,7 +95,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         if (signInError) throw signInError;
       }
       
-      onSuccess?.();
+      onSuccess?.(isSignUp);
       onClose();
     } catch (err: any) {
       setError(err.message || "We ran into an unexpected hiccup while logging you in. Please give it another try! (Err: AUTH-GEN-01)");

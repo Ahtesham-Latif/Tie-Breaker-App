@@ -1,6 +1,7 @@
 # 🧠 The TieBreaker
 
-> **Stop guessing. Start deciding.** A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.
+> **Stop guessing. Start deciding.**  
+> *A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.*
 
 ![React 19](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
@@ -11,42 +12,43 @@
 
 ---
 
-## 🚀 Overview
+## 🚀 Overview: Why We Built This
 
-When users ask general-purpose AI to choose between two options—for example, *“MacBook Air vs iPad Pro”*—the response is typically an open-ended, markdown-heavy wall of text concluding with *"it depends on your needs."* While comprehensive, it fails to deliver a structured, actionable decision framework.
+We've all been there. You ask a general-purpose AI to help you choose between two things—say, *“MacBook Air vs iPad Pro”*—and you receive a massive, rambling wall of text that concludes with the incredibly unhelpful: *"It depends on your needs."* 
 
-**The TieBreaker** operates on the opposite philosophy: **deterministic structure over free-form AI conversation**.
+While technically accurate, it fails to deliver what we actually need: **a structured, actionable decision framework.**
 
-Instead of a chat interface, it enforces a strict backend execution pipeline. Users submit two contenders along with optional personal constraints and evaluation factors. The system processes the input through a schema-driven AI engine, rendering a multi-tab analytical dashboard featuring objective comparison matrices, SWOT profiles, and a definitive, context-grounded winner.
-
-With the integration of **Supabase**, The TieBreaker extends from a session-based utility into a persistent cloud platform. Authenticated users can securely save and manage their past decisions.
-
----
-
-## 📸 Application Previews
-
-### The Tiebreaker Engine
-![Tiebreaker Setup](Pictures/TieBreaker.png)
-*Dual-input fields alongside the 500-word constraint personalized context input engine.*
-
-### Authenticated Cloud State
-![Logged User Interface](Pictures/LoggedUser.png)
-*Adaptive layout for authenticated users, featuring a dedicated "My History" panel to retrieve cloud-synced matrices.*
-
----
-
-## ✨ What Makes This Different?
-
-Most AI tools generate conversational text. The TieBreaker generates **structured data**.
+**The TieBreaker** was built with a different, perhaps humbler philosophy: **deterministic structure over free-form AI conversation**. We didn't build a chat interface; we built a strict backend execution pipeline. We believe AI shouldn't just talk to you—it should organize your thoughts so *you* can make the final call.
 
 Every dilemma is transformed into a structured decision artifact:
-* Objective Comparison Matrices
-* Fact-based Pros & Cons
-* SWOT Profiles
-* Final Verdicts tailored exactly to the user's "My Case" context
-* Persistent Cloud History for authenticated users
+* ⚖️ **Objective Comparison Matrices**
+* 👍 **Fact-based Pros & Cons**
+* 🎯 **SWOT Profiles**
+* 🏆 **Final Verdicts** tailored exactly to your personal context
 
-The result is a decision-first experience designed for action rather than endless conversation.
+---
+
+## 💡 When to Use It
+
+The TieBreaker shines when you are stuck between two solid choices and need objective clarity. Use it for:
+* **Tech Purchases:** `Sony A7IV` vs `Canon R6 Mark II`
+* **Software Tooling:** `React` vs `Vue`, or `Stripe` vs `PayPal`
+* **Business Strategy:** `In-house Marketing` vs `Hiring an Agency`
+* **Life Choices:** `Renting an Apartment` vs `Buying a Starter Home`
+
+*Note: The TieBreaker is a logical tool, not a crystal ball. It thrives on factual comparisons and strategic analysis, but it won't tell you the meaning of life!*
+
+---
+
+## 🛠️ How to Use It
+
+Getting a definitive answer is a simple 3-step process:
+
+1. **Enter Your Options:** Tell the engine exactly what you are comparing (e.g., Option A vs Option B).
+2. **Add Your Factors (Optional):** Tell the engine *how* to judge them (e.g., Cost, Durability, Customer Support). If you leave this blank, the engine will automatically select the best factors for you.
+3. **Plead "Your Case" (Member Only):** In 500 characters or less, tell the AI *who you are*. ("I'm a broke college student who needs a laptop for video editing..."). This completely personalizes the Final Verdict. You must create a free account to unlock this engine!
+
+*(For a full breakdown of the UI, check out our newly added [User Manual](USER_MANUAL.md)!)*
 
 ---
 
@@ -206,13 +208,19 @@ The TieBreaker features a highly optimized, two-tier caching mechanism to protec
 | --- | --- | --- |
 | **Excessive API Compute Costs** | String length boundaries & 500-word payload enforcement | Frontend Input & Express Router |
 | **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
-| **Broken UI / Layout Collapse** | Regex structural parsing interceptors & schema key validations | Express Response Pipe |
-| **Anonymous Spam** | Local storage-tracked client block prompting account initialization after 3 free inquiries | React Frontend |
-| **Free-Tier Abuse** | Hardcoded 15-tie limit enforced via Supabase triggers | Database & Frontend |
+| **Anonymous Spam** | In-memory IP tracking (`req.ip`) strictly capping free unauthenticated requests at 3 | Node.js API Gateway |
+| **Prompt Injection** | Hardcoded XML boundaries (`<decision>`, `<user_context>`) with strict Agent execution overrides | AI Orchestration Layer |
+| **Free-Tier Abuse** | Mathematical JWT verification checking `ties_count` via Supabase directly at the API layer | Backend Authentication |
+| **Cache Corruption** | Non-destructive JSON partial updates prevent wiping previous decision factors | Database State Manager |
+
+### Advanced API Defenses
+* **JWT Backend Verification:** The `/api/analyze` endpoint strictly requires a Supabase Bearer token for authenticated users, completely eliminating the possibility of frontend limitation bypasses.
+* **Semantic Prompt Isolation:** User inputs are fully enclosed in XML tags, with the Agent instructed to treat them purely as unexecutable data, neutralizing prompt injection attacks.
+* **Safe String Parsing:** The UI uses right-to-left `.lastIndexOf(' vs ')` parsing for history retrieval, completely avoiding the destructive "vs" parsing trap if an option naturally contains the delimiter.
 
 ### API Rate Limiting & Cooldowns
 * **Server Limit:** 5 requests per IP every 15 minutes.
-* **Frontend Cooldown:** Strict 10-second penalty blocks on API failures (e.g. Quota Exceeded) that automatically clear themselves, preventing users from spamming the "Analyze" button.
+* **Frontend Cooldown:** Strict 10-second penalty blocks on API failures (e.g., Rate Limits or Quota Exceeded) that evaluate error priorities seamlessly to ensure the user receives accurate cooldown messaging.
 
 ### Validation & Resiliency Checks
 * **Structured AI Formatting:** Pre-hydration regex parsers repair markdown bleed and enforce strict JSON shape.
