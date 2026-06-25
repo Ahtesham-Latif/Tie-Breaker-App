@@ -28,7 +28,8 @@ import {
   AnalysisButton, 
   WelcomeModal,
   SidebarHistory,
-  AuthWallModal
+  AuthWallModal,
+  LoaderSkeleton
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
@@ -347,7 +348,7 @@ export default function App() {
           .from('decisions')
           .select(columnName)
           .eq('user_id', user.id)
-          .eq('query', decisionQuery)
+          .ilike('query', decisionQuery)
           .single();
           
         const dataRecord = dbData as Record<string, any>;
@@ -476,16 +477,33 @@ export default function App() {
     } catch (error: any) {
       console.error(error);
       const errorMessage = error?.message || "";
-      const errorContent = (errorMessage.includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED"))
-        ? "## Quota Exceeded\n\nThe AI service is currently at its limit. Please wait a moment and try again later."
-        : errorMessage.includes("Too many requests") // Check for server-side rate limit message
-          ? "## Rate Limit Exceeded\n\n" + errorMessage
-          : `## Connection Error\n\nFailed to connect to the analysis server. ${errorMessage || "Please ensure your backend server is running on port 8080."}`;
-
-      setAnalysisCache(prev => ({
-        ...prev, 
-        [cacheKey]: { type, content: errorContent, structuredData: null }
-      }));
+      
+      if (errorMessage.includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+        setValidationError("Our AI engine is currently catching its breath due to high demand. Please give it a few moments and try again! (Err: API-429-01)");
+      } else if (errorMessage.includes("Too many requests")) {
+        setValidationError("You're moving too fast! Please slow down and try again shortly. (Err: API-RATE-01)");
+      } else {
+        setValidationError("We ran into a connection issue with the analysis server. Please check your network and try again. (Err: API-NET-01)");
+      }
+      
+      // If we don't have a cached result for this exact query, reset the layout 
+      // so the user is forced to see the error message on the main input screen.
+      if (!analysisCache[cacheKey]) {
+        setHasStarted(false);
+        if (isMobile) {
+          setIsSidebarOpen(true);
+        }
+      }
+      
+      // Scroll to the top so the validation error is perfectly visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Enforce a strict 10 second cooldown after an error, and auto-clear the message
+      setLastRequestTime(Date.now());
+      setTimeout(() => {
+        setValidationError(null);
+      }, 10000);
+      
     } finally {
       setLoadingTypes((prev) => ({ ...prev, [type]: false }));
     }
@@ -557,16 +575,32 @@ export default function App() {
       .sort()
       .join(" ");
 
-    // Pre-populate the local cache with the DB data
-    setAnalysisCache(prev => ({
-      ...prev,
-      [`comparison-${canonicalDecision}-${validFactors.join("|")}`]: { type: "comparison", content: "", structuredData: dbDecision.comparison_data, factors: validFactors },
-      [`pros-cons-${canonicalDecision}-${validFactors.join("|")}`]: { type: "pros-cons", content: "", structuredData: dbDecision.pros_cons_data, factors: validFactors },
-      [`swot-${canonicalDecision}-${validFactors.join("|")}`]: { type: "swot", content: "", structuredData: dbDecision.swot_data, factors: validFactors },
-      [`verdict-${canonicalDecision}-${validFactors.join("|")}`]: { type: "verdict", content: "", structuredData: dbDecision.verdict_data, factors: validFactors },
-    }));
+    // Pre-populate the local cache ONLY with the data that actually exists in the DB
+    setAnalysisCache(prev => {
+      const next = { ...prev };
+      if (dbDecision.comparison_data) {
+        next[`comparison-${canonicalDecision}-${validFactors.join("|")}`] = { type: "comparison", content: "", structuredData: dbDecision.comparison_data, factors: validFactors };
+      }
+      if (dbDecision.pros_cons_data) {
+        next[`pros-cons-${canonicalDecision}-${validFactors.join("|")}`] = { type: "pros-cons", content: "", structuredData: dbDecision.pros_cons_data, factors: validFactors };
+      }
+      if (dbDecision.swot_data) {
+        next[`swot-${canonicalDecision}-${validFactors.join("|")}`] = { type: "swot", content: "", structuredData: dbDecision.swot_data, factors: validFactors };
+      }
+      if (dbDecision.verdict_data) {
+        next[`verdict-${canonicalDecision}-${validFactors.join("|")}`] = { type: "verdict", content: "", structuredData: dbDecision.verdict_data, factors: validFactors };
+      }
+      return next;
+    });
 
-    setSelectedType("pros-cons");
+    // Intelligently select the first tab that actually has data so the UI doesn't show blank
+    let defaultType: AnalysisType = "pros-cons";
+    if (dbDecision.pros_cons_data) defaultType = "pros-cons";
+    else if (dbDecision.comparison_data) defaultType = "comparison";
+    else if (dbDecision.swot_data) defaultType = "swot";
+    else if (dbDecision.verdict_data) defaultType = "verdict";
+
+    setSelectedType(defaultType);
     setHasStarted(true);
     setIsSidebarOpen(false);
   };
@@ -1093,24 +1127,7 @@ export default function App() {
                   "flex-1 overflow-y-auto custom-scrollbar",
                   isSideBySide ? "p-1 md:p-4" : "p-4 md:p-12"
                 )}>
-                  {isCurrentTypeLoading && !currentResult && (
-                    <div className="absolute inset-0 bg-bg-surface/95 backdrop-blur-md z-30 flex items-center justify-center flex-col gap-6">
-                      <div className="relative">
-                        <Loader2
-                          className="animate-spin text-accent"
-                          size={64}
-                        />
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="font-black text-text-bright tracking-tighter uppercase text-lg italic">
-                          Populating Analysis...
-                        </p>
-                        <p className="text-[10px] text-accent font-bold uppercase tracking-[0.2em] animate-pulse whitespace-nowrap">
-                          Building decision matrices
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  <LoaderSkeleton isDark={theme === 'dark'} isLoading={isCurrentTypeLoading && !currentResult} />
 
                   <div className="max-w-7xl mx-auto space-y-12">
                     {currentResult ? (

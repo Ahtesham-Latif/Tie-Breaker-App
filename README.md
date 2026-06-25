@@ -182,14 +182,20 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 * **No Chatbot UX:** Form-driven data dashboard components.
 * **"My Case" Context Engine:** Personalized analysis tailored to 500-word user constraints.
 * **Multi-Lens Analytical Views:** Pros & Cons, Comparison Matrices, SWOT, and Final Verdicts.
-* **Mathematical Factor Padding:** The Node.js layer dynamically injects baseline evaluation criteria if user input is sparse.
+### 🧠 Intelligent Cache Orchestration
+The TieBreaker features a highly optimized, two-tier caching mechanism to protect API quotas and ensure instant data retrieval:
+* **Local LRU Cache:** An in-memory cache instantly returns previously generated tabs during a single session.
+* **Supabase History Pre-population:** When a user clicks a past decision, the backend fetches the JSON payload and pre-populates the local cache *only* for the tabs they actually generated, preventing blank screens or cache poisoning.
+* **Case-Insensitive DB Fallback:** If the local cache misses, a case-insensitive `.ilike()` fallback query checks the cloud database before ever triggering the Azure AI engine, ensuring users aren't charged for slightly miscapitalized queries.
+* **Smart Auto-Selection:** History items intelligently scan their payload and automatically select the first valid analysis tab, guaranteeing the user never lands on an empty screen.
 
 ### Interface Design
+* **Premium Fluid AI Loading Orb:** Replaces boring loading spinners with a state-of-the-art, liquid Apple/OpenAI-style continuous progress animation driven by `requestAnimationFrame`.
 * **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding and a fixed micro-toolbar.
 * **Theme Adaptability:** Full dark/light structural synchronization across all customized components.
 
 ### UX Messaging Architecture
-* **Emotionally Intelligent Feedback:** System boundaries (rate limits, validation failures, auth walls) are handled by a centralized messaging layer ensuring a calm, premium, and reassuring tone.
+* **Emotionally Intelligent Feedback:** System boundaries (rate limits, Azure quota exhaustion, auth walls, and 15-tie database limits) are handled by a centralized messaging layer ensuring a calm, premium, and reassuring tone rather than injecting raw markdown.
 * **Zero Technical Bleed:** Backend errors and JSON parsing failures are elegantly abstracted. Users receive actionable, clear guidance without ever seeing raw stack traces or internal agent details.
 
 ---
@@ -202,11 +208,11 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 | **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
 | **Broken UI / Layout Collapse** | Regex structural parsing interceptors & schema key validations | Express Response Pipe |
 | **Anonymous Spam** | Local storage-tracked client block prompting account initialization after 3 free inquiries | React Frontend |
+| **Free-Tier Abuse** | Hardcoded 15-tie limit enforced via Supabase triggers | Database & Frontend |
 
-### API Rate Limiting
-```text
-5 requests per IP every 15 minutes
-```
+### API Rate Limiting & Cooldowns
+* **Server Limit:** 5 requests per IP every 15 minutes.
+* **Frontend Cooldown:** Strict 10-second penalty blocks on API failures (e.g. Quota Exceeded) that automatically clear themselves, preventing users from spamming the "Analyze" button.
 
 ### Validation & Resiliency Checks
 * **Structured AI Formatting:** Pre-hydration regex parsers repair markdown bleed and enforce strict JSON shape.
@@ -215,6 +221,8 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 * **Fallback Matrix Padding:** Node dynamically injects default properties if the AI returns sparse rows, preventing UI grid collapse.
 
 ---
+
+
 
 ## ⚙️ Technology Stack
 
