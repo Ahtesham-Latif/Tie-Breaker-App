@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'motion/react';
 interface LoaderSkeletonProps {
   isDark?: boolean;
   isLoading?: boolean;
+  startTime?: number;
 }
 
-export default function LoaderSkeleton({ isDark, isLoading = true }: LoaderSkeletonProps) {
+export default function LoaderSkeleton({ isDark, isLoading = true, startTime: initialStartTime }: LoaderSkeletonProps) {
   const [stageIndex, setStageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -22,32 +23,36 @@ export default function LoaderSkeleton({ isDark, isLoading = true }: LoaderSkele
   useEffect(() => {
     if (!isLoading) return;
     
-    // Stage Text Interval
-    const interval = setInterval(() => {
-      setStageIndex((prev) => (prev < stages.length - 1 ? prev + 1 : prev));
-    }, 2000);
-    
-    // Continuous Progress Animation (Moving through time smoothly)
-    const startTime = Date.now();
+    const startTime = initialStartTime || Date.now();
     const duration = 12000; // 12 seconds total for 6 stages
+    const stageDuration = 2000;
     
     let frameId: number;
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;
       const newProgress = Math.min((elapsed / duration) * 100, 98); // Cap at 98% until the AI finishes
+      
+      const currentStageIndex = Math.min(Math.floor(elapsed / stageDuration), stages.length - 1);
+      
       setProgress(newProgress);
+      setStageIndex(currentStageIndex);
+      
       if (newProgress < 98) {
         frameId = requestAnimationFrame(updateProgress);
+      } else {
+        // Keep checking to ensure stage updates if elapsed < duration
+        if (elapsed < duration) {
+          frameId = requestAnimationFrame(updateProgress);
+        }
       }
     };
     
     frameId = requestAnimationFrame(updateProgress);
     
     return () => {
-      clearInterval(interval);
       cancelAnimationFrame(frameId);
     };
-  }, [isLoading, stages.length]);
+  }, [isLoading, initialStartTime, stages.length]);
 
   if (!isLoading) return null;
 

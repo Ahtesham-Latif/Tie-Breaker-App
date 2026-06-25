@@ -181,7 +181,7 @@ export default function App() {
   const [myCase, setMyCase] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [useWebSearch, setUseWebSearch] = useState(false);
-  const [loadingTypes, setLoadingTypes] = useState<Record<string, boolean>>({});
+  const [loadingTypes, setLoadingTypes] = useState<Record<string, number>>({});
   const [hasStarted, setHasStarted] = useState(false);
   const [selectedType, setSelectedType] = useState<AnalysisType>("pros-cons");
   const [copied, setCopied] = useState(false);
@@ -294,6 +294,7 @@ export default function App() {
 
     if (!trimmedA || !trimmedB) {
       setValidationError("Please enter both options so I can properly break the tie for you! (Err: VAL-INPUT-01)");
+      setIsSidebarOpen(true);
       return;
     }
 
@@ -321,6 +322,7 @@ export default function App() {
 
     if (!user && usageCount >= 3) {
       setShowAuthWall(true);
+      setIsSidebarOpen(true);
       return;
     }
 
@@ -334,6 +336,7 @@ export default function App() {
           
         if (profile && profile.plan === 'free' && profile.ties_count >= 15) {
           setValidationError("You've reached your limit of 15 ties on the free plan. We hope you've enjoyed the insights! (Err: VAL-PLAN-01)");
+          setIsSidebarOpen(true);
           return;
         }
       } catch (err) {
@@ -387,13 +390,14 @@ export default function App() {
       setValidationError(
         `Please give me a moment to breathe! I can analyze again in ${remaining}s. (Err: VAL-RATE-01)`,
       );
+      setIsSidebarOpen(true);
       return;
     }
 
     setSelectedType(type);
     setHasStarted(true);
     setValidationError(null);
-    setLoadingTypes((prev) => ({ ...prev, [type]: true }));
+    setLoadingTypes((prev) => ({ ...prev, [type]: Date.now() }));
     setLastRequestTime(now);
 
     try {
@@ -497,14 +501,13 @@ export default function App() {
         setValidationError(errorMessage.split(" (Status:")[0] || "We ran into a connection issue with the analysis server. Please check your network and try again. (Err: API-NET-01)");
       }
       
-      // If we don't have a cached result for this exact query, reset the layout 
-      // so the user is forced to see the error message on the main input screen.
-      if (!analysisCache[cacheKey]) {
+      // If the cache is completely empty, it means their very first request failed.
+      // We send them back to the Hero screen. Otherwise, they are already in the
+      // Dashboard, so keep them there and just open the sidebar to show the error.
+      if (Object.keys(analysisCache).length === 0) {
         setHasStarted(false);
-        if (isMobile) {
-          setIsSidebarOpen(true);
-        }
       }
+      setIsSidebarOpen(true);
       
       // Scroll to the top so the validation error is perfectly visible
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -516,7 +519,11 @@ export default function App() {
       }, 10000);
       
     } finally {
-      setLoadingTypes((prev) => ({ ...prev, [type]: false }));
+      setLoadingTypes((prev) => {
+        const next = { ...prev };
+        delete next[type];
+        return next;
+      });
     }
   };
 
@@ -1196,7 +1203,11 @@ export default function App() {
                   "flex-1 overflow-y-auto custom-scrollbar",
                   isSideBySide ? "p-1 md:p-4" : "p-4 md:p-12"
                 )}>
-                  <LoaderSkeleton isDark={theme === 'dark'} isLoading={isCurrentTypeLoading && !currentResult} />
+                  <LoaderSkeleton 
+                    isDark={theme === 'dark'} 
+                    isLoading={isCurrentTypeLoading && !currentResult} 
+                    startTime={loadingTypes[selectedType]}
+                  />
 
                   <div className="max-w-7xl mx-auto space-y-12">
                     {currentResult ? (

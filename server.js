@@ -33,10 +33,10 @@ app.use(express.json());
 // Trust the Azure Load Balancer to provide correct IP addresses for the rate limiter
 app.set('trust proxy', 1);
 
-// Rate limiting configuration: 5 requests per 15 minutes
+// Rate limiting configuration: 15 requests per 15 minutes
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per window
+  max: 15, // Limit each IP to 15 requests per window
   message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -156,7 +156,15 @@ app.post('/api/analyze', async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`The AI service is currently experiencing issues (${response.status}). Please try again shortly. (Error Code: ERR-04)`);
+      let actualReason = '';
+      try {
+        const errJson = JSON.parse(errText);
+        actualReason = errJson.error?.message || errJson.message || errText;
+      } catch (e) {
+        actualReason = errText;
+      }
+      if (actualReason.length > 200) actualReason = actualReason.substring(0, 200) + '...';
+      throw new Error(`AI Service Error (${response.status}): ${actualReason} (Error Code: ERR-04)`);
     }
 
     // 5. Parsing the Complex Azure Response

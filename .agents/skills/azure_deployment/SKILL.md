@@ -15,9 +15,18 @@ This skill outlines the flawless, best-practice path to deploy a Node.js applica
 2. **Enable Identity:** In the Azure App Service portal, go to **Settings > Identity** and enable **System assigned**.
 3. **IAM Permissions:** In the target Azure AI Project, go to **Access control (IAM)** and assign the **Azure AI Developer** role to the App Service's Managed Identity. *(Note: `Cognitive Services OpenAI User` is not sufficient for Azure Foundry Orchestration Agents).*
 
-## 3. Environment Variables & App Settings
-* Configure variables directly in the Azure Portal under **Settings > Environment variables**.
-* Ensure there are no leading/trailing spaces in values (e.g., URL endpoints), which will crash `fetch()` operations.
+## 3. Environment Variables (The Frontend vs Backend Trap)
+When deploying a full-stack app (React/Vite + Node.js) via GitHub Actions, environment variables must be split logically:
+
+### The Frontend (Vite)
+* Variables prefixed with `VITE_` (e.g., Supabase keys) are baked into the static HTML/JS at *build time*.
+* **Where to set them:** They MUST be stored in **GitHub Secrets** and explicitly mapped in your `.github/workflows` file under the `env:` block for the `npm run build` step.
+* *Danger:* If they are only in Azure and not in GitHub Actions, Vite will build the frontend with empty variables.
+
+### The Backend (Node.js)
+* The live `server.js` file reads environment variables at *runtime* from the cloud container.
+* **Where to set them:** Configure variables (e.g., Azure AI endpoints, Backend Supabase keys) directly in the Azure Portal under **Settings > Environment variables**.
+* *Danger:* The Azure App Service backend does NOT inherit your GitHub Actions secrets. You must set them in the Azure Portal manually.
 * **Crucial:** Variables are loaded into memory exactly once when the Node.js process starts. If a variable is added or changed, you **must** explicitly click **Restart** on the App Service Overview page.
 * To trust the Azure Load Balancer (required for `express-rate-limit`), ensure the Express app has `app.set('trust proxy', 1);`.
 
