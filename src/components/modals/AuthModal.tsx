@@ -32,7 +32,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         if (age) {
           const parsedAge = parseInt(age, 10);
           if (isNaN(parsedAge) || parsedAge <= 10 || parsedAge >= 63) {
-            setError("Age must be between 11 and 62.");
+            setError("Please enter a valid age between 11 and 62 so we can tailor the experience for you. (Err: AUTH-AGE-01)");
             setLoading(false);
             return;
           }
@@ -40,13 +40,13 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
         // Basic validations
         if (password.length < 8) {
-          throw new Error("Password must be at least 8 characters long.");
+          throw new Error("For your security, please use a password that is at least 8 characters long. (Err: AUTH-PWD-01)");
         }
         if (!/\d/.test(password)) {
-          throw new Error("Password must contain at least one number.");
+          throw new Error("To keep your account safe, please include at least one number in your password. (Err: AUTH-PWD-02)");
         }
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-          throw new Error("Password must contain at least one special character.");
+          throw new Error("For extra security, please add at least one special character (like ! or @) to your password. (Err: AUTH-PWD-03)");
         }
 
         const safeEmail = email.trim().toLowerCase();
@@ -59,7 +59,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
         // Sign Up Flow
         if (import.meta.env.VITE_SUPABASE_URL === undefined || import.meta.env.VITE_SUPABASE_URL === "https://dummy.supabase.co") {
-          throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.");
+          throw new Error("We're currently experiencing a slight issue connecting to our authentication servers. Please try again in a moment. (Err: AUTH-ENV-01)");
         }
 
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -74,18 +74,9 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         });
         
         if (signUpError) throw signUpError;
-        
-        // If a session was created immediately, manually update the profile table 
-        // with the age and profession so it's readily available for the AI context.
-        if (data.session && data.user) {
-           await supabase.from('profiles').update({
-             age: age ? parseInt(age, 10) : null,
-             profession: safeProfession
-           }).eq('id', data.user.id);
-        }
 
         if (!data.session) {
-          setError("Check your email for the confirmation link!");
+          setError("We've sent a confirmation link to your email! Please click it to securely activate your account.");
           setLoading(false);
           return;
         }
@@ -93,7 +84,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       } else {
         // Log In Flow
         if (import.meta.env.VITE_SUPABASE_URL === undefined || import.meta.env.VITE_SUPABASE_URL === "https://dummy.supabase.co") {
-          throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.");
+          throw new Error("We're currently experiencing a slight issue connecting to our authentication servers. Please try again in a moment. (Err: AUTH-ENV-02)");
         }
 
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -107,7 +98,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'An error occurred during authentication.');
+      setError(err.message || "We ran into an unexpected hiccup while logging you in. Please give it another try! (Err: AUTH-GEN-01)");
     } finally {
       setLoading(false);
     }

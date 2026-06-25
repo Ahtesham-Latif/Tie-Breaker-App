@@ -10,3 +10,7 @@ coverage/
 .vscode/
 AI_Context.md
 .agents/
+
+# Local Documentation / Session Context
+database_schema.md
+supabase_auth_db_pull_request.md
