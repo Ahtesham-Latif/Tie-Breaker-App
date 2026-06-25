@@ -77,7 +77,7 @@ async function analyzeDecision(
   const text = content?.trim() || "";
 
   if (!text) {
-    throw new Error('The AI engine returned an empty response. Please try again.');
+    throw new Error("It seems our AI was a bit lost for words. Please try your analysis again! (Err: AI-EMPTY-01)");
   }
 
   // Robust parsing logic to handle potential markdown wrappers or thinking blocks
@@ -285,7 +285,7 @@ export default function App() {
     const validFactors = options.filter((o) => o.trim()).map(f => f.toLowerCase()).sort();
 
     if (!trimmedA || !trimmedB) {
-      setValidationError("Please enter both options to break the tie.");
+      setValidationError("Please enter both options so I can properly break the tie for you! (Err: VAL-INPUT-01)");
       return;
     }
 
@@ -314,6 +314,23 @@ export default function App() {
     if (!user && usageCount >= 3) {
       setShowAuthWall(true);
       return;
+    }
+
+    if (user) {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('plan, ties_count')
+          .eq('id', user.id)
+          .single();
+          
+        if (profile && profile.plan === 'free' && profile.ties_count >= 15) {
+          setValidationError("You've reached your limit of 15 ties on the free plan. We hope you've enjoyed the insights! (Err: VAL-PLAN-01)");
+          return;
+        }
+      } catch (err) {
+        console.warn("Failed to check plan limits", err);
+      }
     }
 
     if (loadingTypes[type]) {
@@ -360,7 +377,7 @@ export default function App() {
         (RATE_LIMIT_MS - (now - lastRequestTime)) / 1000,
       );
       setValidationError(
-        `Too many requests. Please wait ${remaining}s before analyzing again.`,
+        `Please give me a moment to breathe! I can analyze again in ${remaining}s. (Err: VAL-RATE-01)`,
       );
       return;
     }
@@ -391,7 +408,7 @@ export default function App() {
       );
 
       if (structuredData?.entities?.length < 2 && (type === "comparison" || type === "verdict")) {
-        throw new Error("Analysis failed: Could not identify multiple entities for comparison.");
+        throw new Error("I had trouble identifying two distinct options to compare. Could you please clarify your choices? (Err: AI-ENT-01)");
       }
 
       const newResult = {
