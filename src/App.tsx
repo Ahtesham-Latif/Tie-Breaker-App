@@ -188,7 +188,7 @@ export default function App() {
   const [isSideBySide, setIsSideBySide] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [lastRequestTime, setLastRequestTime] = useState<number>(0);
+
   const [notifications, setNotifications] = useState<{id: number, text: string}[]>([]);
   const [analysisCache, setAnalysisCache] = useState<
     Record<string, AnalysisResult>
@@ -225,7 +225,7 @@ export default function App() {
     setShowWelcome(false);
   };
 
-  const RATE_LIMIT_MS = 10000;
+
   const MAX_CACHE_SIZE = 30;
 
   // Theme Toggler Logic
@@ -287,6 +287,7 @@ export default function App() {
   };
 
   const handleAnalyze = async (type: AnalysisType = selectedType) => {
+    setSelectedType(type);
     setIsSidebarOpen(false);
     const trimmedA = optionA.trim();
     const trimmedB = optionB.trim();
@@ -309,7 +310,6 @@ export default function App() {
     const cacheKey = `${type}-${canonicalDecision}-${validFactors.join("|")}`;
 
     if (analysisCache[cacheKey]) {
-      setSelectedType(type);
       setHasStarted(true);
       setValidationError(null);
       // Promote to end of object (LRU behavior)
@@ -345,7 +345,6 @@ export default function App() {
     }
 
     if (loadingTypes[type]) {
-      setSelectedType(type);
       setHasStarted(true);
       return;
     }
@@ -372,7 +371,6 @@ export default function App() {
           };
           
           setAnalysisCache((prev) => ({ ...prev, [cacheKey]: newResult }));
-          setSelectedType(type);
           setHasStarted(true);
           setValidationError(null);
           return;
@@ -383,22 +381,9 @@ export default function App() {
     }
 
     const now = Date.now();
-    if (now - lastRequestTime < RATE_LIMIT_MS) {
-      const remaining = Math.ceil(
-        (RATE_LIMIT_MS - (now - lastRequestTime)) / 1000,
-      );
-      setValidationError(
-        `Please give me a moment to breathe! I can analyze again in ${remaining}s. (Err: VAL-RATE-01)`,
-      );
-      setIsSidebarOpen(true);
-      return;
-    }
-
-    setSelectedType(type);
     setHasStarted(true);
     setValidationError(null);
     setLoadingTypes((prev) => ({ ...prev, [type]: Date.now() }));
-    setLastRequestTime(now);
 
     try {
       let contextData = null;
@@ -493,6 +478,8 @@ export default function App() {
       
       if (errorMessage.includes("Error Code: QUOTA-") || errorMessage.includes("Error Code: AUTH-")) {
         setValidationError(errorMessage.split(" (Status:")[0]);
+      } else if (errorMessage.includes("content management policy") || errorMessage.includes("ERR-04")) {
+        setValidationError("Oops! It looks like your inputs hit our AI's safety filters. Please try rephrasing your choices or factors to be more family-friendly. (Err: AI-FILTER-01)");
       } else if (errorMessage.includes("Too many requests") || errorMessage.includes("VAL-RATE")) {
         setValidationError("You're moving too fast! Please slow down and try again shortly. (Err: API-RATE-01)");
       } else if (errorMessage.toLowerCase().includes("quota") || errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
@@ -512,8 +499,7 @@ export default function App() {
       // Scroll to the top so the validation error is perfectly visible
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      // Enforce a strict 10 second cooldown after an error, and auto-clear the message
-      setLastRequestTime(Date.now());
+      // Enforce an auto-clear for the message
       setTimeout(() => {
         setValidationError(null);
       }, 10000);

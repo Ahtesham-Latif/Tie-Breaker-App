@@ -4,29 +4,78 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { rateLimit } from 'express-rate-limit';
 import { createClient } from '@supabase/supabase-js';
+import { DefaultAzureCredential } from '@azure/identity';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize a simple in-memory cache
-const analysisCache = new Map();
-// Initialize anonymous IP usage tracking
-const anonymousUsage = new Map();
+// F) Initialize a TTL cache instead of raw Map
+const analysisCache = {
+  store: new Map(),
+  set(key, value, ttlMs = 3600000) {
+    const expiresAt = Date.now() + ttlMs;
+    this.store.set(key, { value, expiresAt });
+    if (this.store.size > 100) {
+      const firstKey = this.store.keys().next().value;
+      this.store.delete(firstKey);
+    }
+  },
+  get(key) {
+    const item = this.store.get(key);
+    if (!item) return null;
+    if (Date.now() > item.expiresAt) {
+      this.store.delete(key);
+      return null;
+    }
+    return item.value;
+  }
+};
+
+// E) Anonymous IP usage tracking is moved to Supabase table
+// (Removed anonymousUsage Map)
+
+// I) Use proper server env names
+// J) Add startup fail-fast checks
+const foundryEndpoint = process.env.FOUNDRY_ENDPOINT;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (process.env.NODE_ENV === 'production') {
+  if (!foundryEndpoint) {
+    console.error('⚠️  CRITICAL: FOUNDRY_ENDPOINT is not defined in the environment. Failing boot.');
+    process.exit(1);
+  }
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('⚠️  CRITICAL: Supabase variables are missing in environment. Failing boot.');
+    process.exit(1);
+  }
+} else {
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('⚠️ Warning: Supabase variables are missing in environment.');
+  }
+  if (!foundryEndpoint) {
+    console.error('⚠️  CRITICAL: FOUNDRY_ENDPOINT is not defined in the environment.');
+  }
+}
 
 // Initialize Supabase Client
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('⚠️ Warning: Supabase variables are missing in environment.');
-}
 const supabase = createClient(supabaseUrl || '', supabaseKey || '');
 
-// Ensure the endpoint is defined
-const foundryEndpoint = process.env.FOUNDRY_ENDPOINT;
-if (!foundryEndpoint) {
-  console.error('⚠️  CRITICAL: FOUNDRY_ENDPOINT is not defined in the environment.');
-}
+// A) Move credential to startup scope
+// Authenticate using Azure's Default Credentials (supports Managed Identity in App Service and Azure CLI locally)
+const azureCredential = new DefaultAzureCredential();
+
+// Implement CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(express.json());
 
@@ -53,8 +102,19 @@ app.post('/api/analyze', async (req, res) => {
   try {
     const { decision, type, factors, useWebSearch, contextData, myCase } = req.body;
 
-    if (!decision || !type) {
-      return res.status(400).json({ error: 'Please provide both a decision and an analysis type so I can help you! (Error Code: ERR-01)' });
+    // C) Validate request payload
+    const allowedTypes = ['comparison', 'pros-cons', 'swot', 'verdict'];
+    if (!decision || typeof decision !== 'string' || decision.length > 500) {
+      return res.status(400).json({ error: 'Please provide a valid decision (max 500 chars). (Error Code: ERR-VAL1)' });
+    }
+    if (!type || !allowedTypes.includes(type)) {
+      return res.status(400).json({ error: 'Invalid analysis type provided. (Error Code: ERR-VAL2)' });
+    }
+    if (factors && (!Array.isArray(factors) || factors.length > 20)) {
+      return res.status(400).json({ error: 'Too many factors provided (max 20). (Error Code: ERR-VAL3)' });
+    }
+    if (myCase && (typeof myCase !== 'string' || myCase.length > 2000)) {
+      return res.status(400).json({ error: 'My Case text is too long (max 2000 chars). (Error Code: ERR-VAL4)' });
     }
 
     if (!foundryEndpoint) {
@@ -63,37 +123,51 @@ app.post('/api/analyze', async (req, res) => {
 
     // 0. Security Audit Fixes (Auth, Rate Limits, and Quota Exhaustion)
     const authHeader = req.headers.authorization;
-    const clientIp = req.ip || req.connection.remoteAddress;
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    
+    let isAnonymous = true;
+    let userId = null;
+    let currentUsage = 0;
+    let currentTiesCount = 0;
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      // Authenticated User
+      isAnonymous = false;
       const token = authHeader.split(' ')[1];
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
       if (authError || !user) {
         return res.status(401).json({ error: 'Invalid authentication session. (Error Code: AUTH-01)' });
       }
+      userId = user.id;
       
-      // Enforce the 15-tie limit strictly on the backend
       const { data: profile } = await supabase
         .from('profiles')
         .select('ties_count')
         .eq('id', user.id)
         .single();
       
-      if (profile && profile.ties_count >= 15) {
+      currentTiesCount = profile ? profile.ties_count : 0;
+      if (currentTiesCount >= 15) {
         return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
       }
     } else {
-      // Anonymous User - Prevent LocalStorage Bypass
-      const currentUsage = anonymousUsage.get(clientIp) || 0;
+      // E) Move anonymous usage tracking out of memory (use Supabase table)
+      const { data: usageData } = await supabase
+        .from('anonymous_usage')
+        .select('usage_count')
+        .eq('ip_address', clientIp)
+        .single();
+        
+      currentUsage = usageData ? usageData.usage_count : 0;
       if (currentUsage >= 3) {
         return res.status(403).json({ error: 'You have exhausted your free trials. Please log in to continue. (Error Code: QUOTA-02)' });
       }
-      anonymousUsage.set(clientIp, currentUsage + 1);
     }
 
     // Cache key based on input
-    const cacheKey = JSON.stringify({ decision, type, factors, useWebSearch, contextData, myCase });
+    // Do not globally cache personalized verdicts across users
+    const isPersonalized = type === 'verdict' || (myCase && myCase.trim().length > 0) || (contextData && Object.keys(contextData).length > 0);
+    const cacheScope = isPersonalized ? (userId || clientIp) : 'global';
+    const cacheKey = JSON.stringify({ decision, type, factors, useWebSearch, contextData, myCase, cacheScope });
     
     const cachedResponse = analysisCache.get(cacheKey);
     if (cachedResponse) {
@@ -101,12 +175,9 @@ app.post('/api/analyze', async (req, res) => {
       return res.json(cachedResponse);
     }
 
-    // 1. Authenticate using Azure's Default Credentials (supports Managed Identity in App Service and Azure CLI locally)
-    const { DefaultAzureCredential } = await import("@azure/identity");
-    const credential = new DefaultAzureCredential();
-
     // 2. Request a scoped access token specifically for Azure AI services
-    const tokenResponse = await credential.getToken("https://ai.azure.com");
+    // (Credential initialization was moved to startup scope)
+    const tokenResponse = await azureCredential.getToken("https://ai.azure.com");
     if (!tokenResponse) {
       throw new Error("Failed to authenticate with Azure AI services. (Error Code: ERR-03)");
     }
@@ -140,19 +211,29 @@ app.post('/api/analyze', async (req, res) => {
     }
 
     // 4. Executing the Agent Call via raw fetch
-    const response = await fetch(
-      `${foundryEndpoint}?api-version=2025-05-15-preview`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Injects the secure Azure token
-        },
-        body: JSON.stringify({
-          input: messageContent
-        })
-      }
-    );
+    // B) Add request timeout around Foundry fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
+
+    let response;
+    try {
+      response = await fetch(
+        `${foundryEndpoint}?api-version=2025-05-15-preview`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // Injects the secure Azure token
+          },
+          body: JSON.stringify({
+            input: messageContent
+          }),
+          signal: controller.signal
+        }
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       const errText = await response.text();
@@ -189,61 +270,94 @@ app.post('/api/analyze', async (req, res) => {
     const cleanJson = textContent.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, "$1").trim();
 
     // Aggressive sanitization using Regex
-    let sanitized = cleanJson
+    const sanitized = cleanJson
       .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Removes hidden control characters that break JSON
       .replace(/\\(?!["\\/bfnrtu])/g, '\\\\')        // Fixes invalid backslash escapes
       .replace(/([^\\])'|^'/g, '$1\\"')             // Fixes unescaped single quotes
       .trim();
 
-    // Intercept comparison response to map the object back to an array for the frontend
-    if (type === "comparison") {
-      try {
-        const parsed = JSON.parse(sanitized);
-        if (parsed.factors && parsed.comparison) {
-          parsed.comparison.forEach(opt => {
-            const mappedValues = [];
-            // Normalize the AI output keys for loose matching
+    // G) Add strict schema validation after parse
+    // H) Normalize comparison shape to exactly what frontend expects
+    let result;
+    try {
+      const parsed = JSON.parse(sanitized);
+      
+      // Strict Schema Validation
+      if (type === 'comparison') {
+        if (!parsed.factors || !Array.isArray(parsed.factors) || !parsed.comparison || !Array.isArray(parsed.comparison)) {
+          throw new Error('Malformed comparison output from AI (missing factors or comparison arrays)');
+        }
+        
+        parsed.comparison = parsed.comparison.map(opt => {
+          if (!opt || typeof opt !== 'object' || !opt.optionName) return opt;
+          const mappedValues = [];
+          if (opt.values && typeof opt.values === 'object' && !Array.isArray(opt.values)) {
             const normalizedValues = {};
             for (const key in opt.values) {
               const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
               normalizedValues[cleanKey] = opt.values[key];
             }
-
             parsed.factors.forEach(f => {
               const cleanFactor = f.toLowerCase().replace(/[^a-z0-9]/g, '');
               const val = normalizedValues[cleanFactor] || opt.values[f];
-              mappedValues.push(val || "Data missing");
+              mappedValues.push(String(val || "Data missing"));
             });
-            opt.values = mappedValues;
-          });
-          sanitized = JSON.stringify(parsed);
+            return { ...opt, values: mappedValues };
+          } else if (Array.isArray(opt.values)) {
+            parsed.factors.forEach((f, i) => {
+              mappedValues.push(String(opt.values[i] || "Data missing"));
+            });
+            return { ...opt, values: mappedValues };
+          }
+          return opt;
+        });
+      } else if (type === 'pros-cons') {
+        if (!parsed.results || !Array.isArray(parsed.results)) {
+          throw new Error('Malformed pros-cons output from AI');
         }
-      } catch (e) {
-        console.error("Failed to intercept and map comparison values:", e);
-        // We will just let it pass through to the frontend to handle or throw json error
+      } else if (type === 'swot') {
+        if (!parsed.results || !Array.isArray(parsed.results)) {
+          throw new Error('Malformed swot output from AI');
+        }
+      } else if (type === 'verdict') {
+        if (!parsed.winner || !parsed.recommendation || !parsed.keyTakeaways) {
+          throw new Error('Malformed verdict output from AI');
+        }
       }
-    }
-
-    // Make sure it's valid JSON before sending to UI
-    try {
-      const result = JSON.parse(sanitized);
-      const responsePayload = { content: JSON.stringify(result) };
       
-      // Save to cache
-      analysisCache.set(cacheKey, responsePayload);
-      if (analysisCache.size > 100) {
-        const firstKey = analysisCache.keys().next().value;
-        analysisCache.delete(firstKey);
-      }
-
-      return res.json(responsePayload);
+      result = parsed;
     } catch (parseError) {
-      console.error("Failed to parse agent JSON:", sanitized);
+      console.error("Failed to parse or validate agent JSON:", sanitized, parseError);
       throw new Error("I had trouble formatting the AI's response. Please try clicking Analyze again! (Error Code: ERR-06)");
     }
 
+    // D) Only increment quota after successful analysis (Atomic RPC)
+    try {
+      if (isAnonymous) {
+        await supabase.rpc('increment_anonymous_usage', { ip_address: clientIp });
+      } else {
+        await supabase.rpc('increment_tie_count', { user_id: userId });
+      }
+    } catch (quotaErr) {
+      console.error("Failed to increment quota, but returning successful response:", quotaErr);
+    }
+
+    const responsePayload = { content: JSON.stringify(result) };
+    
+    // Save to cache (use TTL caching now)
+    analysisCache.set(cacheKey, responsePayload, useWebSearch ? 3600000 : 86400000); // 1hr if web search, else 24hr
+
+    return res.json(responsePayload);
+
   } catch (error) {
-    console.error('❌ Analysis error details:', error);
+    if (error.message && error.message.includes('ERR-')) {
+      console.error('❌ Analysis error:', error.message);
+    } else {
+      console.error('❌ Analysis error details:', error);
+    }
+    if (error.name === 'AbortError') {
+      return res.status(504).json({ error: 'The AI engine took too long to respond. Please try again. (Error Code: ERR-TIMEOUT)' });
+    }
     // If the error already has an ERR- code, pass it through, otherwise wrap it in ERR-07
     const errorMsg = error.message?.includes('ERR-') 
       ? error.message 
