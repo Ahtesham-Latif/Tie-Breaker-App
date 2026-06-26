@@ -81,27 +81,47 @@ async function analyzeDecision(
     throw new Error(`${errorMessage} (Status: ${response.status})`);
   }
 
-  const { content } = await response.json();
-  const text = content?.trim() || "";
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("Failed to initialize stream reader");
+  
+  const decoder = new TextDecoder();
+  let finalResult: any = null;
 
-  if (!text) {
-    throw new Error("It seems our AI was a bit lost for words. Please try your analysis again! (Err: AI-EMPTY-01)");
-  }
-
-  // Robust parsing logic to handle potential markdown wrappers or thinking blocks
-  try {
-    const cleanedText = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    const jsonMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || 
-                      cleanedText.match(/{[\s\S]*}/);
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
     
-    const jsonToParse = jsonMatch ? (jsonMatch[1] || jsonMatch[0]).trim() : cleanedText;
-    const data = JSON.parse(jsonToParse);
-
-    return { content: text, structuredData: data };
-  } catch (e) {
-    console.error("Failed to parse JSON", e, text);
-    return { content: text, structuredData: null };
+    // Split by double newline for SSE events, or fallback to single
+    const text = decoder.decode(value, { stream: true });
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      
+      try {
+        const payloadStr = line.slice(6).trim();
+        if (!payloadStr) continue;
+        
+        const parsed = JSON.parse(payloadStr);
+        
+        if (parsed.status === 'error') {
+          throw new Error(parsed.error || 'Unknown streaming error');
+        } else if (parsed.status === 'complete') {
+          finalResult = JSON.parse(parsed.content);
+        }
+      } catch (e) {
+         if (e instanceof Error && e.message !== "Unexpected end of JSON input" && !e.message.includes("Unexpected token")) {
+             throw e; // Rethrow actual streaming errors we constructed
+         }
+      }
+    }
   }
+
+  if (!finalResult) {
+    throw new Error("Connection closed before analysis completed. (Err: AI-STREAM-01)");
+  }
+  
+  return { content: "Analysis complete.", structuredData: finalResult };
 }
 
 /**
@@ -478,7 +498,7 @@ export default function App() {
       
       if (errorMessage.includes("Error Code: QUOTA-") || errorMessage.includes("Error Code: AUTH-")) {
         setValidationError(errorMessage.split(" (Status:")[0]);
-      } else if (errorMessage.includes("content management policy") || errorMessage.includes("ERR-04")) {
+      } else if (errorMessage.includes("content management policy") || errorMessage.includes("ERR-04-SAFETY")) {
         setValidationError("Oops! It looks like your inputs hit our AI's safety filters. Please try rephrasing your choices or factors to be more family-friendly. (Err: AI-FILTER-01)");
       } else if (errorMessage.includes("Too many requests") || errorMessage.includes("VAL-RATE")) {
         setValidationError("You're moving too fast! Please slow down and try again shortly. (Err: API-RATE-01)");
@@ -698,7 +718,7 @@ export default function App() {
           
           // --- LAPTOP LOGIC ---
           !isMobile && "relative h-full border-r shadow-sm",
-          !isMobile && isSidebarOpen && "w-1/3 lg:max-w-[450px] p-6 opacity-100",
+          !isMobile && isSidebarOpen && "w-1/3 lg:max-w-112.5 p-6 opacity-100",
           !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
         )}
         onTouchStart={handleTouchStart}

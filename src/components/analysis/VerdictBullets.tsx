@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Zap } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownText } from "../ui/MarkdownText";
 
 export function VerdictBullets({
   data,
@@ -29,9 +29,9 @@ export function VerdictBullets({
         </div>
 
         <div className="text-xl font-bold italic leading-tight">
-        &ldquo;<ReactMarkdown components={{ p: "span" }}>
+        &ldquo;<MarkdownText invertCitations={true}>
             {data.recommendation}
-          </ReactMarkdown>&rdquo;
+          </MarkdownText>&rdquo;
         </div>
 
         <div className="space-y-6 pt-8 border-t border-bg-surface/20">
@@ -46,7 +46,7 @@ export function VerdictBullets({
               >
                 <ArrowRight size={20} className="shrink-0 mt-1" />
                 <div className="flex-1">
-                  <ReactMarkdown components={{ p: "span" }}>{point}</ReactMarkdown>
+                  <MarkdownText invertCitations={true}>{point}</MarkdownText>
                 </div>
               </li>
             ))}

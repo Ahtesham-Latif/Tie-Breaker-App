@@ -1,5 +1,5 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownText } from "../ui/MarkdownText";
 import { cn } from "../../lib/utils";
 
 export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide?: boolean }) {
@@ -31,9 +31,9 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
                   >
-                    <ReactMarkdown components={{ p: "span" }}>
+                    <MarkdownText>
                       {s}
-                    </ReactMarkdown>
+                    </MarkdownText>
                   </li>
                 ))}
               </ul>
@@ -55,9 +55,9 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
                   >
-                    <ReactMarkdown components={{ p: "span" }}>
+                    <MarkdownText>
                       {w}
-                    </ReactMarkdown>
+                    </MarkdownText>
                   </li>
                 ))}
               </ul>
@@ -79,9 +79,9 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-accent pl-3"
                   >
-                    <ReactMarkdown components={{ p: "span" }}>
+                    <MarkdownText>
                       {o}
-                    </ReactMarkdown>
+                    </MarkdownText>
                   </li>
                 ))}
               </ul>
@@ -102,9 +102,9 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
                     key={idx}
                     className="text-xs font-bold leading-relaxed border-l-2 border-danger pl-3"
                   >
-                    <ReactMarkdown components={{ p: "span" }}>
+                    <MarkdownText>
                       {t}
-                    </ReactMarkdown>
+                    </MarkdownText>
                   </li>
                 ))}
               </ul>
