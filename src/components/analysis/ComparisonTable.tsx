@@ -1,5 +1,5 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownText } from "../ui/MarkdownText";
 
 import { cn } from "../../lib/utils";
 
@@ -30,9 +30,17 @@ export function ComparisonTable({
                   {opt.optionName}
                 </span>
                 <div className="text-sm font-bold text-text-main leading-snug">
-                  <ReactMarkdown components={{ p: "span" }}>
-                    {opt.values[fIdx]}
-                  </ReactMarkdown>
+                  <MarkdownText>
+                    {(() => {
+                      if (Array.isArray(opt.values)) return opt.values[fIdx];
+                      if (!opt.values) return "";
+                      const exact = opt.values[factor];
+                      if (exact) return exact;
+                      // Case-insensitive fallback
+                      const key = Object.keys(opt.values).find(k => k.toLowerCase() === factor.toLowerCase());
+                      return key ? opt.values[key] : "";
+                    })()}
+                  </MarkdownText>
                 </div>
               </div>
             ))}

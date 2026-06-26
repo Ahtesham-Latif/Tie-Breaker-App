@@ -26,17 +26,38 @@ Every dilemma is transformed into a structured decision artifact:
 * 🎯 **SWOT Profiles**
 * 🏆 **Final Verdicts** tailored exactly to your personal context
 
+### 📺 Watch the User Manual Guide
+[![The TieBreaker User Manual](https://img.youtube.com/vi/m__IZkOf2AU/maxresdefault.jpg)](https://youtu.be/m__IZkOf2AU)
+> *Click the image above to watch a complete walkthrough of The TieBreaker's features and decision intelligence engine!*
+
+---
+
+## ⚡ At a Glance
+> **Sub-second TTFB • Live Web Grounding • Zero Layout Shifts**
+
+* 🚀 **Real-Time SSE Streaming:** Bypasses standard SDKs for raw `text/event-stream` processing.
+* 🧠 **Azure AI Engine:** Powered by `gpt-4o-mini` for ultra-low latency execution.
+* 🌍 **Live Deep Research:** Autonomously queries Bing to override stale AI assumptions.
+* 🗄️ **Supabase Vault:** Non-destructive `jsonb` persistence with instant, zero-latency retrieval.
+* 🛡️ **Bulletproof Formatting:** Strict regex sanitization guarantees the React UI never breaks.
+
 ---
 
 ## 💡 When to Use It
 
-The TieBreaker shines when you are stuck between two solid choices and need objective clarity. Use it for:
-* **Tech Purchases:** `Sony A7IV` vs `Canon R6 Mark II`
-* **Software Tooling:** `React` vs `Vue`, or `Stripe` vs `PayPal`
-* **Business Strategy:** `In-house Marketing` vs `Hiring an Agency`
-* **Life Choices:** `Renting an Apartment` vs `Buying a Starter Home`
+The TieBreaker shines when you are navigating high-stakes dilemmas that require objective clarity and personalized context. Instead of generic "pros and cons," you provide the engine with specific constraints.
 
-*Note: The TieBreaker is a logical tool, not a crystal ball. It thrives on factual comparisons and strategic analysis, but it won't tell you the meaning of life!*
+**Example 1: Career Architecture**
+* **Dilemma:** *Build AI products vs. Become an AI researcher*
+* **Factors Evaluated:** Personal fulfillment, Financial upside, Daily work satisfaction, Skill compounding, Long-term impact.
+* **Your Context (My Case):** "I am a solo builder from Pakistan. I enjoy turning ideas into real products that people use. I have already built TieBreaker and several portfolio projects, and my long-term dream is to build a billion-dollar AI company inspired by products, not academic research. However, I also love learning how AI works deeply and worry that focusing on products may stop me from reaching frontier AI expertise."
+
+**Example 2: Enterprise Infrastructure**
+* **Dilemma:** *Stripe vs. PayPal for a Global SaaS*
+* **Factors Evaluated:** Setup burden, Monthly cost, Cross-border payment gateways, Subscription management.
+* **Your Context (My Case):** "I am launching an AI-powered SaaS aimed at B2B clients in the US and Europe, but my legal entity is based in a developing market. I need a solution that minimizes cross-border transaction fees while supporting seamless recurring billing APIs."
+
+*Note: The TieBreaker is a deterministic logic engine, not a crystal ball. It thrives on factual comparisons and strategic analysis anchored in your specific reality.*
 
 ---
 
@@ -128,11 +149,12 @@ flowchart LR
 ```
 
 ### Staged Processing Pipeline
-1. **Ingestion & Normalization:** Captures inputs, enforces length boundaries (`maxLength`), and normalizes strings.
-2. **Deterministic Fallback Padding:** Analyzes requested factors and automatically injects universal baseline dimensions if data is sparse.
-3. **Structured Orchestration:** Dispatches a structured schema instruction set via REST to the hosted Azure AI Agent.
-4. **Sanitization Interceptor:** Sanitizes raw LLM output strings via RegEx, parses the JSON payload, and validates it against the expected UI schema before returning it to the client.
-5. **Persistence & Authentication:** Leverages Supabase to authenticate users and securely store generated decision matrices in a cloud database for instant historical retrieval.
+1. **Ingestion:** Enforces `maxLength` bounds and normalizes input strings.
+2. **Padding:** Auto-injects universal baseline dimensions if user factors are sparse.
+3. **Orchestration:** Dispatches strict schemas to Azure, utilizing a **60-second in-memory token cache** to drop auth overhead.
+4. **SSE Streaming:** Processes raw `text/event-stream` chunks, firing live `thinking` pings to the UI while extracting the JSON payload.
+5. **Sanitization:** Repairs markdown bleed, validates JSON schemas, and intercepts Azure `ERR-04-SAFETY` filters.
+6. **Persistence:** Saves the exact `jsonb` artifact into Supabase PostgreSQL for zero-latency historical retrieval.
 
 ---
 
@@ -141,32 +163,44 @@ flowchart LR
 Melinda was engineered as an Azure AI Foundry Agent instead of a standard completion endpoint to enforce strict execution constraints over a probabilistic model. 
 
 The TieBreaker relies heavily on:
-* **Live Web Grounding (Bing Search Tool):** Access to real-time tools ensures Melinda evaluates current market prices, volatile tech specs, and modern product configurations rather than relying on stale training data.
+* **Deep Research Grounding:** Configurable Web Search tool execution (with strict 2-call runtime limits enforced in the prompt) ensures Melinda evaluates current market prices without tanking performance.
 * **Low Volatility (0.3 Temperature):** A strict `0.3` temperature setting prevents hallucinated product specifications, ensuring objective and repeatable data artifacts.
 * **Enterprise Guardrails:** Azure content safety filters ensure that inappropriate or malformed requests are categorically blocked before compute resources are wasted or bad data enters the Supabase ecosystem.
-* **Schema Enforced Output:** Standard conversational APIs are prone to markdown bleed and formatting hallucinations. By enforcing structured output at the agent level, we lock down a strict JSON contract that guarantees the React frontend never encounters a layout shift or broken table.
+* **Schema Enforced Output:** Standard conversational APIs are prone to markdown bleed. By streaming text directly into our custom regex extractors and parsing the result via a robust `MarkdownText` layer, we guarantee the React frontend never encounters a layout shift or broken table—even if factors go missing or casing mismatches.
 
 ---
 
 ## 🧠 Meet Melinda: The Decision Intelligence Engine
 
-The backend brain of TieBreaker is **Melinda**, an isolated agent hosted on Azure AI Foundry. Her single responsibility is converting unstructured human dilemmas into a strictly typed data artifact.
+The backend cognitive engine of TieBreaker is **Melinda**, a specialized decision agent hosted on Azure AI Foundry. Rather than functioning as an open-ended conversationalist, Melinda operates as a strict analytical compiler—transforming ambiguous, emotionally charged dilemmas into objective, strictly-typed data artifacts.
+
+### Engine Specifications & Tooling
+* **Core Model:** Powered by Azure's `gpt-4o-mini` (or equivalent ultra-fast deployments). We specifically leverage low-latency mini models without internal reasoning loops to achieve sub-second TTFB (Time to First Byte) while preserving high-tier logical structuring.
+* **Grounding Integration:** Equipped with the **Azure Bing Web Search Tool**. When Deep Research is enabled, Melinda autonomously queries the live web to anchor her analysis in current pricing, market realities, and factual specs, completely overriding stale pre-trained assumptions.
+* **Context Injection:** She receives layered prompt configurations dynamically assembled by the Express backend. This includes strict XML boundaries around user inputs, historical session memory (ensuring sequential tabs build upon, rather than repeat, past insights), and explicit schema directives.
+
+### Execution Role
+Melinda's execution pipeline is entirely silent. She does not interact directly with the user. Instead, she continuously evaluates the dilemma against the user's specific context constraints and requested analysis mode (Comparison, Pros & Cons, SWOT, Verdict), outputting a highly constrained JSON buffer that the backend intercepts and validates.
 
 ### Expected JSON Output Contract
 Every response must strictly match this schema layout to satisfy the frontend parser:
 
 ```json
 {
-  "entities": ["MacBook Air M3", "iPad Pro M4"],
-  "analyticalReasoning": "Given the user's focus on heavy video editing...",
-  "factors": ["Usability", "Cost", "Performance", "Ecosystem"],
-  "comparison": [
-    {
-      "optionName": "MacBook Air M3",
-      "values": {
-        "Usability": "Full macOS with desktop-class multitasking."
-      }
-    }
+  "entities": ["Build AI products", "Become an AI researcher"],
+  "analyticalReasoning": "Given the user's focus on tangible product development, their geographical constraints (solo builder in Pakistan), and their timeline, the financial and impact realities heavily favor immediate product shipping over a multi-year academic diversion...",
+  "factors": [
+    "Personal fulfillment",
+    "Financial upside",
+    "Daily work satisfaction",
+    "Skill compounding",
+    "Long-term impact"
+  ],
+  "recommendation": "Commit entirely to building AI products. The frontier of applied AI is moving faster than academia, and building aligns perfectly with your proven track record and billion-dollar ambition.",
+  "bulletPoints": [
+    "You already possess the builder's momentum; pivoting to research would stall this trajectory.",
+    "Billion-dollar outcomes in AI are increasingly driven by rapid product iteration, not just base-model research.",
+    "Your anxiety about 'frontier expertise' can be mitigated by reading papers while you build, rather than pausing to publish them."
   ]
 }
 ```
@@ -175,30 +209,35 @@ Every response must strictly match this schema layout to satisfy the frontend pa
 
 ## 🎯 Key Features
 
-### Cloud Identity & History Persistence
-* **Authentication:** Integrated Supabase GoTrue Auth with background blur modal.
-* **Data Persistence:** Decisions are securely saved to a Supabase PostgreSQL database.
-* **Adaptive UI States:** Layouts dynamically collapse and expand based on authentication status.
+### 🗄️ Cloud Persistence & The Supabase Vault
+The TieBreaker isn't just a temporary calculator; it acts as a long-term, cryptographic journal of your strategic pivots. This is achieved through our deep integration with **Supabase PostgreSQL**.
+
+* **What We Store:** Every time you calculate an analysis, the engine securely stores both your constraints (`option_a`, `option_b`, `factors`, `my_case`) and the compiled data artifacts generated by Melinda (`comparison_data`, `pros_cons_data`, `swot_data`, `verdict_data`). 
+* **JSONB Column Architecture:** Rather than spawning new database rows every time you click a different tab, we utilize advanced PostgreSQL `jsonb` columns. This allows the Node backend to perform non-destructive, incremental partial updates to a single dilemma record as you explore different lenses.
+* **Ironclad Privacy (RLS):** Your strategic decisions—whether they are confidential business pivots or personal life choices—are locked down via Supabase Row Level Security (RLS). Database policies strictly enforce that users can only `SELECT`, `UPDATE`, or `INSERT` rows tied to their specific authenticated UUID.
+* **Instant Retrieval:** Because the exact JSON artifacts are preserved in the vault, clicking a past decision in your History Sidebar completely bypasses the Azure AI layer. The React frontend instantly pulls the `jsonb` payload and re-renders the exact matrices you generated days or months ago with zero latency.
 
 ### AI Decision Engine
 * **No Chatbot UX:** Form-driven data dashboard components.
 * **"My Case" Context Engine:** Personalized analysis tailored to 500-word user constraints.
 * **Multi-Lens Analytical Views:** Pros & Cons, Comparison Matrices, SWOT, and Final Verdicts.
+* **Background Extraction:** The backend performs silent JSON evaluation and formatting; the frontend never displays raw reasoning or "AI thinking" scratchpads.
+
 ### 🧠 Intelligent Cache Orchestration
-The TieBreaker features a highly optimized, two-tier caching mechanism to protect API quotas and ensure instant data retrieval:
-* **Local LRU Cache:** An in-memory cache instantly returns previously generated tabs during a single session.
-* **Supabase History Pre-population:** When a user clicks a past decision, the backend fetches the JSON payload and pre-populates the local cache *only* for the tabs they actually generated, preventing blank screens or cache poisoning.
-* **Case-Insensitive DB Fallback:** If the local cache misses, a case-insensitive `.ilike()` fallback query checks the cloud database before ever triggering the Azure AI engine, ensuring users aren't charged for slightly miscapitalized queries.
-* **Smart Auto-Selection:** History items intelligently scan their payload and automatically select the first valid analysis tab, guaranteeing the user never lands on an empty screen.
+* **Local LRU Cache:** Instantly returns previously generated tabs during an active session.
+* **Supabase Pre-population:** History clicks fetch the exact `jsonb` payload to pre-populate the local cache, preventing blank screens.
+* **Case-Insensitive Fallback:** `.ilike()` DB queries prevent users from burning AI quota on slightly miscapitalized identical decisions.
+* **Smart Auto-Selection:** History links auto-scan the payload to land the user on the first valid, non-empty tab.
 
 ### Interface Design
-* **Premium Fluid AI Loading Orb:** Replaces boring loading spinners with a state-of-the-art, liquid Apple/OpenAI-style continuous progress animation driven by `requestAnimationFrame`.
-* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding and a fixed micro-toolbar.
-* **Theme Adaptability:** Full dark/light structural synchronization across all customized components.
+* **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
+* **Premium Fluid AI Orb:** An Apple/OpenAI-style continuous progress animation driven by `requestAnimationFrame`.
+* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding.
+* **Theme Adaptability:** Full Dark/Light structural synchronization.
 
 ### UX Messaging Architecture
-* **Emotionally Intelligent Feedback:** System boundaries (rate limits, Azure quota exhaustion, auth walls, and 15-tie database limits) are handled by a centralized messaging layer ensuring a calm, premium, and reassuring tone rather than injecting raw markdown.
-* **Zero Technical Bleed:** Backend errors and JSON parsing failures are elegantly abstracted. Users receive actionable, clear guidance without ever seeing raw stack traces or internal agent details.
+* **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and 15-tie limits trigger premium, reassuring messaging layers—not raw markdown.
+* **Zero Technical Bleed:** Backend errors and streaming timeouts (`ERR-TIMEOUT`) are elegantly abstracted into actionable UI states.
 
 ---
 
@@ -214,19 +253,19 @@ The TieBreaker features a highly optimized, two-tier caching mechanism to protec
 | **Cache Corruption** | Non-destructive JSON partial updates prevent wiping previous decision factors | Database State Manager |
 
 ### Advanced API Defenses
-* **JWT Backend Verification:** The `/api/analyze` endpoint strictly requires a Supabase Bearer token for authenticated users, completely eliminating the possibility of frontend limitation bypasses.
-* **Semantic Prompt Isolation:** User inputs are fully enclosed in XML tags, with the Agent instructed to treat them purely as unexecutable data, neutralizing prompt injection attacks.
-* **Safe String Parsing:** The UI uses right-to-left `.lastIndexOf(' vs ')` parsing for history retrieval, completely avoiding the destructive "vs" parsing trap if an option naturally contains the delimiter.
+* **JWT Enforced Execution:** The `/api/analyze` endpoint strictly requires a Supabase Bearer token—eliminating frontend-bypass vulnerabilities.
+* **Semantic Prompt Isolation:** User strings are locked inside unexecutable XML tags (`<decision>`, `<user_context>`) to neutralize prompt injection.
+* **Safe String Parsing:** Right-to-left `.lastIndexOf(' vs ')` safely parses history strings, preventing crashes when options naturally contain the delimiter.
 
-### API Rate Limiting & Cooldowns
-* **Server Limit:** 5 requests per IP every 15 minutes.
-* **Frontend Cooldown:** Strict 10-second penalty blocks on API failures (e.g., Rate Limits or Quota Exceeded) that evaluate error priorities seamlessly to ensure the user receives accurate cooldown messaging.
+### Rate Limiting & Cooldowns
+* **Server-Side Throttle:** Hard cap of 5 requests per IP every 15 minutes.
+* **Frontend Cooldowns:** Strict 10-second penalty blocks on API failures (Quota hits, Rate Limits) with evaluated error priorities.
 
 ### Validation & Resiliency Checks
-* **Structured AI Formatting:** Pre-hydration regex parsers repair markdown bleed and enforce strict JSON shape.
-* **Schema Contract Compliance:** Express explicitly guarantees backend structure before payload delivery to React.
-* **Input Enforcement:** Hard truncation constraints prevent massive unstructured uploads from crashing prompt generation.
-* **Fallback Matrix Padding:** Node dynamically injects default properties if the AI returns sparse rows, preventing UI grid collapse.
+* **Stream Extraction:** Regex parsers intercept and repair markdown bleed directly from the SSE buffer.
+* **Schema Contracts:** Express dynamically injects missing matrix rows to ensure payload compliance before hitting React.
+* **Universal UI Fallbacks:** `MarkdownText` layer prevents primitive `undefined` crashes when the AI drops a field.
+* **Flexible Factor Mapping:** Case-insensitive object matching and array index fallbacks secure the UI against AI capitalization shifts.
 
 ---
 
@@ -245,14 +284,58 @@ The TieBreaker features a highly optimized, two-tier caching mechanism to protec
 
 ---
 
+## 📂 Project Structure
+
+```text
+📦 Tie-Breaker-App
+ ┣ 📂 public/              # Static assets & icons
+ ┣ 📂 src/
+ ┃ ┣ 📂 __tests__/         # Modular AAA Vitest suites (Smoke, Integration, etc.)
+ ┃ ┣ 📂 components/        # Isolated React UI pieces
+ ┃ ┃ ┣ 📂 modals/          # Welcome and Auth wall overlays
+ ┃ ┃ ┗ 📂 ui/              # Buttons, inputs, and layout wrappers
+ ┃ ┣ 📂 context/           # Global React Context (AuthProvider)
+ ┃ ┣ 📂 db/                # Supabase PostgreSQL connectivity
+ ┃ ┣ 📂 hooks/             # Custom React lifecycle management
+ ┃ ┣ 📂 lib/               # Shared utilities and parsers
+ ┃ ┣ 📜 App.tsx            # Main application orchestrator & streaming logic
+ ┃ ┣ 📜 index.css          # Tailwind v4 root
+ ┃ ┗ 📜 main.tsx           # React DOM mounting
+ ┣ 📜 server.js            # Node/Express API Gateway & rate limiting
+ ┣ 📜 vite.config.ts       # Bundler configuration
+ ┣ 📜 vitest.config.ts     # Test runner configuration
+ ┗ 📜 package.json         # Dependencies & scripts
+```
+
+---
+
 ## 🧪 Testing & Quality Assurance
 
-The TieBreaker incorporates targeted component test suites (`App.test.jsx`) to verify interface stability, state persistence, and error mitigation vectors.
+The TieBreaker features a completely modular, **AAA (Arrange-Act-Assert)** test suite powered by Vitest and React Testing Library. By breaking down the monolithic architecture into isolated domains, we guarantee bulletproof resiliency across the entire application lifecycle.
 
-### Core Testing Priorities
-* **Component Render Stability:** Verifying the multi-lens dashboard layout maintains layout stability regardless of missing AI matrix factors.
-* **Auth & Gate Logic:** Validating the strict lock-out mechanisms for users who exhaust the free tier, ensuring the local storage triggers align perfectly with the React state.
-* **State Management:** Guaranteeing theme toggling (Dark/Light) and caching layers seamlessly persist across intense UI state changes.
+### Test Suite Architecture
+The test suite is divided into 5 focused domains located in `src/__tests__/`:
+
+1. **`smoke.test.jsx`** - Validates foundational rendering, zero-crash initialization, and DOM integrity.
+2. **`interaction.test.jsx`** - Ensures React state handlers seamlessly track complex user inputs, form mutations, and theme toggling.
+3. **`validation.test.jsx`** - Guards against malformed inputs by enforcing edge-case boundary checks (e.g., disabling submission when factors are empty).
+4. **`integration.test.jsx`** - Orchestrates mocked API fetch streams, verifying that JSON payloads are correctly extracted, validated, and mapped into the UI. Also enforces correct error messaging for server timeouts/500 codes.
+5. **`performance.test.jsx`** - Tests local `localStorage` cache hits to ensure identical requests resolve with zero network overhead.
+
+### Test Results
+![Vitest Green Status](./TestResults.png)
+
+```text
+ ✓ src/__tests__/validation.test.jsx (1 test)
+ ✓ src/__tests__/smoke.test.jsx (1 test)
+ ✓ src/__tests__/interaction.test.jsx (3 tests)
+ ✓ src/__tests__/performance.test.jsx (1 test)
+ ✓ src/__tests__/integration.test.jsx (2 tests)
+
+ Test Files  5 passed (5)
+      Tests  8 passed (8)
+   Duration  7.80s
+```
 
 ---
 
@@ -275,7 +358,7 @@ cp .env.example .env
 ```
 Populate `.env` with:
 ```env
-FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-05-15-preview
+FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-05-15-preview
 Melinda_Agent=your-agent-identifier
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key

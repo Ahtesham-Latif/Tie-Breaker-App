@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { CheckCircle2, XCircle } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownText } from "../ui/MarkdownText";
 import { cn } from "../../lib/utils";
 
 export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSideBySide?: boolean }) {
@@ -27,11 +27,13 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
             </h2>
           </div>
 
-          <div className={cn("font-medium leading-relaxed text-text-main mb-4 italic border-l-4 border-accent pl-4 opacity-90", isSideBySide ? "text-xs" : "text-sm md:text-base")}>
-            <ReactMarkdown components={{ p: "span" }}>
-              {opt.summary}
-            </ReactMarkdown>
-          </div>
+          {opt.summary && (
+            <div className={cn("font-medium leading-relaxed text-text-main mb-4 italic border-l-4 border-accent pl-4 opacity-90", isSideBySide ? "text-xs" : "text-sm md:text-base")}>
+              <MarkdownText>
+                {opt.summary}
+              </MarkdownText>
+            </div>
+          )}
 
           <div className={cn("grid", isSideBySide ? "grid-cols-1 gap-1" : "grid-cols-1 md:grid-cols-2 gap-4")}>
             <div className="space-y-3">
@@ -53,9 +55,9 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
                       size={16}
                     />
                     <div className="text-sm font-bold text-text-main leading-snug flex-1">
-                      <ReactMarkdown components={{ p: "span" }}>
+                      <MarkdownText>
                         {pro}
-                      </ReactMarkdown>
+                      </MarkdownText>
                     </div>
                   </li>
                 ))}
@@ -77,9 +79,9 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
                   >
                     <XCircle className="text-danger shrink-0 mt-0.5" size={16} />
                     <span className="text-sm font-bold text-text-main leading-snug flex-1">
-                      <ReactMarkdown components={{ p: "span" }}>
+                      <MarkdownText>
                         {con}
-                      </ReactMarkdown>
+                      </MarkdownText>
                     </span>
                   </li>
                 ))}
