@@ -14,7 +14,7 @@
 
 ## 🚀 Overview: Why We Built This
 
-We've all been there. You ask a general-purpose AI to help you choose between two things—say, *“MacBook Air vs iPad Pro”*—and you receive a massive, rambling wall of text that concludes with the incredibly unhelpful: *"It depends on your needs."* 
+We've all been there. You ask a general-purpose AI to help you choose between two things—say, *“MBBS vs CA”*—and you receive a massive, rambling wall of text that concludes with the incredibly unhelpful: *"It depends on your needs."* 
 
 While technically accurate, it fails to deliver what we actually need: **a structured, actionable decision framework.**
 
@@ -231,12 +231,13 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 
 ### Interface Design
 * **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
-* **Premium Fluid AI Orb:** An Apple/OpenAI-style continuous progress animation driven by `requestAnimationFrame`.
-* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding.
+* **Premium Fluid AI Orb & Domain-Aware Quotes:** An Apple/OpenAI-style continuous progress animation pairs with an intelligent text parser that feeds curated, domain-specific quotes (Tech, Business, Career, etc.) dynamically based on your `My Case` constraints while you wait.
+* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding, and browser scrollbars have been completely hidden globally to maintain a sleek, app-like aesthetic.
 * **Theme Adaptability:** Full Dark/Light structural synchronization.
 
 ### UX Messaging Architecture
-* **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and 15-tie limits trigger premium, reassuring messaging layers—not raw markdown.
+* **6-Question Feedback Funnel:** Authenticated users who engage heavily with the app are greeted with a beautiful, 6-question survey matrix designed to capture NPS, core use-cases, and roadmap requests directly into the database.
+* **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and Guest Auth Walls trigger premium, reassuring messaging layers—not raw markdown.
 * **Zero Technical Bleed:** Backend errors and streaming timeouts (`ERR-TIMEOUT`) are elegantly abstracted into actionable UI states.
 
 ---
@@ -247,7 +248,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 | --- | --- | --- |
 | **Excessive API Compute Costs** | String length boundaries & 500-word payload enforcement | Frontend Input & Express Router |
 | **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
-| **Anonymous Spam** | In-memory IP tracking (`req.ip`) strictly capping free unauthenticated requests at 3 | Node.js API Gateway |
+| **Anonymous Spam** | In-memory IP tracking (`req.ip`) strictly capping free unauthenticated requests at 2 | Node.js API Gateway |
 | **Prompt Injection** | Hardcoded XML boundaries (`<decision>`, `<user_context>`) with strict Agent execution overrides | AI Orchestration Layer |
 | **Free-Tier Abuse** | Mathematical JWT verification checking `ties_count` via Supabase directly at the API layer | Backend Authentication |
 | **Cache Corruption** | Non-destructive JSON partial updates prevent wiping previous decision factors | Database State Manager |

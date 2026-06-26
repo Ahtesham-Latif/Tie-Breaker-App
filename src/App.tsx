@@ -232,7 +232,10 @@ export default function App() {
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [analyzingCase, setAnalyzingCase] = useState<string>("");
+  
   const lastScrollY = useRef(0);
+  const contentRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollTopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -388,6 +391,11 @@ export default function App() {
     }
 
     const decisionQuery = `${trimmedA} vs ${trimmedB}`;
+    
+    // Create a context string for domain awareness during loading
+    const caseContext = myCase || `${trimmedA} vs ${trimmedB}`;
+    setAnalyzingCase(caseContext);
+
     // Canonical normalization of the decision for the cache key
     const canonicalDecision = decisionQuery
       .toLowerCase()
@@ -1298,6 +1306,7 @@ export default function App() {
                     isDark={theme === 'dark'} 
                     isLoading={isCurrentTypeLoading && !currentResult} 
                     startTime={loadingTypes[selectedType]}
+                    myCase={analyzingCase}
                   />
 
                   <div className="max-w-7xl mx-auto space-y-6">

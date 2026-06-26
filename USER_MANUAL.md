@@ -10,11 +10,10 @@ Whether you're a student picking a major, a developer choosing a tech stack, or 
 
 TieBreaker is designed to adapt to your specific profession and high-stakes constraints. Here are some examples of how our diverse community leverages the engine:
 
-* **👨‍💻 Software Engineers:** Resolving architectural disputes (`Next.js App Router` vs `Vite SPA`), or evaluating infrastructure (`AWS ECS` vs `Vercel Serverless`).
-* **👔 Founders & Entrepreneurs:** Making strategic financial and structural moves (`Bootstrap` vs `Venture Capital`, `Stripe` vs `PayPal for global scaling`).
-* **👩‍🎓 Academics & Students:** Deciding between intensive career paths (`Build AI Products` vs `Become an AI Researcher`), or determining optimal hardware investments (`MacBook Air M3` vs `Dell XPS 13`).
-* **🎨 Designers:** Picking the ultimate systemic design tool (`Figma` vs `Framer`) or determining agency vs freelance pathways.
-* **📈 Growth Marketers:** Comparing attribution models or evaluating CRM scalability (`HubSpot Enterprise` vs `Custom Salesforce Build`).
+* **👨‍💻 Software Engineers & Tech Founders:** Deciding between secure roles and bold ventures (`Accept a stable AI engineering job` vs `Continue building Tie-Breaker full-time`).
+* **👔 Founders & Entrepreneurs:** Making foundational platform choices (`Stripe` vs `Paypal`).
+* **👩‍🎓 Students & Graduates:** Navigating intense academic pathways (`MBBS` vs `CA`), or choosing immediate employment (`Pursue a Master's degree abroad` vs `Work full-time and gain industry experience`).
+* **🔬 Researchers & Innovators:** Choosing a core path of impact (`Build AI Products` vs `Become an AI Researcher`).
 
 ---
 
@@ -25,7 +24,7 @@ When you open the app, you'll see a clean, distraction-free dashboard. Here is h
 ### Option A vs Option B
 * **What it is:** The two primary text boxes at the top of your screen.
 * **How to use it:** Enter exactly the two concepts, products, or paths you are weighing against each other. 
-* *Example:* `Next.js 14` vs `Remix v2`.
+* *Example:* `Stripe` vs `Paypal`.
 
 ### Comparison Factors (Optional)
 * **What it is:** The section where you can click **"Add Option"** to define the specific lenses through which you want the AI to judge the options.
@@ -95,12 +94,16 @@ The TieBreaker is free to try, but creating an account unlocks powerful persiste
 * **Instant Retrieval:** When you click an old decision, our caching layer instantly pulls the payload without triggering a new AI generation—preventing wait times and saving your quota.
 
 ### The Free Tier (Usage Limits)
-* **Anonymous Users:** You can use the engine up to 3 times for free. After that, you'll see a friendly prompt asking you to create an account.
-* **Registered Users:** Your free account grants you up to 15 full AI TieBreaker decisions.
+* **Anonymous Users (Guests):** You can generate up to 2 full AI decisions. After that, you will hit an Auth Wall asking you to create a free account.
+* **Registered Users:** Enjoy unlimited TieBreaker decision generation, fully backed by cloud history persistence.
+
+### User Feedback Survey Funnel
+* **Continuous Improvement:** After you hit 3 successful TieBreaker generations as an authenticated user, you'll be greeted with a beautiful, 6-question UX feedback funnel. It asks targeted questions about what you loved, the ease of use, your use case, and product roadmap features. It’s optional, but highly appreciated!
 
 ---
 
 ## 💡 Best Practices for Optimal Results
 1. **Be Granular:** `Next.js 14 App Router` vs `Remix v2 Single Fetch` yields exponentially better matrix data than just `React Frameworks`.
 2. **Inject Aggressive Constraints:** The engine thrives on constraints. Tell it your budget ceilings, your exact technical skill level, or your exact timeline in the "My Case" box.
-3. **Watch the Orb:** When processing, you will see a fluid AI Loading Orb rather than a spinner. This indicates the server is streaming live SSE `thinking` pings back to your browser while Melinda compiles the final JSON artifact in the background.
+3. **The Domain-Aware Loading Experience:** When processing, you will see a minimized, subtle fluid AI Loading Orb. Beneath it, the system intelligently analyzes your `My Case` context and streams curated, **domain-aware quotes** (e.g., Tech, Business, Career, Academic) cycling every 9 seconds to make your 10-15 second wait insightful.
+4. **Clean UI Focus:** Global browser scrollbars have been completely hidden for a sleek, native app-like experience. Feel free to swipe, scroll, and drag without visual clutter.

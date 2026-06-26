@@ -1,0 +1,112 @@
+[BUSINESS]
+"Chase the vision, not the money; the money will end up following you." — Tony Hsieh
+"Your most unhappy customers are your greatest source of learning." — Bill Gates
+"The best way to predict the future is to create it." — Peter Drucker
+"It's not about ideas. It's about making ideas happen." — Scott Belsky
+"Success is not in what you have, but who you are." — Bo Bennett
+"The secret of business is to know something that nobody else knows." — Aristotle Onassis
+"Don't find customers for your products, find products for your customers." — Seth Godin
+"A brand is no longer what we tell the consumer it is — it is what consumers tell each other it is." — Scott Cook
+"Make every detail perfect and limit the number of details to perfect." — Jack Dorsey
+"The entrepreneur always searches for change, responds to it, and exploits it as an opportunity." — Peter Drucker
+"Risk more than others think is safe. Dream more than others think is practical." — Howard Schultz
+"The critical ingredient is getting off your butt and doing something." — Nolan Bushnell
+"Good companies will meet needs. Great companies will create markets." — Philip Kotler
+"If you really look closely, most overnight successes took a long time." — Steve Jobs
+"The way to get started is to quit talking and begin doing." — Walt Disney
+"Opportunities don't happen. You create them." — Chris Grosser
+"If you can't explain it simply, you don't understand it well enough." — Albert Einstein
+"Without a customer, you don't have a business — you have a hobby." — Don Peppers
+
+[TECH]
+"Any sufficiently advanced technology is indistinguishable from magic." — Arthur C. Clarke
+"The best way to predict the future is to invent it." — Alan Kay
+"Software is eating the world." — Marc Andreessen
+"Talk is cheap. Show me the code." — Linus Torvalds
+"First, solve the problem. Then, write the code." — John Johnson
+"Code is like humor. When you have to explain it, it's bad." — Cory House
+"Simplicity is the soul of efficiency." — Austin Freeman
+"Make it work, make it right, make it fast." — Kent Beck
+"The function of good software is to make the complex appear simple." — Grady Booch
+"Programs must be written for people to read, and only incidentally for machines to execute." — Harold Abelson
+"The most disruptive thing about technology is not the technology itself — it's the behavior it enables." — Unknown
+"Technology is best when it brings people together." — Matt Mullenweg
+"Move fast and break things. Unless you are breaking stuff, you are not moving fast enough." — Mark Zuckerberg
+"In software, the hard part isn't solving problems — it's deciding what problems to solve." — Paul Graham
+"You don't have to be a genius to build great software. You have to be stubborn." — DHH
+"The best error message is the one that never shows up." — Thomas Fuchs
+"Every great developer you know got there by solving problems they were unqualified to solve." — Patrick McKenzie
+
+[CAREER]
+"Choose a job you love and you will never have to work a day in your life." — Confucius
+"The only way to do great work is to love what you do." — Steve Jobs
+"Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do great work." — Steve Jobs
+"Success is walking from failure to failure with no loss of enthusiasm." — Winston Churchill
+"Opportunities are usually disguised as hard work, so most people don't recognize them." — Ann Landers
+"Don't watch the clock; do what it does. Keep going." — Sam Levenson
+"I never dreamed about success. I worked for it." — Estée Lauder
+"The difference between ordinary and extraordinary is that little extra." — Jimmy Johnson
+"Hardships often prepare ordinary people for an extraordinary destiny." — C.S. Lewis
+"Start where you are. Use what you have. Do what you can." — Arthur Ashe
+"You don't get what you wish for. You get what you work for." — Daniel Habit
+"Develop success from failures. Discouragement and failure are two of the surest stepping stones to success." — Dale Carnegie
+"The secret of getting ahead is getting started." — Mark Twain
+"It does not matter how slowly you go as long as you do not stop." — Confucius
+"A career is built one decision at a time — make each one count." — Unknown
+"The people who get on in this world are the people who get up and look for the circumstances they want." — George Bernard Shaw
+"Success usually comes to those who are too busy to be looking for it." — Henry David Thoreau
+
+[LIFE]
+"In the middle of every difficulty lies opportunity." — Albert Einstein
+"Life is what happens when you're busy making other plans." — John Lennon
+"The purpose of our lives is to be happy." — Dalai Lama
+"You only live once, but if you do it right, once is enough." — Mae West
+"In the end, it's not the years in your life that count. It's the life in your years." — Abraham Lincoln
+"Spread love everywhere you go. Let no one ever come to you without leaving happier." — Mother Teresa
+"When you reach the end of your rope, tie a knot in it and hang on." — Franklin D. Roosevelt
+"Always remember that you are absolutely unique. Just like everyone else." — Margaret Mead
+"Do not go where the path may lead, go instead where there is no path and leave a trail." — Ralph Waldo Emerson
+"You will face many defeats in life, but never let yourself be defeated." — Maya Angelou
+"The greatest glory in living lies not in never falling, but in rising every time we fall." — Nelson Mandela
+"In the long run, the sharpest weapon of all is a kind and gentle spirit." — Anne Frank
+"It is during our darkest moments that we must focus to see the light." — Aristotle
+"Whoever is happy will make others happy too." — Anne Frank
+"Do not let making a living prevent you from making a life." — John Wooden
+"Life shrinks or expands in proportion to one's courage." — Anaïs Nin
+"The only impossible journey is the one you never begin." — Tony Robbins
+
+[ACADEMIC]
+"Education is the most powerful weapon which you can use to change the world." — Nelson Mandela
+"Live as if you were to die tomorrow. Learn as if you were to live forever." — Mahatma Gandhi
+"The more that you read, the more things you will know." — Dr. Seuss
+"An investment in knowledge pays the best interest." — Benjamin Franklin
+"The beautiful thing about learning is that no one can take it away from you." — B.B. King
+"Intelligence plus character — that is the goal of true education." — Martin Luther King Jr.
+"Education is not preparation for life; education is life itself." — John Dewey
+"The roots of education are bitter, but the fruit is sweet." — Aristotle
+"It is not that I'm so smart. But I stay with the questions much longer." — Albert Einstein
+"Curiosity is the engine of achievement." — Ken Robinson
+"The mind is not a vessel to be filled, but a fire to be kindled." — Plutarch
+"Research is what I'm doing when I don't know what I'm doing." — Wernher von Braun
+"Science is a way of thinking much more than it is a body of knowledge." — Carl Sagan
+"The more I learn, the more I realize how much I don't know." — Albert Einstein
+"A person who won't read has no advantage over one who can't read." — Mark Twain
+"Study hard what interests you the most in the most undisciplined, irreverent and original manner possible." — Richard Feynman
+
+[DECISION]
+"In any moment of decision, the best thing you can do is the right thing." — Theodore Roosevelt
+"It is in your moments of decision that your destiny is shaped." — Tony Robbins
+"Once you make a decision, the universe conspires to make it happen." — Ralph Waldo Emerson
+"The risk of a wrong decision is preferable to the terror of indecision." — Maimonides
+"Not making a decision is itself a decision." — Unknown
+"Decide what you want, decide what you are willing to exchange for it." — H.L. Hunt
+"When faced with two equally tough choices, most people choose the third choice — to not choose." — Jarod Kintz
+"A good decision is based on knowledge and not on numbers." — Plato
+"The quality of your life is determined by the quality of your decisions." — Unknown
+"You cannot make progress without making decisions." — Jim Rohn
+"In life, you will make tough choices. The measure of who you are is how you handle them." — Unknown
+"Decision is the spark that ignites action." — Wilferd Peterson
+"A wrong decision isn't forever; it can always be amended. But indecision is final." — Felicity Huffman
+"Clarity about what matters provides clarity about what does not." — Cal Newport
+"The choices we make, not the chances we take, determine our destiny." — Unknown
+"Reversible decisions deserve five minutes. Irreversible decisions deserve five days." — Unknown
