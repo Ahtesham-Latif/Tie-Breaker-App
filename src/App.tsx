@@ -87,14 +87,17 @@ async function analyzeDecision(
   
   const decoder = new TextDecoder();
   let finalResult: any = null;
+  let buffer = '';
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     
-    // Split by double newline for SSE events, or fallback to single
-    const text = decoder.decode(value, { stream: true });
-    const lines = text.split('\n');
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    
+    // Keep the last line in the buffer since it might be incomplete
+    buffer = lines.pop() || '';
     
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
@@ -777,20 +780,20 @@ export default function App() {
         transition={{ type: "spring", stiffness: 350, damping: 30 }}
       >
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-2">
           <div
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex items-center gap-2 cursor-pointer group shrink"
             onClick={reset}
           >
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-bg-surface rotate-12 transition-transform group-hover:rotate-0 shadow-lg shadow-accent/20">
+            <div className="w-8 h-8 shrink-0 bg-accent rounded-lg flex items-center justify-center text-bg-surface rotate-12 transition-transform group-hover:rotate-0 shadow-lg shadow-accent/20">
               <ScaleIcon size={20} />
             </div>
-            <span className="font-extrabold text-xl tracking-tighter text-text-bright uppercase">
+            <span className="font-extrabold text-lg sm:text-xl tracking-tighter text-text-bright uppercase leading-tight">
               THE TIE<span className="text-accent">BREAKER</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {isMobile && hasStarted && (
               <button 
                 title="Show Analysis Results"
@@ -841,8 +844,8 @@ export default function App() {
                   onChange={(e) => setOptionA(e.target.value)}
                   maxLength={100}
                   placeholder="Option A (e.g. iPhone 15 Pro Max)"
-                  rows={1}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-10"
+                  rows={2}
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
                 />
                 <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
                   VS
@@ -853,8 +856,8 @@ export default function App() {
                   onChange={(e) => setOptionB(e.target.value)}
                   maxLength={100}
                   placeholder="Option B (e.g. Galaxy S24 Ultra)"
-                  rows={1}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-10"
+                  rows={2}
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
                 />
               </div>
               
@@ -878,8 +881,8 @@ export default function App() {
                       }
                     }}
                     placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
-                    rows={2}
-                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
+                    rows={4}
+                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[100px]"
                   />
                 </div>
               ) : (
@@ -897,8 +900,8 @@ export default function App() {
                     <textarea
                       disabled
                       placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
-                      rows={2}
-                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2 text-sm text-text-main font-semibold shadow-inner resize-none min-h-15 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
+                      rows={4}
+                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-[100px] cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-bg-surface/20 backdrop-blur-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="bg-accent text-bg-surface px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">

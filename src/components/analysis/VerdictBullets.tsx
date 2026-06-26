@@ -23,26 +23,26 @@ export function VerdictBullets({
           <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-60">
             The Winning Choice
           </span>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
             {data.winner}
           </h2>
         </div>
 
-        <div className="text-xl font-bold italic leading-tight">
+        <div className="text-base font-bold italic leading-tight text-justify">
         &ldquo;<MarkdownText invertCitations={true}>
             {data.recommendation}
           </MarkdownText>&rdquo;
         </div>
 
         <div className="space-y-6 pt-8 border-t border-bg-surface/20">
-          <h3 className="text-xs font-black uppercase tracking-widest opacity-60">
+          <h3 className="text-[11px] font-black uppercase tracking-widest opacity-60">
             Analysis Takeaways
           </h3>
           <ul className="space-y-4">
             {data.keyTakeaways.map((point: string, i: number) => (
               <li
                 key={i}
-                className="flex items-start gap-4 text-base font-black italic"
+                className="flex items-start gap-4 text-sm font-black italic text-justify"
               >
                 <ArrowRight size={20} className="shrink-0 mt-1" />
                 <div className="flex-1">
