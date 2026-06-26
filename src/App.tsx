@@ -17,7 +17,8 @@ import {
   Copy, 
   Check, 
   PanelLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowUp
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
@@ -223,6 +224,51 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const lastScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollTopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    
+    if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+      // Scrolling down
+      setIsScrollingDown(true);
+      setShowScrollTop(false);
+      if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+    } else if (currentScrollY < lastScrollY.current) {
+      // Scrolling up
+      setIsScrollingDown(false);
+      
+      // Show button if we're far enough down
+      if (currentScrollY > 200) {
+        setShowScrollTop(true);
+        if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+        scrollTopTimeoutRef.current = setTimeout(() => {
+          setShowScrollTop(false);
+        }, 2000);
+      } else {
+        setShowScrollTop(false);
+        if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+      }
+    }
+    
+    lastScrollY.current = currentScrollY;
+  };
+
+  const scrollToTop = () => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    setShowScrollTop(false);
+    if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -1089,13 +1135,15 @@ export default function App() {
           ) : (
             <motion.div
               key="result"
+              ref={scrollContainerRef}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex-1 flex flex-col p-3 md:p-4 h-full bg-bg-base"
+              onScroll={handleScroll}
+              className="flex-1 flex flex-col p-1.5 md:p-2 h-full bg-bg-base overflow-y-auto custom-scrollbar"
             >
-              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-10">
-                <div className="space-y-3">
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
+                  <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Tooltip content="Toggle Theme" position="bottom">
                       <button
@@ -1122,7 +1170,7 @@ export default function App() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 sm:flex bg-accent-muted p-1.5 rounded-2xl border-2 border-accent/10 shadow-sm gap-1">
+                <div className="grid grid-cols-2 sm:flex bg-accent-muted p-1 rounded-2xl border-2 border-accent/10 shadow-sm gap-1">
                   <TypeTab
                     active={selectedType === "pros-cons"}
                     onClick={() => handleAnalyze("pros-cons")}
@@ -1143,12 +1191,12 @@ export default function App() {
                     onClick={() => handleAnalyze("verdict")}
                     label="VERDICT"
                   />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex-1 bg-bg-surface rounded-3xl border-2 border-accent/10 overflow-hidden flex flex-col relative shadow-[0_20px_50px_rgba(117,81,57,0.1)]">
-                <div className="flex justify-between items-center p-2 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
-                  <div className="pl-1 pr-2 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="flex-1 bg-bg-surface rounded-3xl border-2 border-accent/10 flex flex-col relative shadow-[0_20px_50px_rgba(117,81,57,0.1)] min-h-[min-content]">
+                <div className="flex justify-between items-center p-1 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
+                  <div className="pl-0.5 pr-1 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
                     {selectedType === "pros-cons" && "Pros & Cons"}
                     {selectedType === "comparison" && "Comparison"}
                     {selectedType === "swot" && "SWOT"}
@@ -1205,9 +1253,10 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className={cn(
-                  "flex-1 overflow-y-auto custom-scrollbar",
-                  isSideBySide ? "p-1 md:p-4" : "p-4 md:p-12"
+                <div 
+                  className={cn(
+                  "flex-1 rounded-b-3xl overflow-hidden",
+                  isSideBySide ? "p-0.5 md:p-2" : "p-2 md:p-6"
                 )}>
                   <LoaderSkeleton 
                     isDark={theme === 'dark'} 
@@ -1215,7 +1264,7 @@ export default function App() {
                     startTime={loadingTypes[selectedType]}
                   />
 
-                  <div className="max-w-7xl mx-auto space-y-12">
+                  <div className="max-w-7xl mx-auto space-y-6">
                     {currentResult ? (
                       currentResult.structuredData ? (
                         <AnalysisDisplay
@@ -1230,13 +1279,29 @@ export default function App() {
                       )
                     ) : (
                        !isCurrentTypeLoading && (
-                         <div className="text-center opacity-20 py-20 font-black uppercase tracking-widest">Select an analysis type to begin</div>
+                         <div className="text-center opacity-20 py-10 font-black uppercase tracking-widest">Select an analysis type to begin</div>
                        )
                     )}
                   </div>
                 </div>
               </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Scroll to Top Button */}
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              onClick={scrollToTop}
+              className="absolute bottom-6 right-6 z-50 p-3 bg-accent text-bg-surface rounded-full shadow-2xl shadow-accent/40 hover:scale-110 active:scale-95 transition-transform"
+              title="Scroll to top"
+            >
+              <ArrowUp size={20} />
+            </motion.button>
           )}
         </AnimatePresence>
       </main>
