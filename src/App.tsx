@@ -31,7 +31,8 @@ import {
   SidebarHistory,
   AuthWallModal,
   LoaderSkeleton,
-  Tooltip
+  Tooltip,
+  SurveyModal
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
@@ -222,6 +223,8 @@ export default function App() {
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [surveyTriggerType, setSurveyTriggerType] = useState<string>("");
   const [usageCount, setUsageCount] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -231,7 +234,7 @@ export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const lastScrollY = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollTopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const currentScrollY = e.currentTarget.scrollTop;
@@ -285,9 +288,25 @@ export default function App() {
     if (!welcomed) {
       setShowWelcome(true);
     }
-    const count = parseInt(localStorage.getItem("tiebreaker_usage_count") || "0", 10);
-    setUsageCount(count);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      supabase.from('profiles').select('ties_count').eq('id', user.id).single().then(({ data }) => {
+        if (data) {
+          setUsageCount(data.ties_count);
+          if (data.ties_count > 2) {
+            supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('user_id', user.id).then(({ count }) => {
+              if (count === 0) setShowSurveyModal(true);
+            });
+          }
+        }
+      });
+    } else {
+      const count = parseInt(localStorage.getItem("tiebreaker_usage_count") || "0", 10);
+      setUsageCount(count);
+    }
+  }, [user]);
 
   const handleCloseWelcome = () => {
     localStorage.setItem("tiebreaker_welcomed", "true");
@@ -508,7 +527,18 @@ export default function App() {
                 factors: validFactors,
                 my_case: myCase,
                 [columnName]: structuredData
-              }).then();
+              }).then(() => {
+                supabase.from('profiles').select('ties_count').eq('id', user.id).single().then(({ data: profile }) => {
+                  if (profile && profile.ties_count >= 2) {
+                    supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('user_id', user.id).then(({ count }) => {
+                      if (count === 0) {
+                        setSurveyTriggerType(type);
+                        setShowSurveyModal(true);
+                      }
+                    });
+                  }
+                });
+              });
             }
           });
       }
@@ -530,7 +560,9 @@ export default function App() {
 
       setUsageCount(prev => {
         const next = prev + 1;
-        localStorage.setItem("tiebreaker_usage_count", next.toString());
+        if (!user) {
+          localStorage.setItem("tiebreaker_usage_count", next.toString());
+        }
         return next;
       });
       
@@ -704,6 +736,7 @@ export default function App() {
     >
       <AnimatePresence>
         {showWelcome && <WelcomeModal onClose={handleCloseWelcome} />}
+        <SurveyModal isOpen={showSurveyModal} onClose={() => setShowSurveyModal(false)} triggeredAfter={surveyTriggerType} />
         {showAuthWall && (
           <AuthWallModal 
             onClose={() => setShowAuthWall(false)} 
@@ -845,7 +878,7 @@ export default function App() {
                   maxLength={100}
                   placeholder="Option A (e.g. iPhone 15 Pro Max)"
                   rows={2}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
                 <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
                   VS
@@ -857,7 +890,7 @@ export default function App() {
                   maxLength={100}
                   placeholder="Option B (e.g. Galaxy S24 Ultra)"
                   rows={2}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[60px]"
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
               </div>
               
@@ -882,7 +915,7 @@ export default function App() {
                     }}
                     placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
                     rows={4}
-                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-[100px]"
+                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-25"
                   />
                 </div>
               ) : (
@@ -901,7 +934,7 @@ export default function App() {
                       disabled
                       placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
                       rows={4}
-                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-[100px] cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
+                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-25 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-bg-surface/20 backdrop-blur-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="bg-accent text-bg-surface px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
