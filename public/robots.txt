@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tie-breaker-v2-avdmcehxfef8caeh.centralus-01.azurewebsites.net/sitemap.xml

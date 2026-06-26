@@ -240,6 +240,11 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 * **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and Guest Auth Walls trigger premium, reassuring messaging layers—not raw markdown.
 * **Zero Technical Bleed:** Backend errors and streaming timeouts (`ERR-TIMEOUT`) are elegantly abstracted into actionable UI states.
 
+### 🔎 Enterprise SEO Architecture
+* **Inline JSON-LD Validation:** Structured schema markup natively embedded for zero-dependency semantic search processing.
+* **Dynamic Open Graph & Twitter Cards:** Authentic, dimension-perfect UI assets generated natively for premium social sharing previews.
+* **Intelligent Web Crawl Infrastructure:** Fully structured `robots.txt` and priority-weighted `sitemap.xml` mapping.
+
 ---
 
 ## 🔒 Security & Reliability
@@ -387,6 +392,7 @@ The **Google Gemini CLI** was utilized as an engineering accelerator throughout 
 * Integrating Supabase authentication and PostgreSQL history tracking
 * Implementing strict regex sanitizers to parse corrupted JSON output blocks
 * Structuring automated UI and integration testing patterns inside Vitest
+* Building modular, strictly validated **Agent Skills** natively into `.agents/` for repeatable agentic execution (e.g., SEO checklists, Database mappings).
 
 ### Verified Badges
 **Build AI Agents with Gemini**

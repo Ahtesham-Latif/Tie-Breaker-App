@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   CheckCircle2, 
   XCircle, 
+  AlertCircle,
   ArrowRight, 
   Zap, 
   Loader2, 
@@ -869,7 +870,7 @@ export default function App() {
                     className="bg-danger/10 border-2 border-danger/20 p-4 rounded-xl mb-4"
                   >
                     <p className="text-[11px] font-black text-danger uppercase tracking-wider flex items-center gap-2">
-                      <XCircle size={14} /> {validationError}
+                      <AlertCircle size={14} className="shrink-0" /> <span className="leading-relaxed">{validationError}</span>
                     </p>
                   </motion.div>
                 )}
