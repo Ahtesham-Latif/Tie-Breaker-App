@@ -94,8 +94,7 @@ The TieBreaker is free to try, but creating an account unlocks powerful persiste
 * **Instant Retrieval:** When you click an old decision, our caching layer instantly pulls the payload without triggering a new AI generation—preventing wait times and saving your quota.
 
 ### The Free Tier & Pro Features (Usage Limits)
-* **Anonymous Users (Guests):** You can generate up to 3 full AI decisions. After that, you will hit an Auth Wall asking you to create a free account.
-* **Registered Free Users:** Enjoy up to 15 TieBreaker decisions fully backed by cloud history persistence.
+* **Registered Free Users:** Enjoy up to 15 TieBreaker decisions fully backed by cloud history persistence. Authentication is strictly required to generate analyses.
 * **Pro Members:** Level up to Pro for **unlimited decisions**. Pro users also unlock the ability to permanently **delete** items from their history vault, and gain access to **Privacy Mode (Ghost Mode)** which prevents new decisions from appearing in the app UI altogether while still securely hitting our APIs.
 
 ### User Feedback Survey Funnel

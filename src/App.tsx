@@ -34,7 +34,6 @@ import {
   AnalysisButton, 
   WelcomeModal,
   SidebarHistory,
-  AuthWallModal,
   LoaderSkeleton,
   Tooltip,
   SurveyModal,
@@ -228,8 +227,8 @@ export default function App() {
   >({});
 
   const [showWelcome, setShowWelcome] = useState(false);
-  const [showAuthWall, setShowAuthWall] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalIsSignUp, setAuthModalIsSignUp] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showAboutUsModal, setShowAboutUsModal] = useState(false);
@@ -340,9 +339,6 @@ export default function App() {
           }
         }
       });
-    } else {
-      const count = parseInt(localStorage.getItem("tiebreaker_usage_count") || "0", 10);
-      setUsageCount(count);
     }
   }, [user]);
 
@@ -451,8 +447,8 @@ export default function App() {
       return;
     }
 
-    if (!user && usageCount >= 3) {
-      setShowAuthWall(true);
+    if (!user) {
+      setShowAuthModal(true);
       setIsSidebarOpen(true);
       return;
     }
@@ -611,13 +607,7 @@ export default function App() {
       
       addNotification(`${type.replace("-", " ").toUpperCase()} analysis ready!`);
 
-      setUsageCount(prev => {
-        const next = prev + 1;
-        if (!user) {
-          localStorage.setItem("tiebreaker_usage_count", next.toString());
-        }
-        return next;
-      });
+      setUsageCount(prev => prev + 1);
       
       setHasStarted(true);
       
@@ -787,19 +777,14 @@ export default function App() {
       )}
     >
       <AnimatePresence>
-        {showWelcome && <WelcomeModal onClose={handleCloseWelcome} />}
+        {showWelcome && <WelcomeModal onClose={handleCloseWelcome} onOpenAuth={(isSignUp) => {
+          setAuthModalIsSignUp(isSignUp);
+          setShowAuthModal(true);
+        }} />}
         <SurveyModal isOpen={showSurveyModal} onClose={() => setShowSurveyModal(false)} triggeredAfter={surveyTriggerType} />
-        {showAuthWall && (
-          <AuthWallModal 
-            onClose={() => setShowAuthWall(false)} 
-            onAuthenticate={() => {
-              setShowAuthWall(false);
-              setShowAuthModal(true);
-            }} 
-          />
-        )}
         <AuthModal
           isOpen={showAuthModal}
+          initialIsSignUp={authModalIsSignUp}
           onClose={() => setShowAuthModal(false)}
           onSuccess={(isSignUp) => {
             if (isSignUp) {

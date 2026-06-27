@@ -7,10 +7,17 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (isSignUp: boolean) => void;
+  initialIsSignUp?: boolean;
 }
 
-export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
+export function AuthModal({ isOpen, onClose, onSuccess, initialIsSignUp = false }: AuthModalProps) {
+  const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsSignUp(initialIsSignUp);
+    }
+  }, [isOpen, initialIsSignUp]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [age, setAge] = useState('');

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Github, Linkedin, Mail, Youtube, Video, Info, User, HelpCircle, Award, Zap, BrainCircuit, CheckCircle2, Target, Activity, Layers, ArrowRight, Scale as ScaleIcon } from "lucide-react";
+import meImage from "../../assets/me1.png";
 interface AboutUsModalProps {
   onClose: () => void;
 }
@@ -82,7 +83,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-6"
               >
                  <div className="w-32 h-32 shrink-0 rounded-full bg-accent/20 border-4 border-accent shadow-xl overflow-hidden flex items-center justify-center">
-                    <img src="/me1.png" alt="Ahtesham Latif" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={meImage} alt="Ahtesham Latif" className="w-full h-full object-cover" loading="lazy" />
                  </div>
                  <h2 className="text-3xl font-black uppercase tracking-tighter text-text-bright">
                     About The Creator
@@ -240,7 +241,15 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                           Platform Overview
                        </h2>
                        <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative">
-                          <video src="/Tie_Breaker_Launch.mp4" controls className="w-full h-full object-contain" preload="metadata" />
+                          <iframe
+                             className="w-full h-full"
+                             src="https://www.youtube.com/embed/vZ70JQEDPWY"
+                             title="Platform Overview"
+                             frameBorder="0"
+                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                             referrerPolicy="strict-origin-when-cross-origin"
+                             allowFullScreen
+                          ></iframe>
                        </div>
                     </div>
                     

@@ -105,9 +105,7 @@ flowchart LR
     PRO -- No --> FREE{< 15 Free Ties?}
     FREE -- Yes --> API
     FREE -- No --> UPGRADE[Show Pro Upgrade]
-    G -- No --> GUEST{< 3 Guest Uses?}
-    GUEST -- Yes --> API
-    GUEST -- No --> WALL[Show Auth Wall]
+    G -- No --> WALL[Show Auth Modal]
 
     %% =========================
     %% Backend Orchestration
@@ -244,7 +242,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 * **Theme Adaptability:** Full Dark/Light structural synchronization.
 
 ### UX Messaging Architecture & Quotas
-* **Strict Quota Enforcement:** Protects backend resources by locking Anonymous users at 3 generations and Free Logged-In users at 15 generations before prompting a seamless upgrade flow.
+* **Strict Quota Enforcement:** Protects backend resources by requiring authentication for any generation, and locking Free Logged-In users at 15 generations before prompting a seamless upgrade flow.
 * **Pro Tier Features:** Upon claiming the Pro Tier, users unlock a golden profile badge, unlimited decisions, the ability to permanently delete history, and an exclusive **Privacy Mode (Ghost Mode)** that saves decisions to the DB but completely hides them from the UI.
 * **6-Question Feedback Funnel:** Authenticated users who engage heavily with the app are greeted with a beautiful, 6-question survey matrix designed to capture NPS, core use-cases, and roadmap requests directly into the database.
 * **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and Guest Auth Walls trigger premium, reassuring messaging layers—not raw markdown.
@@ -263,7 +261,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 | --- | --- | --- |
 | **Excessive API Compute Costs** | String length boundaries & 500-word payload enforcement | Frontend Input & Express Router |
 | **Rate Limit / API Exhaustion** | Cluster rate limiting via `express-rate-limit` middleware | Node.js Server Ingestion |
-| **Anonymous Spam** | In-memory IP tracking (`req.ip`) strictly capping free unauthenticated requests at 2 | Node.js API Gateway |
+| **Anonymous Spam** | Authentication strictly required before API gateway processing | Node.js API Gateway |
 | **Prompt Injection** | Hardcoded XML boundaries (`<decision>`, `<user_context>`) with strict Agent execution overrides | AI Orchestration Layer |
 | **Free-Tier Abuse** | Mathematical JWT verification checking `ties_count` via Supabase directly at the API layer | Backend Authentication |
 | **Cache Corruption** | Non-destructive JSON partial updates prevent wiping previous decision factors | Database State Manager |

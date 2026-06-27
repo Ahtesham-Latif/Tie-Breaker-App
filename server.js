@@ -139,42 +139,29 @@ app.post('/api/analyze', async (req, res) => {
     const authHeader = req.headers.authorization;
     const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
     
-    let isAnonymous = true;
     let userId = null;
-    let currentUsage = 0;
     let currentTiesCount = 0;
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      isAnonymous = false;
-      const token = authHeader.split(' ')[1];
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      if (authError || !user) {
-        return res.status(401).json({ error: 'Invalid authentication session. (Error Code: AUTH-01)' });
-      }
-      userId = user.id;
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('ties_count, plan')
-        .eq('id', user.id)
-        .single();
-      
-      currentTiesCount = profile ? profile.ties_count : 0;
-      if (currentTiesCount >= 15 && profile?.plan !== 'pro') {
-        return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
-      }
-    } else {
-      // E) Move anonymous usage tracking out of memory (use Supabase table)
-      const { data: usageData } = await supabase
-        .from('anonymous_usage')
-        .select('usage_count')
-        .eq('ip_address', clientIp)
-        .single();
-        
-      currentUsage = usageData ? usageData.usage_count : 0;
-      if (currentUsage >= 3) {
-        return res.status(403).json({ error: 'You have exhausted your free trials. Please log in to continue. (Error Code: QUOTA-02)' });
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Authentication is required to generate an analysis. (Error Code: AUTH-REQ)' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid authentication session. (Error Code: AUTH-01)' });
+    }
+    userId = user.id;
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('ties_count, plan')
+      .eq('id', user.id)
+      .single();
+    
+    currentTiesCount = profile ? profile.ties_count : 0;
+    if (currentTiesCount >= 15 && profile?.plan !== 'pro') {
+      return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
     }
 
     // Cache key based on input
@@ -430,11 +417,7 @@ app.post('/api/analyze', async (req, res) => {
 
     // D) Only increment quota after successful analysis (Atomic RPC)
     try {
-      if (isAnonymous) {
-        await supabase.rpc('increment_anonymous_usage', { ip_address: clientIp });
-      } else {
-        await supabase.rpc('increment_tie_count', { user_id: userId });
-      }
+      await supabase.rpc('increment_tie_count', { user_id: userId });
     } catch (quotaErr) {
       console.error("Failed to increment quota, but returning successful response:", quotaErr);
     }
