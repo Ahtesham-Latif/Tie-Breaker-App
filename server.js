@@ -155,12 +155,12 @@ app.post('/api/analyze', async (req, res) => {
       
       const { data: profile } = await supabase
         .from('profiles')
-        .select('ties_count')
+        .select('ties_count, plan')
         .eq('id', user.id)
         .single();
       
       currentTiesCount = profile ? profile.ties_count : 0;
-      if (currentTiesCount >= 15) {
+      if (currentTiesCount >= 15 && profile?.plan !== 'pro') {
         return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
       }
     } else {
