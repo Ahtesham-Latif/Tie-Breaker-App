@@ -73,13 +73,13 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
-      className="max-w-3xl mx-auto min-h-[400px] flex flex-col items-center justify-center p-8 relative"
+      className="max-w-3xl mx-auto min-h-[300px] md:min-h-[400px] flex flex-col items-center justify-center p-2 md:p-8 relative overflow-hidden w-full"
     >
-      <div className="text-[11px] font-black uppercase tracking-[0.3em] text-accent/60 mb-12 animate-pulse">
+      <div className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-accent/60 mb-8 md:mb-12 animate-pulse text-center">
         {phase === "neutral" || phase === "analysis" ? "Weighing the Decision..." : "The Verdict is In"}
       </div>
 
-      <div className="relative w-full max-w-lg flex items-center justify-between gap-4 md:gap-8">
+      <div className="relative w-full max-w-lg flex items-center justify-between gap-2 md:gap-8 px-2 md:px-0">
         
         {/* Left Contender */}
         <motion.div
@@ -90,12 +90,12 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
           }}
           transition={{ type: "spring", stiffness: 50, damping: 15 }}
           className={cn(
-            "relative z-20 flex-1 bg-bg-panel border-2 rounded-2xl p-5 shadow-xl flex flex-col items-center gap-3 transition-colors duration-500",
+            "relative z-20 flex-1 bg-bg-panel border-2 rounded-xl md:rounded-2xl p-3 md:p-5 shadow-xl flex flex-col items-center gap-2 md:gap-3 transition-colors duration-500 min-w-0",
             phase === "winner" && winnerSide === "left" ? "border-accent shadow-[0_0_30px_rgba(var(--color-accent),0.3)]" : "border-border-dim"
           )}
         >
           <div className={cn(
-            "text-sm md:text-base font-bold text-center line-clamp-3",
+            "text-xs md:text-base font-bold text-center line-clamp-3 break-words w-full",
             phase === "winner" && winnerSide === "left" ? "text-text-bright" : "text-text-main"
           )}>
             {a}
@@ -127,14 +127,14 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
           }
           className="shrink-0 relative z-30"
         >
-          <div className="w-20 h-20 md:w-28 md:h-28 bg-accent rounded-2xl md:rounded-3xl flex items-center justify-center text-bg-surface shadow-2xl shadow-accent/30">
-            <ScaleIcon size={48} className="md:w-16 md:h-16" strokeWidth={2.5} />
+          <div className="w-14 h-14 md:w-28 md:h-28 bg-accent rounded-xl md:rounded-3xl flex items-center justify-center text-bg-surface shadow-2xl shadow-accent/30">
+            <ScaleIcon size={32} className="w-8 h-8 md:w-16 md:h-16" strokeWidth={2.5} />
           </div>
           
           {/* Subtle glow behind logo */}
           <motion.div 
             animate={{ opacity: phase === "winner" ? 0.8 : 0.2 }}
-            className="absolute inset-0 bg-accent blur-2xl -z-10 rounded-full" 
+            className="absolute inset-0 bg-accent blur-xl md:blur-2xl -z-10 rounded-full" 
           />
         </motion.div>
 
@@ -147,12 +147,12 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
           }}
           transition={{ type: "spring", stiffness: 50, damping: 15 }}
           className={cn(
-            "relative z-20 flex-1 bg-bg-panel border-2 rounded-2xl p-5 shadow-xl flex flex-col items-center gap-3 transition-colors duration-500",
+            "relative z-20 flex-1 bg-bg-panel border-2 rounded-xl md:rounded-2xl p-3 md:p-5 shadow-xl flex flex-col items-center gap-2 md:gap-3 transition-colors duration-500 min-w-0",
             phase === "winner" && winnerSide === "right" ? "border-accent shadow-[0_0_30px_rgba(var(--color-accent),0.3)]" : "border-border-dim"
           )}
         >
           <div className={cn(
-            "text-sm md:text-base font-bold text-center line-clamp-3",
+            "text-xs md:text-base font-bold text-center line-clamp-3 break-words w-full",
             phase === "winner" && winnerSide === "right" ? "text-text-bright" : "text-text-main"
           )}>
             {b}
