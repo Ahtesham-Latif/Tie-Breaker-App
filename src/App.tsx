@@ -34,7 +34,8 @@ import {
   LoaderSkeleton,
   Tooltip,
   SurveyModal,
-  AboutUsModal
+  AboutUsModal,
+  ConfirmLogoutModal
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
@@ -224,6 +225,7 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showAboutUsModal, setShowAboutUsModal] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -768,6 +770,15 @@ export default function App() {
           }}
         />
         {showAboutUsModal && <AboutUsModal onClose={() => setShowAboutUsModal(false)} />}
+        {showLogoutModal && (
+          <ConfirmLogoutModal 
+            onConfirm={() => {
+              signOut();
+              setShowLogoutModal(false);
+            }}
+            onCancel={() => setShowLogoutModal(false)}
+          />
+        )}
       </AnimatePresence>
 
 
@@ -866,8 +877,8 @@ export default function App() {
                   <Tooltip content="Log Out" position="bottom">
                     <button
                       aria-label="Log Out"
-                      onClick={signOut}
-                      className="p-1 rounded-lg bg-danger/10 text-danger hover:bg-danger hover:text-bg-surface transition-all shadow-sm flex items-center justify-center"
+                      onClick={() => setShowLogoutModal(true)}
+                      className="p-1.5 rounded-lg bg-bg-panel border border-border-dim text-text-main hover:text-danger hover:border-danger/30 hover:bg-danger/10 transition-all shadow-sm flex items-center justify-center"
                     >
                       <LogOut size={18} />
                     </button>
@@ -1097,6 +1108,7 @@ export default function App() {
                 setShowHistoryView(false);
               }} 
               onShowAuth={() => setShowAuthModal(true)} 
+              onShowLogout={() => setShowLogoutModal(true)}
             />
           </div>
         )}
@@ -1153,10 +1165,10 @@ export default function App() {
                  </div>
                  <Tooltip content="Log Out" position="bottom">
                    <button 
-                     onClick={signOut}
-                     className="ml-2 p-0.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
+                     onClick={() => setShowLogoutModal(true)}
+                     className="ml-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-danger hover:bg-danger/10 rounded-full transition-all flex items-center gap-1.5 border border-transparent hover:border-danger/20"
                    >
-                     <LogOut size={12} />
+                     <LogOut size={12} /> Sign Out
                    </button>
                  </Tooltip>
                </div>

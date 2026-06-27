@@ -7,10 +7,11 @@ import { motion } from 'motion/react';
 interface SidebarHistoryProps {
   onLoadDecision: (decisionData: any) => void;
   onShowAuth: () => void;
+  onShowLogout: () => void;
 }
 
-export function SidebarHistory({ onLoadDecision, onShowAuth }: SidebarHistoryProps) {
-  const { user, signOut } = useAuth();
+export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: SidebarHistoryProps) {
+  const { user } = useAuth();
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,11 +53,11 @@ export function SidebarHistory({ onLoadDecision, onShowAuth }: SidebarHistoryPro
           </div>
         </div>
         <button 
-          onClick={signOut}
-          className="p-1 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all"
+          onClick={onShowLogout}
+          className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-danger/20"
           title="Sign Out"
         >
-          <LogOut size={16} />
+          <LogOut size={14} /> Sign Out
         </button>
       </div>
 
