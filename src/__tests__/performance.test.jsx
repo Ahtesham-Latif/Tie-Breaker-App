@@ -20,9 +20,13 @@ describe('5. Performance & Caching', () => {
     const inputB = screen.getByPlaceholderText(/Option B/i);
     const analyzeButton = screen.getAllByRole('button', { name: /Pros & Cons/i })[0];
     
-    // Act: First Request
-    fireEvent.change(inputA, { target: { value: 'Mac' } });
-    fireEvent.change(inputB, { target: { value: 'PC' } });
+    // Act
+    fireEvent.change(inputA, { target: { value: 'Cat' } });
+    fireEvent.change(inputB, { target: { value: 'Dog' } });
+
+    // Wait for auth to resolve
+    await new Promise(r => setTimeout(r, 50));
+
     fireEvent.click(analyzeButton);
     
     // Wait for first response

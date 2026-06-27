@@ -23,6 +23,10 @@ describe('4. Asynchronous Data Fetching & API Integration', () => {
     // Act
     fireEvent.change(inputA, { target: { value: 'Cat' } });
     fireEvent.change(inputB, { target: { value: 'Dog' } });
+
+    // Wait for auth to resolve
+    await new Promise(r => setTimeout(r, 50));
+
     fireEvent.click(analyzeButton);
     
     // Assert
@@ -51,6 +55,10 @@ describe('4. Asynchronous Data Fetching & API Integration', () => {
     // Act
     fireEvent.change(inputA, { target: { value: 'Option 1' } });
     fireEvent.change(inputB, { target: { value: 'Option 2' } });
+
+    // Wait for auth to resolve
+    await new Promise(r => setTimeout(r, 50));
+
     fireEvent.click(analyzeButton);
 
     // Assert

@@ -58,7 +58,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
         <div className="flex flex-col items-center text-center space-y-4 overflow-y-auto custom-scrollbar pr-2 pb-1">
           <div className="space-y-1">
             <h2 className="text-2xl font-black uppercase tracking-tighter text-text-bright">
-              Welcome to <span className="text-accent underline decoration-2 underline-offset-4 decoration-accent/30">TieBreaker</span>
+              Welcome to <span className="text-accent underline decoration-2 underline-offset-4 decoration-accent/30">TieBreaker</span> 👋
             </h2>
             <p className="text-sm text-text-main font-semibold">
               Sign in to generate AI verdicts.
