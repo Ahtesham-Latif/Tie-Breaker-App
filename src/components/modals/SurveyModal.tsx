@@ -106,14 +106,14 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 overflow-y-auto"
         >
           <motion.div
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.95, y: -20, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-bg-surface border-2 border-border-dim rounded-4xl p-6 md:p-10 max-w-lg w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden my-8"
+            className="bg-bg-surface border-2 border-border-dim rounded-4xl p-5 md:p-9 max-w-lg w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden my-8"
           >
             <div className="absolute top-0 left-0 w-full h-1.5 bg-linear-to-r from-accent to-accent-muted" />
             
@@ -128,7 +128,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="flex flex-col items-center justify-center text-center py-12"
+                className="flex flex-col items-center justify-center text-center py-11"
               >
                 <div className="w-16 h-16 bg-accent/20 text-accent rounded-full flex items-center justify-center mb-4">
                   <CheckCircle size={32} />
@@ -155,7 +155,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                       <select 
                         value={loved}
                         onChange={(e) => setLoved(e.target.value)}
-                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
+                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
                       >
                         <option value="" disabled>Pick the one that stood out...</option>
                         {LOVED_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -171,7 +171,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                       <select 
                         value={ease}
                         onChange={(e) => setEase(e.target.value)}
-                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
+                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
                       >
                         <option value="" disabled>Be honest — it helps us improve...</option>
                         {EASE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -187,7 +187,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                       <select 
                         value={useCase}
                         onChange={(e) => setUseCase(e.target.value)}
-                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
+                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
                       >
                         <option value="" disabled>Helps us understand who uses TieBreaker...</option>
                         {USE_CASE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -203,7 +203,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                       <select 
                         value={future}
                         onChange={(e) => setFuture(e.target.value)}
-                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
+                        className="w-full appearance-none bg-bg-panel border-2 border-transparent rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner cursor-pointer"
                       >
                         <option value="" disabled>Your vote shapes the roadmap...</option>
                         {FUTURE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -218,7 +218,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                       <label className="text-xs font-bold text-text-dim uppercase tracking-wider">5. How likely are you to recommend TieBreaker?</label>
                       <span className="text-[10px] font-medium text-text-muted">0 = Never, 10 = Absolutely</span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-between bg-bg-panel p-2 sm:p-3 rounded-2xl border-2 border-transparent">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-between bg-bg-panel p-1 sm:p-2 rounded-2xl border-2 border-transparent">
                       {NPS_OPTIONS.map(num => (
                         <button
                           key={num}
@@ -250,7 +250,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                         placeholder="One line is enough, but we read every single one..."
                         rows={2}
                         maxLength={500}
-                        className="w-full bg-bg-panel border-2 border-transparent rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-none"
+                        className="w-full bg-bg-panel border-2 border-transparent rounded-xl pl-10 pr-3 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-none"
                       />
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                   type="submit"
                   disabled={!isFormValid || isSubmitting}
                   className={cn(
-                    "w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 mt-auto shrink-0",
+                    "w-full py-3 rounded-xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 mt-auto shrink-0",
                     isFormValid 
                       ? "bg-accent text-bg-surface hover:scale-[1.02] active:scale-95 shadow-xl shadow-accent/30" 
                       : "bg-bg-panel text-text-dim opacity-50 cursor-not-allowed"

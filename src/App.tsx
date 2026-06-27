@@ -33,12 +33,13 @@ import {
   AuthWallModal,
   LoaderSkeleton,
   Tooltip,
-  SurveyModal
+  SurveyModal,
+  AboutUsModal
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./db/supabase";
-import { User as UserIcon, LogOut, Clock, ArrowLeft, Lock } from "lucide-react";
+import { User as UserIcon, LogOut, Clock, ArrowLeft, Lock, Info } from "lucide-react";
 
 
 // --- AI Service ---
@@ -223,6 +224,7 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAboutUsModal, setShowAboutUsModal] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [surveyTriggerType, setSurveyTriggerType] = useState<string>("");
@@ -765,6 +767,7 @@ export default function App() {
             setShowAuthModal(false);
           }}
         />
+        {showAboutUsModal && <AboutUsModal onClose={() => setShowAboutUsModal(false)} />}
       </AnimatePresence>
 
 
@@ -804,12 +807,12 @@ export default function App() {
           "bg-bg-surface border-border-dim flex flex-col shrink-0 z-50",
           
           // --- MOBILE LOGIC ---
-          isMobile && !hasStarted && "relative w-full border-b p-4 sm:p-6",
-          isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-60 h-dvh w-[85vw] max-w-100 border-r p-4 sm:p-6",
+          isMobile && !hasStarted && "relative w-full border-b p-3 sm:p-5",
+          isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-60 h-dvh w-[85vw] max-w-100 border-r p-3 sm:p-5",
           
           // --- LAPTOP LOGIC ---
           !isMobile && "relative h-full border-r shadow-sm",
-          !isMobile && isSidebarOpen && "w-1/3 lg:max-w-112.5 p-6 opacity-100",
+          !isMobile && isSidebarOpen && "w-1/3 lg:max-w-112.5 p-5 opacity-100",
           !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
         )}
         onTouchStart={handleTouchStart}
@@ -821,7 +824,7 @@ export default function App() {
         }}
         transition={{ type: "spring", stiffness: 350, damping: 30 }}
       >
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4 gap-2">
           <div
             className="flex items-center gap-2 cursor-pointer group shrink"
@@ -840,16 +843,54 @@ export default function App() {
               <button 
                 title="Show Analysis Results"
                 onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-[10px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-bg-surface transition-all"
+                className="flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent rounded-lg text-[10px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-bg-surface transition-all"
               >
                 Results <ChevronRight size={14} />
               </button>
             )}
+
+            {/* Mobile About & Auth Buttons */}
+            {isMobile && (
+              <>
+                <Tooltip content="About Us" position="bottom">
+                  <button
+                    aria-label="About Us"
+                    onClick={() => setShowAboutUsModal(true)}
+                    className="p-1 rounded-lg bg-bg-panel border border-border-dim text-text-main hover:text-accent hover:border-accent/30 transition-all shadow-sm flex items-center justify-center"
+                  >
+                    <Info size={18} />
+                  </button>
+                </Tooltip>
+                
+                {user ? (
+                  <Tooltip content="Log Out" position="bottom">
+                    <button
+                      aria-label="Log Out"
+                      onClick={signOut}
+                      className="p-1 rounded-lg bg-danger/10 text-danger hover:bg-danger hover:text-bg-surface transition-all shadow-sm flex items-center justify-center"
+                    >
+                      <LogOut size={18} />
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <Tooltip content="Log In" position="bottom">
+                    <button
+                      aria-label="Log In"
+                      onClick={() => setShowAuthModal(true)}
+                      className="p-1 rounded-lg bg-accent text-bg-surface hover:scale-105 active:scale-95 transition-all shadow-sm flex items-center justify-center"
+                    >
+                      <UserIcon size={18} />
+                    </button>
+                  </Tooltip>
+                )}
+              </>
+            )}
+
             <Tooltip content="Toggle Theme" position="bottom">
               <button
                 aria-label="Toggle Theme"
                 onClick={toggleTheme}
-                className="p-2 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+                className="p-1 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
               >
                 {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
               </button>
@@ -859,7 +900,7 @@ export default function App() {
 
         {!showHistoryView ? (
           <>
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
               {/* Validation Feedback */}
               <AnimatePresence>
                 {validationError && (
@@ -867,7 +908,7 @@ export default function App() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="bg-danger/10 border-2 border-danger/20 p-4 rounded-xl mb-4"
+                    className="bg-danger/10 border-2 border-danger/20 p-3 rounded-xl mb-4"
                   >
                     <p className="text-[11px] font-black text-danger uppercase tracking-wider flex items-center gap-2">
                       <AlertCircle size={14} className="shrink-0" /> <span className="leading-relaxed">{validationError}</span>
@@ -887,7 +928,7 @@ export default function App() {
                   maxLength={100}
                   placeholder="Option A (e.g. iPhone 15 Pro Max)"
                   rows={2}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
                 <div className="text-center text-[10px] font-black uppercase text-text-dim/50 tracking-widest">
                   VS
@@ -899,7 +940,7 @@ export default function App() {
                   maxLength={100}
                   placeholder="Option B (e.g. Galaxy S24 Ultra)"
                   rows={2}
-                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
+                  className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
               </div>
               
@@ -924,14 +965,14 @@ export default function App() {
                     }}
                     placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
                     rows={4}
-                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-4 py-2.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-25"
+                    className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-25"
                   />
                 </div>
               ) : (
                 <div className="mt-4">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center justify-between mb-2">
                     My Case / Context
-                    <span className="opacity-60 font-black text-[9px] tracking-wider text-accent flex items-center gap-1 uppercase bg-accent/10 px-2 py-0.5 rounded-md">
+                    <span className="opacity-60 font-black text-[9px] tracking-wider text-accent flex items-center gap-1 uppercase bg-accent/10 px-1 py-0 rounded-md">
                       <Lock size={10} /> Member Only
                     </span>
                   </label>
@@ -943,10 +984,10 @@ export default function App() {
                       disabled
                       placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
                       rows={4}
-                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-4 py-2.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-25 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
+                      className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-3 py-1.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-25 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-bg-surface/20 backdrop-blur-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="bg-accent text-bg-surface px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+                      <span className="bg-accent text-bg-surface px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
                         <UserIcon size={12} /> Log In to Unlock
                       </span>
                     </div>
@@ -964,7 +1005,7 @@ export default function App() {
                 />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-main opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
                   🌐 Deep Web Search 
-                  <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest border border-accent/20">SLOWER</span>
+                  <span className="bg-accent/10 text-accent px-0.5 py-0 rounded text-[8px] font-black tracking-widest border border-accent/20">SLOWER</span>
                 </span>
               </label>
 
@@ -987,13 +1028,13 @@ export default function App() {
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
                         maxLength={25}
                         placeholder={`Factor ${idx + 1} (e.g. Cost)`}
-                        className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-4 py-2 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
+                        className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-3 py-1 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                       />
                       {options.length > 2 && (
                         <Tooltip content="Remove this factor" position="top">
                           <button
                             onClick={() => handleRemoveOption(idx)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-danger opacity-100 md:opacity-0 group-hover/opt:opacity-100 transition-opacity"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1005,7 +1046,7 @@ export default function App() {
                     <button
                       title="Add another comparison factor"
                       onClick={handleAddFactor}
-                      className="w-full flex items-center justify-center p-3 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
+                      className="w-full flex items-center justify-center p-2 rounded-xl border-2 border-dashed border-accent/20 text-accent hover:border-accent hover:bg-accent-muted transition-all text-xs font-bold"
                     >
                       <Plus size={16} className="mr-2" />
                       Add Option
@@ -1015,12 +1056,12 @@ export default function App() {
               </div>
             </div>
 
-            <div className="pt-4 shrink-0 mt-auto">
+            <div className="pt-3 shrink-0 mt-auto">
               <button
                 title="Calculate Decision Analysis"
                 onClick={() => handleAnalyze(selectedType)}
                 disabled={isAnyLoading || !optionA.trim() || !optionB.trim()}
-                className="w-full py-3.5 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-accent/30 transition-all flex items-center justify-center gap-2"
               >
                 {isAnyLoading ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -1034,7 +1075,7 @@ export default function App() {
                 <button 
                   title="View your saved history"
                   onClick={() => setShowHistoryView(true)}
-                  className="mt-3 w-full py-3 bg-bg-panel border border-border-dim text-accent rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 transition-colors flex justify-center items-center gap-2 shadow-sm"
+                  className="mt-3 w-full py-2 bg-bg-panel border border-border-dim text-accent rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 transition-colors flex justify-center items-center gap-2 shadow-sm"
                 >
                   <Clock size={16} /> My History
                 </button>
@@ -1042,11 +1083,11 @@ export default function App() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             <button 
               title="Return to input form"
               onClick={() => setShowHistoryView(false)}
-              className="mb-4 w-full py-3 bg-bg-panel border border-border-dim text-text-main rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 hover:text-accent transition-colors flex justify-center items-center gap-2 shrink-0 shadow-sm"
+              className="mb-4 w-full py-2 bg-bg-panel border border-border-dim text-text-main rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent/10 hover:text-accent transition-colors flex justify-center items-center gap-2 shrink-0 shadow-sm"
             >
               <ArrowLeft size={16} /> Back to Inputs
             </button>
@@ -1071,7 +1112,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-accent text-bg-surface px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border-2 border-white/10 backdrop-blur-md"
+              className="bg-accent text-bg-surface px-5 py-2 rounded-full shadow-2xl flex items-center gap-3 border-2 border-white/10 backdrop-blur-md"
             >
               <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
               <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
@@ -1091,9 +1132,16 @@ export default function App() {
 
         {/* Top Right Desktop Auth Button */}
         {!isMobile && (
-          <div className="hidden md:flex justify-end pt-6 pr-8 w-full z-40 shrink-0">
+          <div className="hidden md:flex justify-end pt-5 pr-7 w-full z-40 shrink-0 gap-4">
+            <button
+              title="About Us"
+              onClick={() => setShowAboutUsModal(true)}
+              className="px-5 py-1.5 bg-bg-panel text-text-main rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-border-dim hover:text-accent hover:border-accent/30"
+            >
+              <Info size={14} /> About Us
+            </button>
             {user ? (
-               <div className="flex items-center gap-4 bg-bg-surface/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-accent/20 shadow-lg shadow-accent/5">
+               <div className="flex items-center gap-4 bg-bg-surface/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/20 shadow-lg shadow-accent/5">
                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                    <UserIcon size={12} />
                  </div>
@@ -1106,7 +1154,7 @@ export default function App() {
                  <Tooltip content="Log Out" position="bottom">
                    <button 
                      onClick={signOut}
-                     className="ml-2 p-1.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
+                     className="ml-2 p-0.5 text-text-muted hover:text-danger bg-bg-panel rounded-full transition-colors"
                    >
                      <LogOut size={12} />
                    </button>
@@ -1116,7 +1164,7 @@ export default function App() {
                <button 
                  title="Log In or Create an Account"
                  onClick={() => setShowAuthModal(true)}
-                 className="px-6 py-2.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-accent-muted"
+                 className="px-5 py-1.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-accent-muted"
                >
                  <UserIcon size={14} /> Log In / Sign Up
                </button>
@@ -1130,10 +1178,10 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex-1 flex items-center justify-center p-6 md:p-12"
+              className="flex-1 flex items-center justify-center p-5 md:p-11"
             >
               <div className="max-w-2xl text-center flex flex-col items-center">
-                <div className="inline-block px-4 py-1.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest leading-none mb-6 shadow-lg shadow-accent/20">
+                <div className="inline-block px-3 py-0.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest leading-none mb-6 shadow-lg shadow-accent/20">
                   AI Decision Engine
                 </div>
                 <h1 className="text-5xl md:text-7xl font-black text-text-bright tracking-tighter leading-[0.85] uppercase mb-6">
@@ -1185,7 +1233,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               onScroll={handleScroll}
-              className="flex-1 flex flex-col p-1.5 md:p-2 h-full bg-bg-base overflow-y-auto custom-scrollbar"
+              className="flex-1 flex flex-col p-0.5 md:p-1 h-full bg-bg-base overflow-y-auto custom-scrollbar"
             >
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
                   <div className="space-y-3">
@@ -1194,12 +1242,12 @@ export default function App() {
                       <button
                         aria-label="Toggle Theme"
                         onClick={toggleTheme}
-                        className="p-1 rounded-md bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+                        className="p-0 rounded-md bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
                       >
                         {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
                       </button>
                     </Tooltip>
-                    <span className="px-3 py-1 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
+                    <span className="px-2 py-0 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
                       {selectedType.replace("-", " ")} Mode
                     </span>
                     <button
@@ -1215,7 +1263,7 @@ export default function App() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 sm:flex bg-accent-muted p-1 rounded-2xl border-2 border-accent/10 shadow-sm gap-1">
+                <div className="grid grid-cols-2 sm:flex bg-accent-muted p-0 rounded-2xl border-2 border-accent/10 shadow-sm gap-1">
                   <TypeTab
                     active={selectedType === "pros-cons"}
                     onClick={() => handleAnalyze("pros-cons")}
@@ -1240,8 +1288,8 @@ export default function App() {
                 </div>
 
               <div className="flex-1 bg-bg-surface rounded-3xl border-2 border-accent/10 flex flex-col relative shadow-[0_20px_50px_rgba(117,81,57,0.1)] min-h-[min-content]">
-                <div className="flex justify-between items-center p-1 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
-                  <div className="pl-0.5 pr-1 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                <div className="flex justify-between items-center p-0 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
+                  <div className="pl-0 pr-0 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
                     {selectedType === "pros-cons" && "Pros & Cons"}
                     {selectedType === "comparison" && "Comparison"}
                     {selectedType === "swot" && "SWOT"}
@@ -1251,7 +1299,7 @@ export default function App() {
                     <Tooltip content={isSidebarOpen ? "Hide" : "Input"} position="bottom">
                       <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="px-1.5 py-1 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center justify-center gap-1 shadow-sm"
+                        className="px-0.5 py-0 rounded-md border bg-bg-panel text-accent border-accent/20 hover:bg-accent/10 transition-all flex items-center justify-center gap-1 shadow-sm"
                       >
                         <PanelLeft size={12} className={cn("transition-transform duration-300", !isSidebarOpen && "rotate-180")} />
                         <span className="text-[8px] font-black uppercase tracking-widest">
@@ -1264,7 +1312,7 @@ export default function App() {
                       <button
                         onClick={() => setIsSideBySide(!isSideBySide)}
                         className={cn(
-                          "px-1.5 py-1 rounded-md border transition-all flex items-center gap-1 shadow-sm",
+                          "px-0.5 py-0 rounded-md border transition-all flex items-center gap-1 shadow-sm",
                           isSideBySide 
                             ? "bg-accent text-bg-surface border-accent/20" 
                             : "bg-bg-panel text-accent border-accent/20 hover:bg-accent/10"
@@ -1280,7 +1328,7 @@ export default function App() {
                     <Tooltip content="Copy to clipboard" position="bottom">
                       <button
                         onClick={handleCopy}
-                        className="px-1.5 py-1 rounded-md bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-1 group shadow-sm"
+                        className="px-0.5 py-0 rounded-md bg-accent text-bg-surface hover:brightness-110 transition-all flex items-center gap-1 group shadow-sm"
                       >
                         {copied ? (
                           <>
@@ -1301,7 +1349,7 @@ export default function App() {
                 <div 
                   className={cn(
                   "flex-1 rounded-b-3xl overflow-hidden",
-                  isSideBySide ? "p-0.5 md:p-2" : "p-2 md:p-6"
+                  isSideBySide ? "p-0 md:p-1" : "p-1 md:p-5"
                 )}>
                   <LoaderSkeleton 
                     isDark={theme === 'dark'} 
@@ -1325,7 +1373,7 @@ export default function App() {
                       )
                     ) : (
                        !isCurrentTypeLoading && (
-                         <div className="text-center opacity-20 py-10 font-black uppercase tracking-widest">Select an analysis type to begin</div>
+                         <div className="text-center opacity-20 py-9 font-black uppercase tracking-widest">Select an analysis type to begin</div>
                        )
                     )}
                   </div>
@@ -1343,7 +1391,7 @@ export default function App() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               onClick={scrollToTop}
-              className="absolute bottom-6 right-6 z-50 p-3 bg-accent text-bg-surface rounded-full shadow-2xl shadow-accent/40 hover:scale-110 active:scale-95 transition-transform"
+              className="absolute bottom-6 right-6 z-50 p-2 bg-accent text-bg-surface rounded-full shadow-2xl shadow-accent/40 hover:scale-110 active:scale-95 transition-transform"
               title="Scroll to top"
             >
               <ArrowUp size={20} />

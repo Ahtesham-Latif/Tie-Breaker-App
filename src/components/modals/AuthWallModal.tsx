@@ -8,14 +8,14 @@ export function AuthWallModal({ onClose, onAuthenticate }: { onClose: () => void
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: -20, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-bg-surface border-4 border-accent rounded-[2rem] p-8 md:p-12 max-w-lg w-full shadow-[0_20px_50px_rgba(117,81,57,0.4)] relative overflow-hidden text-center"
+        className="bg-bg-surface border-4 border-accent rounded-[2rem] p-7 md:p-11 max-w-lg w-full shadow-[0_20px_50px_rgba(117,81,57,0.4)] relative overflow-hidden text-center"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-accent to-accent-muted" />
         
@@ -36,7 +36,7 @@ export function AuthWallModal({ onClose, onAuthenticate }: { onClose: () => void
             onClick={onAuthenticate}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full py-4 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group"
+            className="w-full py-3 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group"
           >
             Create Free Account
           </motion.button>

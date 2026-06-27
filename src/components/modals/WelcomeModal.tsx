@@ -8,14 +8,14 @@ export function WelcomeModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-md p-3"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: -20, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-bg-surface border-4 border-accent/20 rounded-4xl p-8 md:p-12 max-w-lg w-full shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden"
+        className="bg-bg-surface border-4 border-accent/20 rounded-4xl p-7 md:p-11 max-w-lg w-full shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-accent to-accent-muted" />
         
@@ -38,7 +38,7 @@ export function WelcomeModal({ onClose }: { onClose: () => void }) {
             </p>
           </div>
 
-          <div className="w-full space-y-3 text-left bg-bg-base/50 p-6 rounded-2xl border border-border-dim">
+          <div className="w-full space-y-3 text-left bg-bg-base/50 p-5 rounded-2xl border border-border-dim">
             <div className="flex items-center gap-3">
               <span className="shrink-0 w-6 h-6 rounded-full bg-accent text-bg-surface flex items-center justify-center text-xs font-black">1</span>
               <span className="text-sm font-bold text-text-main">Enter your Contenders (Option A vs B)</span>
@@ -57,7 +57,7 @@ export function WelcomeModal({ onClose }: { onClose: () => void }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onClose}
-            className="w-full py-4 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group mt-4"
+            className="w-full py-3 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group mt-4"
           >
             Let's Go <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </motion.button>
