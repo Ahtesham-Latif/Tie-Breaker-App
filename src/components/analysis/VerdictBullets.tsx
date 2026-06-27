@@ -1,19 +1,31 @@
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Zap } from "lucide-react";
 import { MarkdownText } from "../ui/MarkdownText";
+import { VerdictAnimation } from "./VerdictAnimation";
 
 export function VerdictBullets({
   data,
 }: {
-  data: { winner: string; recommendation: string; keyTakeaways: string[] };
+  data: { winner: string; recommendation: string; keyTakeaways: string[]; entities?: string[] };
 }) {
+  const [isWeighing, setIsWeighing] = useState(true);
+
+  useEffect(() => {
+    setIsWeighing(true);
+  }, [data]);
+
   return (
-    <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className="max-w-3xl mx-auto bg-accent text-bg-surface p-4 md:p-6 rounded-xl md:rounded-2xl shadow-2xl relative overflow-hidden"
-    >
+    <AnimatePresence mode="wait">
+      {isWeighing && data.winner ? (
+        <VerdictAnimation key="animation" data={data} onComplete={() => setIsWeighing(false)} />
+      ) : (
+        <motion.div
+          key="verdict"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="max-w-3xl mx-auto bg-accent text-bg-surface p-4 md:p-6 rounded-xl md:rounded-2xl shadow-2xl relative overflow-hidden"
+        >
       <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
         <Zap size={160} />
       </div>
@@ -53,6 +65,8 @@ export function VerdictBullets({
           </ul>
         </div>
       </div>
-    </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
