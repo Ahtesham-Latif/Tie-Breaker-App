@@ -68,7 +68,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
              </div>
           </div>
           
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-nowrap w-full sm:w-auto overflow-y-hidden">
              <button
                 onClick={() => setActiveTab("about")}
                 className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${activeTab === 'about' ? 'bg-accent text-bg-surface' : 'bg-transparent text-text-main hover:bg-accent/10 hover:text-accent'}`}
@@ -337,8 +337,8 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                   </div>
 
                   <div className="bg-accent/5 border-2 border-accent/20 rounded-2xl p-3 shadow-md shadow-accent/5 space-y-2">
-                    <h3 className="text-[17px] font-black uppercase tracking-widest text-accent border-b border-accent/20 pb-1 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <h3 className="text-[17px] font-black uppercase tracking-widest text-accent border-b border-accent/20 pb-1 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         Pro Plan
                         <motion.div
                           animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
@@ -357,9 +357,9 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                     <p className="text-[13px] text-text-main font-semibold leading-relaxed">
                       Pro users can enable <span className="font-bold text-accent">Private Mode</span>, which excludes their decision history and analyses from being used to improve TieBreaker. Your analyses remain available only for your personal use and account history, subject to our operational requirements.
                     </p>
-                    <div className="flex items-center justify-between gap-2 pt-2 mt-2 border-t border-accent/20">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-accent">Offer Ends In:</span>
-                      <div className="flex gap-1 font-mono text-[12px] font-bold text-text-bright">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 mt-2 border-t border-accent/20">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-accent shrink-0">Offer Ends In:</span>
+                      <div className="flex flex-wrap gap-1 font-mono text-[12px] font-bold text-text-bright">
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.days}d</span>
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.hours.toString().padStart(2, '0')}h</span>
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.minutes.toString().padStart(2, '0')}m</span>

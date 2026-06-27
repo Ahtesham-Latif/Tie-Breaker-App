@@ -23,7 +23,7 @@ export function ComparisonTable({
           <div className={cn("flex", isSideBySide ? "flex-row gap-1 md:gap-2" : "flex-col md:flex-row gap-3 md:gap-6")}>
             {data.comparison.map((opt, oIdx) => (
               <div key={oIdx} className={cn(
-                "flex-1 bg-bg-surface border-2 border-accent/5 shadow-sm",
+                "flex-1 min-w-0 bg-bg-surface border-2 border-accent/5 shadow-sm",
                 isSideBySide ? "rounded-lg p-1" : "rounded-lg md:rounded-xl p-2 md:p-3"
               )}>
                 <span className="text-[10px] font-black uppercase text-text-dim/70 mb-2 block tracking-wider">

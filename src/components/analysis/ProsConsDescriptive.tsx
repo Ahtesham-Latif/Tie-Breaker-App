@@ -22,7 +22,7 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
             <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-bg-surface shadow-lg">
               <CheckCircle2 size={20} />
             </div>
-            <h2 className={cn("font-black text-text-bright tracking-tighter uppercase", isSideBySide ? "text-lg md:text-xl" : "text-2xl")}>
+            <h2 className={cn("font-black text-text-bright tracking-tighter uppercase break-words min-w-0 flex-1", isSideBySide ? "text-lg md:text-xl" : "text-2xl")}>
               {opt.optionName}
             </h2>
           </div>

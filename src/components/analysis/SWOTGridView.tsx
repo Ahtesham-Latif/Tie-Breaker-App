@@ -8,7 +8,7 @@ export function SWOTGridView({ data, isSideBySide }: { data: any[]; isSideBySide
       {data.map((opt, i) => (
         <div key={i} className="space-y-8">
           <div className="flex items-center gap-4">
-            <div className="px-6 py-2 bg-accent text-bg-surface font-black rounded-full text-sm uppercase tracking-widest shadow-lg">
+            <div className="px-6 py-2 bg-accent text-bg-surface font-black rounded-3xl text-sm uppercase tracking-widest shadow-lg shrink break-words min-w-0 text-center">
               {opt.optionName}
             </div>
             <div className="flex-1 h-1 bg-accent/10 rounded-full" />
