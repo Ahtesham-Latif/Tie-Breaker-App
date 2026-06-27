@@ -1,4 +1,5 @@
 # 🧠 The TieBreaker
+[![Build and deploy Node.js app to Azure Web App](https://github.com/Ahtesham-Latif/Tie-Breaker-App/actions/workflows/main_tie-breaker.yml/badge.svg)](https://github.com/Ahtesham-Latif/Tie-Breaker-App/actions/workflows/main_tie-breaker.yml)
 
 > **Stop guessing. Start deciding.**  
 > *A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.*
@@ -69,7 +70,7 @@ Getting a definitive answer is a simple 3-step process:
 2. **Add Your Factors (Optional):** Tell the engine *how* to judge them (e.g., Cost, Durability, Customer Support). If you leave this blank, the engine will automatically select the best factors for you.
 3. **Plead "Your Case" (Member Only):** In 500 characters or less, tell the AI *who you are*. ("I'm a broke college student who needs a laptop for video editing..."). This completely personalizes the Final Verdict. You must create a free account to unlock this engine!
 
-*(For a full breakdown of the UI, check out our newly added [User Manual](USER_MANUAL.md)!)*
+*(For a full breakdown of the UI, check out our newly added [User Manual](USER_MANUAL.md) or click the **About Us** button in the app to meet the creator!)*
 
 ---
 
@@ -99,10 +100,14 @@ flowchart LR
     %% Client Access Control
     %% =========================
     FE --> G{Authenticated?}
-    G -- Yes --> API
-    G -- No --> L{Free local usage remaining?}
-    L -- Yes --> API
-    L -- No --> WALL[Show Auth Wall / Upgrade Prompt]
+    G -- Yes --> PRO{Pro Plan?}
+    PRO -- Yes --> API
+    PRO -- No --> FREE{< 15 Free Ties?}
+    FREE -- Yes --> API
+    FREE -- No --> UPGRADE[Show Pro Upgrade]
+    G -- No --> GUEST{< 3 Guest Uses?}
+    GUEST -- Yes --> API
+    GUEST -- No --> WALL[Show Auth Wall]
 
     %% =========================
     %% Backend Orchestration
@@ -172,6 +177,8 @@ The TieBreaker relies heavily on:
 
 ## 🧠 Meet Melinda: The Decision Intelligence Engine
 
+![Melinda - The Decision Intelligence Engine](Pictures/Melinda.png)
+
 The backend cognitive engine of TieBreaker is **Melinda**, a specialized decision agent hosted on Azure AI Foundry. Rather than functioning as an open-ended conversationalist, Melinda operates as a strict analytical compiler—transforming ambiguous, emotionally charged dilemmas into objective, strictly-typed data artifacts.
 
 ### Engine Specifications & Tooling
@@ -233,6 +240,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 * **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
 * **Premium Fluid AI Orb & Domain-Aware Quotes:** An Apple/OpenAI-style continuous progress animation pairs with an intelligent text parser that feeds curated, domain-specific quotes (Tech, Business, Career, etc.) dynamically based on your `My Case` constraints while you wait.
 * **Native Desktop Scrolling:** Flawlessly transitions between side-by-side data grids and vertical stacked views, leveraging native window scrolling for an incredibly smooth experience across both desktop trackpads and mobile devices.
+* **Mobile-First Accessibility:** Minimalist icon-only mobile buttons and edge-handles gracefully expand to reveal descriptive labels upon interaction, keeping the UI perfectly clean without sacrificing usability.
 * **Theme Adaptability:** Full Dark/Light structural synchronization.
 
 ### UX Messaging Architecture & Quotas
