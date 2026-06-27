@@ -862,12 +862,13 @@ export default function App() {
       {isMobile && !isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(true)}
-          className="fixed left-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-bg-surface border-y border-r border-border-dim rounded-r-xl z-40 flex items-center justify-center cursor-pointer shadow-lg group hover:w-8 transition-all duration-300 flex-col gap-1"
+          className="fixed left-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-bg-surface border-y border-r border-border-dim rounded-r-xl z-40 flex items-center justify-center cursor-pointer shadow-lg group hover:w-8 hover:h-28 transition-all duration-300 flex-col gap-1 overflow-hidden"
           title="Open Inputs"
         >
-          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
-          <div className="w-1 h-3 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
-          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:bg-accent transition-colors" />
+          <span className="hidden group-hover:block -rotate-90 text-[8px] font-black tracking-widest text-accent uppercase whitespace-nowrap">Edit</span>
+          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:hidden transition-colors" />
+          <div className="w-1 h-3 bg-border-dim rounded-full group-hover:hidden transition-colors" />
+          <div className="w-1 h-1.5 bg-border-dim rounded-full group-hover:hidden transition-colors" />
         </div>
       )}
 
@@ -898,91 +899,100 @@ export default function App() {
         transition={{ type: "spring", stiffness: 350, damping: 30 }}
       >
         <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
-          <div className="flex items-center justify-between mb-4 gap-2">
-          <div
-            className="flex items-center gap-2 cursor-pointer group shrink"
-            onClick={reset}
-          >
-            <div className="w-8 h-8 shrink-0 bg-accent rounded-lg flex items-center justify-center text-bg-surface rotate-12 transition-transform group-hover:rotate-0 shadow-lg shadow-accent/20">
-              <ScaleIcon size={20} />
-            </div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tighter text-text-bright uppercase leading-tight">
-              THE TIE<span className="text-accent">BREAKER</span>
-            </span>
-          </div>
+          <div className="flex flex-col gap-3 mb-4 shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex items-center gap-2 cursor-pointer group shrink"
+                  onClick={reset}
+                >
+                  <div className="w-8 h-8 shrink-0 bg-accent rounded-lg flex items-center justify-center text-bg-surface rotate-12 transition-transform group-hover:rotate-0 shadow-lg shadow-accent/20">
+                    <ScaleIcon size={20} />
+                  </div>
+                  <span className="font-extrabold text-lg sm:text-xl tracking-tighter text-text-bright uppercase leading-tight flex items-center">
+                    THE TIE<span className="text-accent">BREAKER</span>
+                  </span>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {isMobile && hasStarted && (
-              <button 
-                title="Show Analysis Results"
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent rounded-lg text-[10px] font-black uppercase tracking-widest border border-accent/20 hover:bg-accent hover:text-bg-surface transition-all"
-              >
-                Results <ChevronRight size={14} />
-              </button>
-            )}
-
-            {/* Mobile About & Auth Buttons */}
-            {isMobile && (
-              <>
-                <Tooltip content="About Us" position="bottom">
-                  <button
+              <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <Tooltip content="Meet The Creator" position="bottom">
+                  <motion.button
+                    initial={{ scale: 1, x: -10, opacity: 0 }}
+                    animate={{ 
+                      scale: [1, 1.1, 1, 1.1, 1, 1.1, 1],
+                      rotate: [0, -5, 5, -5, 5, -5, 0],
+                      x: 0,
+                      opacity: 1
+                    }}
+                    transition={{ duration: 4, ease: "easeInOut" }}
                     aria-label="About Us"
                     onClick={() => setShowAboutUsModal(true)}
-                    className="p-1 rounded-lg bg-bg-panel border border-border-dim text-text-main hover:text-accent hover:border-accent/30 transition-all shadow-sm flex items-center justify-center"
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm flex items-center justify-center gap-1.5 group shrink-0"
                   >
-                    <Info size={18} />
-                  </button>
+                    <Info size={16} />
+                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest whitespace-nowrap">About Us</span>
+                  </motion.button>
                 </Tooltip>
                 
-                {user ? (
-                  <div className="flex items-center gap-2">
-                    {userProfile?.plan === 'pro' ? (
-                      <div className="px-2 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-lg flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.15)] select-none">
-                        <Crown size={14} className="animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-widest mt-[1px]">Pro</span>
-                      </div>
-                    ) : (
-                      <div className="px-2 py-1 bg-text-muted/10 text-text-muted border border-border-dim rounded-lg flex items-center gap-1.5 select-none">
-                        <UserIcon size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-widest mt-[1px]">Free</span>
-                      </div>
-                    )}
-                    <Tooltip content="Log Out" position="bottom">
+                {isMobile && (
+                  user ? (
+                    <div className="flex items-center gap-2">
+                      {userProfile?.plan === 'pro' ? (
+                        <div className="px-2 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-lg flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.15)] select-none">
+                          <Crown size={14} className="animate-pulse" />
+                          <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest mt-[1px]">Pro</span>
+                        </div>
+                      ) : (
+                        <div className="px-2 py-1 bg-text-muted/10 text-text-muted border border-border-dim rounded-lg flex items-center gap-1.5 select-none">
+                          <UserIcon size={14} />
+                          <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest mt-[1px]">Free</span>
+                        </div>
+                      )}
                       <button
-                        aria-label="Log Out"
                         onClick={() => setShowLogoutModal(true)}
-                        className="p-1 rounded-lg bg-accent-muted text-accent hover:bg-danger/20 hover:text-danger transition-all shadow-sm flex items-center justify-center"
+                        className="p-1.5 text-text-muted hover:text-red-500 transition-colors"
+                        title="Sign Out"
                       >
-                        <LogOut size={18} />
+                        <LogOut size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <Tooltip content="Log In" position="bottom">
+                      <button
+                        aria-label="Log In"
+                        onClick={() => setShowAuthModal(true)}
+                        className="p-1.5 rounded-lg bg-accent text-bg-surface hover:scale-105 active:scale-95 transition-all shadow-sm flex items-center justify-center"
+                      >
+                        <UserIcon size={18} />
                       </button>
                     </Tooltip>
-                  </div>
-                ) : (
-                  <Tooltip content="Log In" position="bottom">
-                    <button
-                      aria-label="Log In"
-                      onClick={() => setShowAuthModal(true)}
-                      className="p-1 rounded-lg bg-accent text-bg-surface hover:scale-105 active:scale-95 transition-all shadow-sm flex items-center justify-center"
-                    >
-                      <UserIcon size={18} />
-                    </button>
-                  </Tooltip>
+                  )
                 )}
-              </>
-            )}
+              </div>
+            </div>
 
-            <Tooltip content="Toggle Theme" position="bottom">
+            <div className="flex items-center gap-3">
               <button
                 aria-label="Toggle Theme"
                 onClick={toggleTheme}
-                className="p-1 rounded-lg bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
+                className="px-3 py-1.5 rounded-full bg-bg-panel border border-border-dim text-text-main hover:text-accent hover:border-accent/30 transition-all shadow-sm flex items-center gap-1.5 shrink-0 group"
               >
-                {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+                {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+                <span className="text-[10px] font-black uppercase tracking-widest">Theme</span>
               </button>
-            </Tooltip>
+
+              {isMobile && hasStarted && (
+                <button 
+                  title="Show Analysis Results"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-accent/90 transition-all group shrink-0"
+                >
+                  <span className="inline">Show</span> Results <ChevronRight size={14} />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
         {!showHistoryView ? (
           <>
@@ -1238,16 +1248,9 @@ export default function App() {
 
         {/* Top Right Desktop Auth Button */}
         {!isMobile && (
-          <div className="hidden md:flex justify-end pt-5 pr-7 w-full z-40 shrink-0 gap-4">
-            <button
-              title="About Us"
-              onClick={() => setShowAboutUsModal(true)}
-              className="px-5 py-1.5 bg-bg-panel text-text-main rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-border-dim hover:text-accent hover:border-accent/30"
-            >
-              <Info size={14} /> About Us
-            </button>
-            {user ? (
-               <div className={cn(
+           <div className="hidden md:flex justify-end pt-5 pr-7 w-full z-40 shrink-0 gap-4">
+             {user ? (
+                <div className={cn(
                  "flex items-center gap-4 backdrop-blur-md px-4 py-1.5 rounded-full border shadow-lg transition-colors",
                  userProfile?.plan === 'pro' 
                    ? "bg-amber-500/10 border-amber-500/30 shadow-amber-500/10"
@@ -1360,15 +1363,6 @@ export default function App() {
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
                   <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Tooltip content="Toggle Theme" position="bottom">
-                      <button
-                        aria-label="Toggle Theme"
-                        onClick={toggleTheme}
-                        className="p-0 rounded-md bg-accent-muted text-accent hover:bg-accent hover:text-bg-surface transition-all shadow-sm"
-                      >
-                        {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
-                      </button>
-                    </Tooltip>
                     <span className="px-2 py-0 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
                       {selectedType.replace("-", " ")} Mode
                     </span>
