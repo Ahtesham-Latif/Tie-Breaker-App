@@ -178,8 +178,8 @@ app.post('/api/analyze', async (req, res) => {
 
     // 2. Request a scoped access token specifically for Azure AI services
     // (Credential initialization was moved to startup scope)
-    const token = await getAzureToken();
-    if (!token) {
+    const azureToken = await getAzureToken();
+    if (!azureToken) {
       throw new Error("Failed to authenticate with Azure AI services. (Error Code: ERR-03)");
     }
 
@@ -247,7 +247,7 @@ app.post('/api/analyze', async (req, res) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // Injects the secure Azure token
+            "Authorization": `Bearer ${azureToken}` // Injects the secure Azure token
           },
           body: JSON.stringify({
             input: messageContent,
