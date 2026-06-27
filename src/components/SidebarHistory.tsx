@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, Loader2, LogOut, User as UserIcon } from 'lucide-react';
+import { Clock, Loader2, LogOut, User as UserIcon, Trash2, EyeOff, Shield } from 'lucide-react';
 import { supabase } from '../db/supabase';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
+import { cn } from '../lib/utils';
 
 interface SidebarHistoryProps {
   onLoadDecision: (decisionData: any) => void;
@@ -14,15 +15,34 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
   const { user } = useAuth();
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPro, setIsPro] = useState(false);
+  const [privacyMode, setPrivacyMode] = useState(false);
+  const [tiesCount, setTiesCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     
     const fetchHistory = async () => {
       setLoading(true);
+      
+      // Fetch profile to check Pro status, privacy mode, and usage limit
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan, privacy_mode, ties_count')
+        .eq('id', user.id)
+        .single();
+        
+      if (profile) {
+        setIsPro(profile.plan === 'pro');
+        setPrivacyMode(!!profile.privacy_mode);
+        setTiesCount(profile.ties_count || 0);
+      }
+
       const { data, error } = await supabase
         .from('decisions')
         .select('*')
+        .eq('user_id', user.id)
+        .eq('is_hidden', false)
         .order('created_at', { ascending: false });
         
       if (!error && data) {
@@ -34,21 +54,51 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
     fetchHistory();
   }, [user]);
 
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent loading the decision
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+    
+    await supabase
+      .from('decisions')
+      .update({ is_hidden: true })
+      .eq('id', id);
+  };
+
+  const togglePrivacyMode = async () => {
+    if (!isPro) return;
+    const newMode = !privacyMode;
+    setPrivacyMode(newMode);
+    
+    await supabase
+      .from('profiles')
+      .update({ privacy_mode: newMode })
+      .eq('id', user.id);
+  };
+
   if (!user) return null;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <div className="flex md:hidden items-center justify-between mb-6 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent shadow-inner">
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center shadow-inner",
+            isPro ? "bg-amber-500/20 text-amber-500" : "bg-accent/10 text-accent"
+          )}>
             <UserIcon size={16} />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-text-bright truncate max-w-[150px]">
+            <span className={cn(
+              "text-xs font-bold truncate max-w-[150px]",
+              isPro ? "text-amber-600 dark:text-amber-400" : "text-text-bright"
+            )}>
               {user.email?.split('@')[0]}
             </span>
-            <span className="text-[9px] font-black uppercase tracking-wider text-accent opacity-80">
-              Pro Member
+            <span className={cn(
+              "text-[9px] font-black uppercase tracking-wider opacity-80",
+              isPro ? "text-amber-500" : "text-accent"
+            )}>
+              {isPro ? "Pro Member" : `${tiesCount}/15 Free Ties`}
             </span>
           </div>
         </div>
@@ -61,9 +111,25 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
         </button>
       </div>
 
-      <h3 className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center gap-2 mb-3 shrink-0">
-        <Clock size={14} /> My History
-      </h3>
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <h3 className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center gap-2">
+          <Clock size={14} /> My History
+        </h3>
+        {isPro && (
+          <button
+            onClick={togglePrivacyMode}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+              privacyMode 
+                ? 'bg-accent text-bg-surface shadow-md shadow-accent/20' 
+                : 'bg-bg-panel text-text-muted hover:text-text-main border border-border-dim'
+            }`}
+            title={privacyMode ? "Privacy Mode On: New decisions are hidden" : "Privacy Mode Off: Saving decisions"}
+          >
+            {privacyMode ? <Shield size={12} /> : <EyeOff size={12} />}
+            {privacyMode ? 'Privacy On' : 'Privacy Off'}
+          </button>
+        )}
+      </div>
 
       <div className="flex-1 relative min-h-[200px]">
         <div className="absolute inset-0 overflow-y-auto custom-scrollbar pr-1 pb-3 space-y-2">
@@ -77,20 +143,33 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
             </p>
           ) : (
             history.map((item) => (
-              <motion.button
+              <div
                 key={item.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onLoadDecision(item)}
-                className="w-full text-left p-2 rounded-xl bg-bg-panel border-2 border-transparent hover:border-accent/30 transition-all group flex flex-col gap-1 shadow-sm"
+                className="w-full relative group flex"
               >
-                <div className="text-xs font-bold text-text-main truncate group-hover:text-accent transition-colors">
-                  {item.query}
-                </div>
-                <div className="text-[10px] text-text-muted opacity-70">
-                  {new Date(item.created_at).toLocaleDateString()}
-                </div>
-              </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => onLoadDecision(item)}
+                  className="flex-1 text-left p-2 rounded-xl bg-bg-panel border-2 border-transparent hover:border-accent/30 transition-all flex flex-col gap-1 shadow-sm pr-10"
+                >
+                  <div className="text-xs font-bold text-text-main truncate group-hover:text-accent transition-colors">
+                    {item.query}
+                  </div>
+                  <div className="text-[10px] text-text-muted opacity-70">
+                    {new Date(item.created_at).toLocaleDateString()}
+                  </div>
+                </motion.button>
+                {isPro && (
+                  <button
+                    onClick={(e) => handleDelete(e, item.id)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-danger opacity-0 group-hover:opacity-100 hover:bg-danger/10 rounded-lg transition-all"
+                    title="Delete from history"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
             ))
           )}
         </div>

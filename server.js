@@ -357,8 +357,14 @@ app.post('/api/analyze', async (req, res) => {
       throw new Error('I could not process that request. Please ensure your topic is clear and try again. (Error Code: ERR-05)');
     }
     // 6. JSON Sanitization Pipeline
-    // Strip out Markdown formatting (e.g., ```json ... ```)
-    const cleanJson = finalRawText.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, "$1").trim();
+    let cleanJson = finalRawText;
+    
+    // Extract everything between the first { and last } to ignore AI conversational filler
+    const firstBrace = cleanJson.indexOf('{');
+    const lastBrace = cleanJson.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+    }
 
     // Aggressive sanitization using Regex
     const sanitized = cleanJson

@@ -19,7 +19,11 @@ import {
   Check, 
   PanelLeft,
   ChevronRight,
-  ArrowUp
+  ArrowUp,
+  ArrowLeft,
+  Crown,
+  EyeOff,
+  Shield
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
@@ -35,12 +39,13 @@ import {
   Tooltip,
   SurveyModal,
   AboutUsModal,
-  ConfirmLogoutModal
+  ConfirmLogoutModal,
+  PricingModal
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./db/supabase";
-import { User as UserIcon, LogOut, Clock, ArrowLeft, Lock, Info } from "lucide-react";
+import { User as UserIcon, LogOut, Clock, Lock, Info } from "lucide-react";
 
 
 // --- AI Service ---
@@ -226,6 +231,7 @@ export default function App() {
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [showAboutUsModal, setShowAboutUsModal] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -238,42 +244,48 @@ export default function App() {
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [analyzingCase, setAnalyzingCase] = useState<string>("");
+  const [userProfile, setUserProfile] = useState<{ plan: string; privacy_mode: boolean; ties_count: number } | null>(null);
   
   const lastScrollY = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollTopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const currentScrollY = e.currentTarget.scrollTop;
-    
-    if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-      // Scrolling down
-      setIsScrollingDown(true);
-      setShowScrollTop(false);
-      if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
-    } else if (currentScrollY < lastScrollY.current) {
-      // Scrolling up
-      setIsScrollingDown(false);
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      const currentScrollY = window.scrollY;
       
-      // Show button if we're far enough down
-      if (currentScrollY > 200) {
-        setShowScrollTop(true);
-        if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
-        scrollTopTimeoutRef.current = setTimeout(() => {
-          setShowScrollTop(false);
-        }, 2000);
-      } else {
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // Scrolling down
+        setIsScrollingDown(true);
         setShowScrollTop(false);
         if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up
+        setIsScrollingDown(false);
+        
+        // Show button if we're far enough down
+        if (currentScrollY > 200) {
+          setShowScrollTop(true);
+          if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+          scrollTopTimeoutRef.current = setTimeout(() => {
+            setShowScrollTop(false);
+          }, 2000);
+        } else {
+          setShowScrollTop(false);
+          if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
+        }
       }
-    }
-    
-    lastScrollY.current = currentScrollY;
-  };
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleWindowScroll);
+    return () => window.removeEventListener('scroll', handleWindowScroll);
+  }, []);
 
   const scrollToTop = () => {
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setShowScrollTop(false);
     if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
   };
@@ -283,6 +295,24 @@ export default function App() {
       if (scrollTopTimeoutRef.current) clearTimeout(scrollTopTimeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('plan, privacy_mode, ties_count')
+        .eq('id', user.id)
+        .single()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setUserProfile(data as any);
+          }
+        });
+    } else {
+      setUserProfile(null);
+    }
+  }, [user]);
+
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -427,18 +457,27 @@ export default function App() {
       return;
     }
 
+    let userPrivacyMode = userProfile?.privacy_mode || false;
+    let isPro = userProfile?.plan === 'pro';
     if (user) {
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('plan, ties_count')
+          .select('plan, ties_count, privacy_mode')
           .eq('id', user.id)
           .single();
           
-        if (profile && profile.plan === 'free' && profile.ties_count >= 15) {
-          setValidationError("You've reached your limit of 15 ties on the free plan. We hope you've enjoyed the insights! (Err: VAL-PLAN-01)");
-          setIsSidebarOpen(true);
-          return;
+        if (profile) {
+          userPrivacyMode = !!profile.privacy_mode;
+          isPro = profile.plan === 'pro';
+          // Sync local state
+          setUserProfile(profile as any);
+          
+          if (profile.plan === 'free' && profile.ties_count >= 15) {
+            setShowPricingModal(true);
+            setIsSidebarOpen(true);
+            return;
+          }
         }
       } catch (err) {
         console.warn("Failed to check plan limits", err);
@@ -539,7 +578,8 @@ export default function App() {
                 query: decisionQuery,
                 factors: validFactors,
                 my_case: myCase,
-                [columnName]: structuredData
+                [columnName]: structuredData,
+                is_hidden: userPrivacyMode
               }).then(() => {
                 supabase.from('profiles').select('ties_count').eq('id', user.id).single().then(({ data: profile }) => {
                   if (profile && profile.ties_count >= 2) {
@@ -742,9 +782,8 @@ export default function App() {
   return (
     <div
       className={cn(
-        "flex h-dvh w-full overflow-hidden transition-colors duration-500 text-text-main bg-bg-base font-sans selection:bg-accent/20 selection:text-accent",
-        theme === "dark" ? "dark bg-bg-base" : "bg-bg-base",
-        !isMobile && "md:h-screen md:overflow-hidden", // Locked height only on desktop
+        "flex min-h-dvh w-full transition-colors duration-500 text-text-main bg-bg-base font-sans selection:bg-accent/20 selection:text-accent",
+        theme === "dark" ? "dark bg-bg-base" : "bg-bg-base"
       )}
     >
       <AnimatePresence>
@@ -779,6 +818,29 @@ export default function App() {
             onCancel={() => setShowLogoutModal(false)}
           />
         )}
+        {showPricingModal && (
+          <PricingModal 
+            onClose={() => setShowPricingModal(false)}
+            onClaim={async () => {
+              if (user) {
+                // Optimistically update UI
+                setUserProfile(prev => prev ? { ...prev, plan: 'pro' } : null);
+                setShowPricingModal(false);
+                
+                // Update DB
+                await supabase
+                  .from('profiles')
+                  .update({ plan: 'pro' })
+                  .eq('id', user.id);
+                  
+                // Re-trigger analysis immediately if they were blocked
+                // Or they can just click it again, but user said "they can go for analysis instead of showing the modal again, once claimed"
+                // The easiest way is to let them click the button again, or we can trigger it.
+                // The user said "and now they can make unlimited ties" - yes, the quota check uses `profile.plan === 'free'`.
+              }
+            }}
+          />
+        )}
       </AnimatePresence>
 
 
@@ -810,7 +872,7 @@ export default function App() {
       )}
 
       {/* Main Container */}
-      <div className="flex h-full w-full relative">
+      <div className="flex w-full relative">
 
       {/* Sidebar - Inputs */}
       <motion.aside 
@@ -822,7 +884,7 @@ export default function App() {
           isMobile && hasStarted && "fixed inset-y-0 left-0 shadow-2xl z-60 h-dvh w-[85vw] max-w-100 border-r p-3 sm:p-5",
           
           // --- LAPTOP LOGIC ---
-          !isMobile && "relative h-full border-r shadow-sm",
+          !isMobile && "sticky top-0 h-dvh border-r shadow-sm overflow-y-auto",
           !isMobile && isSidebarOpen && "w-1/3 lg:max-w-112.5 p-5 opacity-100",
           !isMobile && !isSidebarOpen && "w-0 p-0 overflow-hidden border-r-0 opacity-0"
         )}
@@ -874,15 +936,28 @@ export default function App() {
                 </Tooltip>
                 
                 {user ? (
-                  <Tooltip content="Log Out" position="bottom">
-                    <button
-                      aria-label="Log Out"
-                      onClick={() => setShowLogoutModal(true)}
-                      className="p-1.5 rounded-lg bg-bg-panel border border-border-dim text-text-main hover:text-danger hover:border-danger/30 hover:bg-danger/10 transition-all shadow-sm flex items-center justify-center"
-                    >
-                      <LogOut size={18} />
-                    </button>
-                  </Tooltip>
+                  <div className="flex items-center gap-2">
+                    {userProfile?.plan === 'pro' ? (
+                      <div className="px-2 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-lg flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.15)] select-none">
+                        <Crown size={14} className="animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest mt-[1px]">Pro</span>
+                      </div>
+                    ) : (
+                      <div className="px-2 py-1 bg-text-muted/10 text-text-muted border border-border-dim rounded-lg flex items-center gap-1.5 select-none">
+                        <UserIcon size={14} />
+                        <span className="text-[10px] font-black uppercase tracking-widest mt-[1px]">Free</span>
+                      </div>
+                    )}
+                    <Tooltip content="Log Out" position="bottom">
+                      <button
+                        aria-label="Log Out"
+                        onClick={() => setShowLogoutModal(true)}
+                        className="p-1 rounded-lg bg-accent-muted text-accent hover:bg-danger/20 hover:text-danger transition-all shadow-sm flex items-center justify-center"
+                      >
+                        <LogOut size={18} />
+                      </button>
+                    </Tooltip>
+                  </div>
                 ) : (
                   <Tooltip content="Log In" position="bottom">
                     <button
@@ -911,7 +986,7 @@ export default function App() {
 
         {!showHistoryView ? (
           <>
-            <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
               {/* Validation Feedback */}
               <AnimatePresence>
                 {validationError && (
@@ -1068,6 +1143,26 @@ export default function App() {
             </div>
 
             <div className="pt-3 shrink-0 mt-auto">
+              {userProfile?.plan === 'pro' && (
+                <div className="flex items-center justify-end mb-3">
+                  <button
+                    onClick={async () => {
+                      const newMode = !userProfile.privacy_mode;
+                      setUserProfile(prev => prev ? { ...prev, privacy_mode: newMode } : null);
+                      await supabase.from('profiles').update({ privacy_mode: newMode }).eq('id', user!.id);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      userProfile.privacy_mode 
+                        ? 'bg-accent text-bg-surface shadow-md shadow-accent/20' 
+                        : 'bg-bg-panel text-text-muted hover:text-text-main border border-border-dim'
+                    }`}
+                    title={userProfile.privacy_mode ? "Privacy Mode On: New decisions are hidden" : "Privacy Mode Off: Saving decisions"}
+                  >
+                    {userProfile.privacy_mode ? <Shield size={14} /> : <EyeOff size={14} />}
+                    {userProfile.privacy_mode ? 'Privacy On' : 'Privacy Off'}
+                  </button>
+                </div>
+              )}
               <button
                 title="Calculate Decision Analysis"
                 onClick={() => handleAnalyze(selectedType)}
@@ -1138,8 +1233,7 @@ export default function App() {
       {/* Main Content - Results */}
       <main className={cn(
         "flex-1 flex flex-col min-w-0 bg-bg-base relative z-10",
-        isMobile && !hasStarted && "hidden", // On mobile, hide results area until started
-        !isMobile && "overflow-hidden"
+        isMobile && !hasStarted && "hidden" // On mobile, hide results area until started
       )}>
 
         {/* Top Right Desktop Auth Button */}
@@ -1153,15 +1247,33 @@ export default function App() {
               <Info size={14} /> About Us
             </button>
             {user ? (
-               <div className="flex items-center gap-4 bg-bg-surface/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/20 shadow-lg shadow-accent/5">
-                 <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+               <div className={cn(
+                 "flex items-center gap-4 backdrop-blur-md px-4 py-1.5 rounded-full border shadow-lg transition-colors",
+                 userProfile?.plan === 'pro' 
+                   ? "bg-amber-500/10 border-amber-500/30 shadow-amber-500/10"
+                   : "bg-bg-surface/80 border-accent/20 shadow-accent/5"
+               )}>
+                 <div className={cn(
+                   "w-6 h-6 rounded-full flex items-center justify-center",
+                   userProfile?.plan === 'pro'
+                     ? "bg-amber-500/20 text-amber-500"
+                     : "bg-accent/10 text-accent"
+                 )}>
                    <UserIcon size={12} />
                  </div>
                  <div className="flex flex-col">
-                   <span className="text-[10px] font-black uppercase tracking-widest text-text-bright leading-none">
+                   <span className={cn(
+                     "text-[10px] font-black uppercase tracking-widest leading-none",
+                     userProfile?.plan === 'pro' ? "text-amber-600 dark:text-amber-400" : "text-text-bright"
+                   )}>
                      {user.email?.split('@')[0]}
                    </span>
-                   <span className="text-[8px] font-bold text-accent uppercase tracking-widest mt-0.5">Member Only</span>
+                   <span className={cn(
+                     "text-[8px] font-bold uppercase tracking-widest mt-0.5",
+                     userProfile?.plan === 'pro' ? "text-amber-500" : "text-accent"
+                   )}>
+                     {userProfile?.plan === 'pro' ? 'Pro Member' : `${userProfile?.ties_count || 0}/15 Free Ties`}
+                   </span>
                  </div>
                  <Tooltip content="Log Out" position="bottom">
                    <button 
@@ -1190,7 +1302,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex-1 flex items-center justify-center p-5 md:p-11"
+              className="flex-1 flex items-center justify-center p-5 md:p-11 min-h-[80vh]"
             >
               <div className="max-w-2xl text-center flex flex-col items-center">
                 <div className="inline-block px-3 py-0.5 bg-accent text-bg-surface rounded-full text-[10px] font-black uppercase tracking-widest leading-none mb-6 shadow-lg shadow-accent/20">
@@ -1240,12 +1352,10 @@ export default function App() {
           ) : (
             <motion.div
               key="result"
-              ref={scrollContainerRef}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              onScroll={handleScroll}
-              className="flex-1 flex flex-col p-0.5 md:p-1 h-full bg-bg-base overflow-y-auto custom-scrollbar"
+              className="flex-1 flex flex-col p-4 md:p-8 bg-bg-base"
             >
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
                   <div className="space-y-3">
@@ -1299,7 +1409,7 @@ export default function App() {
                   </div>
                 </div>
 
-              <div className="flex-1 bg-bg-surface rounded-3xl border-2 border-accent/10 flex flex-col relative shadow-[0_20px_50px_rgba(117,81,57,0.1)] min-h-[min-content]">
+              <div className="grow shrink-0 bg-bg-surface rounded-3xl border-2 border-accent/10 relative shadow-[0_20px_50px_rgba(117,81,57,0.1)]">
                 <div className="flex justify-between items-center p-0 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
                   <div className="pl-0 pr-0 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
                     {selectedType === "pros-cons" && "Pros & Cons"}
@@ -1360,7 +1470,7 @@ export default function App() {
 
                 <div 
                   className={cn(
-                  "flex-1 rounded-b-3xl overflow-hidden",
+                  "rounded-b-3xl flex flex-col",
                   isSideBySide ? "p-0 md:p-1" : "p-1 md:p-5"
                 )}>
                   <LoaderSkeleton 

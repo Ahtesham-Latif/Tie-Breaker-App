@@ -93,9 +93,10 @@ The TieBreaker is free to try, but creating an account unlocks powerful persiste
 * **How it works:** If you are logged in, every dilemma you generate is securely saved to a cloud database. You can click the **My History** button on the left sidebar to open your history.
 * **Instant Retrieval:** When you click an old decision, our caching layer instantly pulls the payload without triggering a new AI generation—preventing wait times and saving your quota.
 
-### The Free Tier (Usage Limits)
-* **Anonymous Users (Guests):** You can generate up to 2 full AI decisions. After that, you will hit an Auth Wall asking you to create a free account.
-* **Registered Users:** Enjoy unlimited TieBreaker decision generation, fully backed by cloud history persistence.
+### The Free Tier & Pro Features (Usage Limits)
+* **Anonymous Users (Guests):** You can generate up to 3 full AI decisions. After that, you will hit an Auth Wall asking you to create a free account.
+* **Registered Free Users:** Enjoy up to 15 TieBreaker decisions fully backed by cloud history persistence.
+* **Pro Members:** Level up to Pro for **unlimited decisions**. Pro users also unlock the ability to permanently **delete** items from their history vault, and gain access to **Privacy Mode (Ghost Mode)** which prevents new decisions from appearing in the app UI altogether while still securely hitting our APIs.
 
 ### User Feedback Survey Funnel
 * **Continuous Improvement:** After you hit 3 successful TieBreaker generations as an authenticated user, you'll be greeted with a beautiful, 6-question UX feedback funnel. It asks targeted questions about what you loved, the ease of use, your use case, and product roadmap features. It’s optional, but highly appreciated!

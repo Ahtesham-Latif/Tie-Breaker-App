@@ -232,13 +232,15 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 ### Interface Design
 * **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
 * **Premium Fluid AI Orb & Domain-Aware Quotes:** An Apple/OpenAI-style continuous progress animation pairs with an intelligent text parser that feeds curated, domain-specific quotes (Tech, Business, Career, etc.) dynamically based on your `My Case` constraints while you wait.
-* **Zero-Scroll Mobile Engine:** Side-by-side data grids optimized with compact padding, and browser scrollbars have been completely hidden globally to maintain a sleek, app-like aesthetic.
+* **Native Desktop Scrolling:** Flawlessly transitions between side-by-side data grids and vertical stacked views, leveraging native window scrolling for an incredibly smooth experience across both desktop trackpads and mobile devices.
 * **Theme Adaptability:** Full Dark/Light structural synchronization.
 
-### UX Messaging Architecture
+### UX Messaging Architecture & Quotas
+* **Strict Quota Enforcement:** Protects backend resources by locking Anonymous users at 3 generations and Free Logged-In users at 15 generations before prompting a seamless upgrade flow.
+* **Pro Tier Features:** Upon claiming the Pro Tier, users unlock a golden profile badge, unlimited decisions, the ability to permanently delete history, and an exclusive **Privacy Mode (Ghost Mode)** that saves decisions to the DB but completely hides them from the UI.
 * **6-Question Feedback Funnel:** Authenticated users who engage heavily with the app are greeted with a beautiful, 6-question survey matrix designed to capture NPS, core use-cases, and roadmap requests directly into the database.
 * **Emotionally Intelligent Feedback:** Rate limits, Azure quota hits, and Guest Auth Walls trigger premium, reassuring messaging layers—not raw markdown.
-* **Zero Technical Bleed:** Backend errors and streaming timeouts (`ERR-TIMEOUT`) are elegantly abstracted into actionable UI states.
+* **Zero Technical Bleed:** Backend errors and streaming timeouts (`ERR-TIMEOUT`, `ERR-06`) are elegantly abstracted into actionable UI states.
 
 ### 🔎 Enterprise SEO Architecture
 * **Inline JSON-LD Validation:** Structured schema markup natively embedded for zero-dependency semantic search processing.
