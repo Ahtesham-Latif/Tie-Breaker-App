@@ -39,7 +39,8 @@ import {
   SurveyModal,
   AboutUsModal,
   ConfirmLogoutModal,
-  PricingModal
+  PricingModal,
+  InteractiveGuide
 } from "./components";
 import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
@@ -1345,6 +1346,8 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col p-4 md:p-8 bg-bg-base"
             >
+              <InteractiveGuide activeType={selectedType} onSelectType={handleAnalyze} />
+              
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
                   <div className="space-y-3">
                   <div className="flex items-center gap-3">
