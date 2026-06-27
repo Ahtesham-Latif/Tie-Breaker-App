@@ -81,8 +81,8 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-6"
               >
-                 <div className="w-32 h-32 rounded-full bg-accent/20 border-4 border-accent shadow-xl overflow-hidden flex items-center justify-center">
-                    <img src="/me1.jpg" alt="Ahtesham Latif" className="w-full h-full object-cover" />
+                 <div className="w-32 h-32 shrink-0 rounded-full bg-accent/20 border-4 border-accent shadow-xl overflow-hidden flex items-center justify-center">
+                    <img src="/me1.png" alt="Ahtesham Latif" className="w-full h-full object-cover" loading="lazy" />
                  </div>
                  <h2 className="text-3xl font-black uppercase tracking-tighter text-text-bright">
                     About The Creator
