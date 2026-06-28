@@ -1042,7 +1042,7 @@ export default function App() {
                   value={optionA}
                   onChange={(e) => setOptionA(e.target.value)}
                   maxLength={100}
-                  placeholder="e.g. Honda City 2024"
+                  placeholder="Option A e.g. Honda City 2024"
                   rows={2}
                   className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
@@ -1054,7 +1054,7 @@ export default function App() {
                   value={optionB}
                   onChange={(e) => setOptionB(e.target.value)}
                   maxLength={100}
-                  placeholder="e.g. Toyota Corolla 2024"
+                  placeholder="Option B e.g. Toyota Corolla 2024"
                   rows={2}
                   className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
@@ -1143,7 +1143,7 @@ export default function App() {
                         value={opt}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
                         maxLength={25}
-                        placeholder={(['Fuel Economy', 'Resale Value', 'Maintenance Cost', 'Comfort', 'Parts Availability', 'Engine Power'][idx] || `Factor ${idx + 1}`)}
+                        placeholder={`Factor ${idx + 1} e.g. ${['Fuel Economy', 'Resale Value', 'Maintenance Cost', 'Comfort', 'Parts Availability', 'Engine Power'][idx] || 'Custom Factor'}`}
                         className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-3 py-1 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                       />
                       {options.length > 2 && (
