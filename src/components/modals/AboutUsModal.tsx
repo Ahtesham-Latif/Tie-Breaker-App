@@ -40,19 +40,19 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 flex-wrap min-w-0"
     >
       <motion.div
         initial={{ scale: 0.95, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: -20, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-bg-surface border-4 border-accent/20 rounded-3xl w-full max-w-4xl h-[85vh] sm:h-[80vh] shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden flex flex-col"
+        className="bg-bg-surface border-4 border-accent/20 rounded-3xl w-full max-w-4xl h-[85vh] sm:h-[80vh] shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden flex flex-col flex-wrap min-w-0"
       >
         {/* Modal Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-b border-border-dim bg-bg-panel gap-4">
-          <div className="flex items-center gap-2">
-             <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-b border-border-dim bg-bg-panel gap-4 flex-wrap min-w-0">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+             <div className="flex gap-2 flex-wrap min-w-0">
                 <a href="mailto:bladerunner2049kjoe@gmail.com" target="_blank" rel="noreferrer" title="Email" className="p-1 rounded-lg bg-accent/10 text-accent hover:bg-accent hover:text-bg-surface transition-all">
                   <Mail size={18} />
                 </a>
@@ -68,7 +68,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
              </div>
           </div>
           
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-nowrap w-full sm:w-auto overflow-y-hidden">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-nowrap w-full sm:w-auto overflow-y-hidden flex-wrap min-w-0">
              <button
                 onClick={() => setActiveTab("about")}
                 className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${activeTab === 'about' ? 'bg-accent text-bg-surface' : 'bg-transparent text-text-main hover:bg-accent/10 hover:text-accent'}`}
@@ -112,25 +112,25 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-3"
+                className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-3 flex-wrap min-w-0"
               >
-                 <div className="w-32 h-32 shrink-0 rounded-full bg-accent/20 border-4 border-accent shadow-xl overflow-hidden flex items-center justify-center">
-                    <img src={meImage} alt="Ahtesham Latif" className="w-full h-full object-cover" loading="lazy" />
+                 <div className="w-32 h-32 shrink-0 rounded-full bg-accent/20 border-4 border-accent shadow-xl overflow-hidden flex items-center justify-center flex-wrap min-w-0">
+                    <img src={meImage} alt="Ahtesham Latif" className="w-full h-full object-cover max-w-full h-auto" loading="lazy" />
                  </div>
                  <h2 className="text-3xl font-black uppercase tracking-tighter text-text-bright">
                     About The Creator
                  </h2>
-                 <p className="text-[15px] text-text-main font-semibold">
+                 <p className="text-[clamp(11px,1.5vw,23px)] text-text-main font-semibold">
                     Ahtesham Latif
                  </p>
-                 <div className="flex flex-wrap justify-center gap-4 pt-3">
-                    <a href="https://github.com/Ahtesham-Latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[15px] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all">
+                 <div className="flex flex-wrap justify-center gap-4 pt-3 min-w-0">
+                    <a href="https://github.com/Ahtesham-Latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[clamp(11px,1.5vw,23px)] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all flex-wrap min-w-0">
                        <Github size={20} /> GitHub
                     </a>
-                    <a href="https://www.linkedin.com/in/ahtesham-latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[15px] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all">
+                    <a href="https://www.linkedin.com/in/ahtesham-latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[clamp(11px,1.5vw,23px)] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all flex-wrap min-w-0">
                        <Linkedin size={20} /> LinkedIn
                     </a>
-                    <a href="https://www.credly.com/users/f23ba044-ahtesham-latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[15px] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all">
+                    <a href="https://www.credly.com/users/f23ba044-ahtesham-latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[clamp(11px,1.5vw,23px)] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all flex-wrap min-w-0">
                        <Award size={20} /> Credly Profile
                     </a>
                  </div>
@@ -150,7 +150,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                     <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-text-bright">
                        THE TIE<span className="text-accent">BREAKER</span>
                     </h2>
-                    <p className="text-[15px] text-text-main font-semibold max-w-2xl mx-auto">
+                    <p className="text-[clamp(11px,1.5vw,23px)] text-text-main font-semibold max-w-2xl mx-auto">
                        TieBreaker is an AI Decision Intelligence Platform. Instead of answering questions, it <span className="text-accent font-bold">resolves dilemmas</span>.
                     </p>
                  </div>
@@ -158,28 +158,28 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                  {/* Problem vs Solution Grid */}
                  <div className="grid md:grid-cols-2 gap-3">
                     <div className="bg-bg-panel border-2 border-border-dim rounded-2xl p-3 space-y-2 shadow-sm">
-                       <div className="w-12 h-12 bg-danger/10 text-danger rounded-xl flex items-center justify-center">
+                       <div className="w-12 h-12 bg-danger/10 text-danger rounded-xl flex items-center justify-center flex-wrap min-w-0">
                           <span className="text-2xl leading-none grayscale" role="img" aria-label="thinking">🤔</span>
                        </div>
                        <h3 className="text-2xl font-black uppercase tracking-widest text-text-bright">The Problem</h3>
-                       <p className="text-[15px] text-text-main">
+                       <p className="text-[clamp(11px,1.5vw,23px)] text-text-main">
                           The most important decisions regarding career, business, money, and relationships are still solved using Google, Reddit, and gut feeling. 
                        </p>
-                       <p className="text-danger font-bold text-[13px] uppercase tracking-widest bg-danger/5 py-[3px] px-[11px] rounded-lg inline-block border border-danger/20">
+                       <p className="text-danger font-bold text-[clamp(10px,1.3vw,21px)] uppercase tracking-widest bg-danger/5 py-[3px] px-[11px] rounded-lg inline-block border border-danger/20">
                           Result: Decision Paralysis
                        </p>
                     </div>
                     
                     <div className="bg-accent/10 border-2 border-accent/20 rounded-2xl p-3 space-y-2 shadow-lg shadow-accent/5">
-                       <div className="w-12 h-12 bg-accent text-bg-surface rounded-xl flex items-center justify-center">
+                       <div className="w-12 h-12 bg-accent text-bg-surface rounded-xl flex items-center justify-center flex-wrap min-w-0">
                           <ScaleIcon size={24} />
                        </div>
                        <h3 className="text-2xl font-black uppercase tracking-widest text-accent">The Solution</h3>
-                       <p className="text-[15px] text-text-main">
+                       <p className="text-[clamp(11px,1.5vw,23px)] text-text-main">
                           Users don't ask: <span className="italic">"Should I pursue a Master's degree abroad?"</span><br/>
                           They ask: <span className="font-bold text-text-bright">"Pursue a Master's degree abroad VS Work full-time and gain industry experience."</span>
                        </p>
-                       <p className="text-accent font-bold text-[13px] uppercase tracking-widest bg-bg-surface py-1 px-3 rounded-lg inline-block border border-accent/20 shadow-sm mt-2">
+                       <p className="text-accent font-bold text-[clamp(10px,1.3vw,21px)] uppercase tracking-widest bg-bg-surface py-1 px-3 rounded-lg inline-block border border-accent/20 shadow-sm mt-2">
                           Result: Deterministic Verdict
                        </p>
                     </div>
@@ -187,29 +187,29 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
 
                  {/* Differentiators */}
                  <div className="space-y-3">
-                    <h3 className="text-[19px] font-black uppercase tracking-tighter text-text-bright text-center">
+                    <h3 className="text-[clamp(15px,1.9vw,27px)] font-black uppercase tracking-tighter text-text-bright text-center">
                        What Makes Us Different
                     </h3>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
                        <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl hover:border-accent/50 transition-colors">
                           <Layers className="text-accent mb-2" size={20} />
-                          <h4 className="font-bold text-[14px] text-text-bright mb-1">Structured Engine</h4>
-                          <p className="text-[13px] text-text-main leading-tight">Comparison → Pros/Cons → SWOT → Final Verdict.</p>
+                          <h4 className="font-bold text-[clamp(10px,1.4vw,22px)] text-text-bright mb-1">Structured Engine</h4>
+                          <p className="text-[clamp(10px,1.3vw,21px)] text-text-main leading-tight">Comparison → Pros/Cons → SWOT → Final Verdict.</p>
                        </div>
                        <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl hover:border-accent/50 transition-colors">
                           <User className="text-accent mb-2" size={20} />
-                          <h4 className="font-bold text-[14px] text-text-bright mb-1">Personalized</h4>
-                          <p className="text-[13px] text-text-main leading-tight">Factors in goals, budgets, and constraints via 'My Case'.</p>
+                          <h4 className="font-bold text-[clamp(10px,1.4vw,22px)] text-text-bright mb-1">Personalized</h4>
+                          <p className="text-[clamp(10px,1.3vw,21px)] text-text-main leading-tight">Factors in goals, budgets, and constraints via 'My Case'.</p>
                        </div>
                        <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl hover:border-accent/50 transition-colors">
                           <Zap className="text-accent mb-2" size={20} />
-                          <h4 className="font-bold text-[14px] text-text-bright mb-1">Real-Time Search</h4>
-                          <p className="text-[13px] text-text-main leading-tight">Web-grounded verification prevents outdated advice.</p>
+                          <h4 className="font-bold text-[clamp(10px,1.4vw,22px)] text-text-bright mb-1">Real-Time Search</h4>
+                          <p className="text-[clamp(10px,1.3vw,21px)] text-text-main leading-tight">Web-grounded verification prevents outdated advice.</p>
                        </div>
                        <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl hover:border-accent/50 transition-colors">
                           <Target className="text-accent mb-2" size={20} />
-                          <h4 className="font-bold text-[14px] text-text-bright mb-1">Transparent AI</h4>
-                          <p className="text-[13px] text-text-main leading-tight">Visible reasoning: why one option won, and why the other failed.</p>
+                          <h4 className="font-bold text-[clamp(10px,1.4vw,22px)] text-text-bright mb-1">Transparent AI</h4>
+                          <p className="text-[clamp(10px,1.3vw,21px)] text-text-main leading-tight">Visible reasoning: why one option won, and why the other failed.</p>
                        </div>
                     </div>
                  </div>
@@ -217,25 +217,25 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                  {/* Features & Users */}
                  <div className="grid md:grid-cols-2 gap-3">
                     <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl">
-                       <h3 className="font-black uppercase tracking-widest text-text-bright mb-3 flex items-center gap-2">
+                       <h3 className="font-black uppercase tracking-widest text-text-bright mb-3 flex items-center gap-2 flex-wrap min-w-0">
                           <CheckCircle2 size={18} className="text-accent" /> Features
                        </h3>
-                       <ul className="grid grid-cols-2 gap-y-2 gap-x-2 text-[13px] text-text-main font-semibold">
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Comparison</li>
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Pros & Cons</li>
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>SWOT Analysis</li>
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Final Verdict</li>
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Web Search</li>
-                          <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>History & Auth</li>
+                       <ul className="grid grid-cols-2 gap-y-2 gap-x-2 text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold">
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Comparison</li>
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Pros & Cons</li>
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>SWOT Analysis</li>
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Final Verdict</li>
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>Web Search</li>
+                          <li className="flex items-center gap-2 flex-wrap min-w-0"><div className="w-1.5 h-1.5 bg-accent rounded-full shrink-0"/>History & Auth</li>
                        </ul>
                     </div>
-                    <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl flex flex-col justify-center text-center space-y-2">
+                    <div className="bg-bg-panel border border-border-dim p-3 rounded-2xl flex flex-col justify-center text-center space-y-2 flex-wrap min-w-0">
                        <h3 className="font-black uppercase tracking-widest text-text-bright">Competitive Advantage</h3>
-                       <div className="text-[13px] font-semibold space-y-1 text-left w-fit mx-auto bg-bg-surface p-3 rounded-xl border border-border-dim">
+                       <div className="text-[clamp(10px,1.3vw,21px)] font-semibold space-y-1 text-left w-fit mx-auto bg-bg-surface p-3 rounded-xl border border-border-dim">
                           <p><span className="text-text-dim">ChatGPT</span> answers questions.</p>
                           <p><span className="text-text-dim">Google</span> finds information.</p>
                           <p><span className="text-text-dim">Reddit</span> shares opinions.</p>
-                          <p className="text-accent font-black text-[14px] flex items-center gap-2 pt-1 mt-2 border-t border-border-dim">
+                          <p className="text-accent font-black text-[clamp(10px,1.4vw,22px)] flex items-center gap-2 pt-1 mt-2 border-t border-border-dim flex-wrap min-w-0">
                              TieBreaker makes decisions. <ArrowRight size={14} />
                           </p>
                        </div>
@@ -251,7 +251,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                        <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter mb-2">
                           The Vision
                        </h3>
-                       <p className="text-[15px] font-semibold opacity-90 max-w-2xl mx-auto">
+                       <p className="text-[clamp(11px,1.5vw,23px)] font-semibold opacity-90 max-w-2xl mx-auto">
                           Our goal is to create the world's most trusted AI decision engine, serving as the final voice before a decision gets made.
                        </p>
                     </div>
@@ -265,14 +265,14 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center max-w-4xl mx-auto h-full"
+                className="flex flex-col items-center max-w-4xl mx-auto h-full flex-wrap min-w-0"
               >
                  <div className="w-full space-y-6 pb-6">
                     <div>
                        <h2 className="text-xl font-black uppercase tracking-tighter text-text-bright mb-3 text-center">
                           Platform Overview
                        </h2>
-                       <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative">
+                       <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative flex-wrap min-w-0">
                           <iframe
                              className="w-full h-full"
                              src="https://www.youtube.com/embed/vZ70JQEDPWY"
@@ -289,7 +289,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                        <h2 className="text-2xl font-black uppercase tracking-tighter text-text-bright mb-4 text-center">
                           User Manual
                        </h2>
-                       <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative">
+                       <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative flex-wrap min-w-0">
                           <iframe
                              className="w-full h-full"
                              src="https://www.youtube.com/embed/m__IZkOf2AU"
@@ -314,31 +314,31 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 className="max-w-3xl mx-auto space-y-4 pb-4"
               >
                 <div className="text-center space-y-1">
-                  <div className="w-10 h-10 bg-accent/10 text-accent rounded-xl flex items-center justify-center mx-auto mb-1">
+                  <div className="w-10 h-10 bg-accent/10 text-accent rounded-xl flex items-center justify-center mx-auto mb-1 flex-wrap min-w-0">
                     <Shield size={20} />
                   </div>
                   <h2 className="text-xl font-black uppercase tracking-tighter text-text-bright">
                     Usage & Privacy Policy
                   </h2>
-                  <p className="text-text-main font-semibold text-[14px]">
+                  <p className="text-text-main font-semibold text-[clamp(10px,1.4vw,22px)]">
                     We believe in full transparency about how your data is used.
                   </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="bg-bg-panel border-2 border-border-dim rounded-2xl p-3 shadow-sm space-y-2">
-                    <h3 className="text-[17px] font-black uppercase tracking-widest text-text-bright border-b border-border-dim pb-1">Free Plan</h3>
-                    <p className="text-[13px] text-text-main font-semibold leading-relaxed">
+                    <h3 className="text-[clamp(13px,1.7vw,25px)] font-black uppercase tracking-widest text-text-bright border-b border-border-dim pb-1">Free Plan</h3>
+                    <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
                       By using the free version of TieBreaker, you agree that your submitted decision prompts, analysis preferences, and generated results may be reviewed and used in an anonymized form to improve TieBreaker, including its prompts, decision engine, features, and overall user experience.
                     </p>
-                    <p className="text-[13px] text-text-main font-semibold leading-relaxed">
+                    <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
                       We do <span className="font-bold text-text-bright">not</span> intentionally use your personal identity for this purpose. Where practical, personally identifying information is excluded or anonymized before review.
                     </p>
                   </div>
 
                   <div className="bg-accent/5 border-2 border-accent/20 rounded-2xl p-3 shadow-md shadow-accent/5 space-y-2">
-                    <h3 className="text-[17px] font-black uppercase tracking-widest text-accent border-b border-accent/20 pb-1 flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 shrink-0">
+                    <h3 className="text-[clamp(13px,1.7vw,25px)] font-black uppercase tracking-widest text-accent border-b border-accent/20 pb-1 flex flex-wrap items-center justify-between gap-2 min-w-0">
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap min-w-0">
                         Pro Plan
                         <motion.div
                           animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
@@ -348,18 +348,18 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                           👏
                         </motion.div>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 items-end sm:items-center">
-                         <span className="text-[9px] sm:text-[10px] font-black bg-accent text-bg-surface px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md shadow-sm shadow-accent/20 animate-pulse">FREE FOR 1st MONTH</span>
-                         <span className="text-[9px] sm:text-[10px] font-black bg-accent text-bg-surface px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">PRIVATE MODE</span>
+                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 items-end sm:items-center flex-wrap min-w-0">
+                         <span className="text-[clamp(10px,0.9vw,17px)] sm:text-[clamp(10px,1.0vw,18px)] font-black bg-accent text-bg-surface px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md shadow-sm shadow-accent/20 animate-pulse">FREE FOR 1st MONTH</span>
+                         <span className="text-[clamp(10px,0.9vw,17px)] sm:text-[clamp(10px,1.0vw,18px)] font-black bg-accent text-bg-surface px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">PRIVATE MODE</span>
                       </div>
                     </h3>
-                    <p className="text-[13px] font-bold text-text-bright">Your privacy comes first.</p>
-                    <p className="text-[13px] text-text-main font-semibold leading-relaxed">
+                    <p className="text-[clamp(10px,1.3vw,21px)] font-bold text-text-bright">Your privacy comes first.</p>
+                    <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
                       Pro users can enable <span className="font-bold text-accent">Private Mode</span>, which excludes their decision history and analyses from being used to improve TieBreaker. Your analyses remain available only for your personal use and account history, subject to our operational requirements.
                     </p>
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 mt-2 border-t border-accent/20">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-accent shrink-0">Offer Ends In:</span>
-                      <div className="flex flex-wrap gap-1 font-mono text-[12px] font-bold text-text-bright">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 mt-2 border-t border-accent/20 min-w-0">
+                      <span className="text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-widest text-accent shrink-0">Offer Ends In:</span>
+                      <div className="flex flex-wrap gap-1 font-mono text-[clamp(10px,1.2vw,20px)] font-bold text-text-bright min-w-0">
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.days}d</span>
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.hours.toString().padStart(2, '0')}h</span>
                         <span className="bg-bg-surface shadow-sm px-1.5 py-0.5 rounded border border-accent/20">{timeLeft.minutes.toString().padStart(2, '0')}m</span>
@@ -370,19 +370,19 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 </div>
 
                 <div className="bg-bg-panel border border-border-dim rounded-2xl p-3">
-                  <h3 className="text-[14px] font-black uppercase tracking-widest text-text-bright mb-2 flex items-center gap-2">
+                  <h3 className="text-[clamp(10px,1.4vw,22px)] font-black uppercase tracking-widest text-text-bright mb-2 flex items-center gap-2 flex-wrap min-w-0">
                     <X className="text-danger" size={16} /> What We Don't Do
                   </h3>
-                  <ul className="space-y-1 text-[13px] text-text-main font-semibold">
-                    <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not sell your personal data.</li>
-                    <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not share your private decision history with other users.</li>
-                    <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not use your data for advertising.</li>
+                  <ul className="space-y-1 text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold">
+                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not sell your personal data.</li>
+                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not share your private decision history with other users.</li>
+                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not use your data for advertising.</li>
                   </ul>
                 </div>
 
                 <div className="text-center bg-bg-surface p-3 rounded-2xl border-2 border-border-dim">
-                  <h3 className="text-[14px] font-black uppercase tracking-widest text-text-bright mb-1">Your Choice</h3>
-                  <p className="text-[13px] text-text-main font-semibold">
+                  <h3 className="text-[clamp(10px,1.4vw,22px)] font-black uppercase tracking-widest text-text-bright mb-1">Your Choice</h3>
+                  <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold">
                     If you prefer complete privacy, upgrading to <span className="font-bold text-accent">TieBreaker Pro</span> with <span className="font-bold text-text-bright">Private Mode</span> allows you to opt out of improvement-related data usage while continuing to enjoy all premium features. <span className="text-accent font-bold">(Good news: Pro is currently completely free for the first month!)</span>
                   </p>
                 </div>

@@ -117,3 +117,52 @@
 .markdown-body tr:last-child td {
   @apply border-b-0;
 }
+
+/* ─── Zoom Resilience (scoped — never affects 100% zoom) ─── */
+
+/* 25% zoom and below */
+[data-zoom="out"] .vs-title {
+  font-size: clamp(16px, 2vw, 32px) !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+[data-zoom="out"] .result-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* 300% zoom and above */
+[data-zoom="in"] .vs-title {
+  font-size: clamp(11px, 4vw, 18px) !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+[data-zoom="in"] .sidebar.sticky {
+  display: none !important;
+}
+
+[data-zoom="in"] .result-main-content {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+[data-zoom="in"] .tab-bar {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+
+[data-zoom="in"] .tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+[data-zoom="in"] .toolbar-row {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ─── End Zoom Resilience ─── */

@@ -73,13 +73,13 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
-      className="max-w-3xl mx-auto min-h-[300px] md:min-h-[400px] flex flex-col items-center justify-center p-2 md:p-8 relative overflow-hidden w-full"
+      className="max-w-3xl mx-auto min-h-[300px] md:min-h-[400px] flex flex-col items-center justify-center p-2 md:p-8 relative overflow-hidden w-full flex-wrap min-w-0"
     >
-      <div className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-accent/60 mb-8 md:mb-12 animate-pulse text-center">
+      <div className="text-[clamp(10px,1.0vw,18px)] md:text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-accent/60 mb-8 md:mb-12 animate-pulse text-center">
         {phase === "neutral" || phase === "analysis" ? "Weighing the Decision..." : "The Verdict is In"}
       </div>
 
-      <div className="relative w-full max-w-lg flex items-center justify-between gap-2 md:gap-8 px-2 md:px-0">
+      <div className="relative w-full max-w-lg flex items-center justify-between gap-2 md:gap-8 px-2 md:px-0 flex-wrap min-w-0">
         
         {/* Left Contender */}
         <motion.div
@@ -105,7 +105,7 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
               <motion.div
                 initial={{ scale: 0, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="bg-accent text-bg-surface px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 mt-2"
+                className="bg-accent text-bg-surface px-4 py-1 rounded-full text-[clamp(10px,1.0vw,18px)] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 mt-2 flex-wrap min-w-0"
               >
                 <Trophy size={14} /> Winner
               </motion.div>
@@ -127,7 +127,7 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
           }
           className="shrink-0 relative z-30"
         >
-          <div className="w-14 h-14 md:w-28 md:h-28 bg-accent rounded-xl md:rounded-3xl flex items-center justify-center text-bg-surface shadow-2xl shadow-accent/30">
+          <div className="w-14 h-14 md:w-28 md:h-28 bg-accent rounded-xl md:rounded-3xl flex items-center justify-center text-bg-surface shadow-2xl shadow-accent/30 flex-wrap min-w-0">
             <ScaleIcon size={32} className="w-8 h-8 md:w-16 md:h-16" strokeWidth={2.5} />
           </div>
           
@@ -162,7 +162,7 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
               <motion.div
                 initial={{ scale: 0, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="bg-accent text-bg-surface px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 mt-2"
+                className="bg-accent text-bg-surface px-4 py-1 rounded-full text-[clamp(10px,1.0vw,18px)] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 mt-2 flex-wrap min-w-0"
               >
                 <Trophy size={14} /> Winner
               </motion.div>

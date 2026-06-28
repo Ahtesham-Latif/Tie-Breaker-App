@@ -78,24 +78,24 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
   if (!user) return null;
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-      <div className="flex md:hidden items-center justify-between mb-6 shrink-0">
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden flex-wrap min-w-0">
+      <div className="flex md:hidden items-center justify-between mb-6 shrink-0 flex-wrap min-w-0">
+        <div className="flex items-center gap-3 flex-wrap min-w-0">
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center shadow-inner",
             isPro ? "bg-amber-500/20 text-amber-500" : "bg-accent/10 text-accent"
           )}>
             <UserIcon size={16} />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col flex-wrap min-w-0">
             <span className={cn(
-              "text-xs font-bold truncate max-w-[150px]",
+              "text-xs font-bold truncate max-w-full max-w-[min(150px,100vw)] min-w-0",
               isPro ? "text-amber-600 dark:text-amber-400" : "text-text-bright"
             )}>
               {user.email?.split('@')[0]}
             </span>
             <span className={cn(
-              "text-[9px] font-black uppercase tracking-wider opacity-80",
+              "text-[clamp(10px,0.9vw,17px)] font-black uppercase tracking-wider opacity-80",
               isPro ? "text-amber-500" : "text-accent"
             )}>
               {isPro ? "Pro Member" : `${tiesCount}/15 Free Ties`}
@@ -104,21 +104,21 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
         </div>
         <button 
           onClick={onShowLogout}
-          className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-danger/20"
+          className="px-3 py-1.5 text-[clamp(10px,1.0vw,18px)] font-bold uppercase tracking-widest text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-danger/20 flex-wrap min-w-0"
           title="Sign Out"
         >
           <LogOut size={14} /> Sign Out
         </button>
       </div>
 
-      <div className="flex items-center justify-between mb-3 shrink-0">
-        <h3 className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3 shrink-0 flex-wrap min-w-0">
+        <h3 className="text-[clamp(10px,1.1vw,19px)] font-bold uppercase tracking-widest text-accent flex items-center gap-2 flex-wrap min-w-0">
           <Clock size={14} /> My History
         </h3>
         {isPro && (
           <button
             onClick={togglePrivacyMode}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[clamp(10px,0.9vw,17px)] font-black uppercase tracking-widest transition-all ${
               privacyMode 
                 ? 'bg-accent text-bg-surface shadow-md shadow-accent/20' 
                 : 'bg-bg-panel text-text-muted hover:text-text-main border border-border-dim'
@@ -134,7 +134,7 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
       <div className="flex-1 relative min-h-[200px]">
         <div className="absolute inset-0 overflow-y-auto custom-scrollbar pr-1 pb-3 space-y-2">
           {loading ? (
-            <div className="flex justify-center p-3">
+            <div className="flex justify-center p-3 flex-wrap min-w-0">
               <Loader2 className="animate-spin text-accent" size={16} />
             </div>
           ) : history.length === 0 ? (
@@ -145,18 +145,18 @@ export function SidebarHistory({ onLoadDecision, onShowAuth, onShowLogout }: Sid
             history.map((item) => (
               <div
                 key={item.id}
-                className="w-full relative group flex"
+                className="w-full relative group flex flex-wrap min-w-0"
               >
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => onLoadDecision(item)}
-                  className="flex-1 text-left p-2 rounded-xl bg-bg-panel border-2 border-transparent hover:border-accent/30 transition-all flex flex-col gap-1 shadow-sm pr-10"
+                  className="flex-1 text-left p-2 rounded-xl bg-bg-panel border-2 border-transparent hover:border-accent/30 transition-all flex flex-col gap-1 shadow-sm pr-10 flex-wrap min-w-0"
                 >
                   <div className="text-xs font-bold text-text-main truncate group-hover:text-accent transition-colors">
                     {item.query}
                   </div>
-                  <div className="text-[10px] text-text-muted opacity-70">
+                  <div className="text-[clamp(10px,1.0vw,18px)] text-text-muted opacity-70">
                     {new Date(item.created_at).toLocaleDateString()}
                   </div>
                 </motion.button>

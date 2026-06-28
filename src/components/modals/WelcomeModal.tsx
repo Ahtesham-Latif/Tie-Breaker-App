@@ -37,14 +37,14 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-md p-3"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-md p-3 flex-wrap min-w-0"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: -20, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="bg-bg-surface border-4 border-accent/20 rounded-[2rem] p-6 md:p-8 max-w-md w-full shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden flex flex-col max-h-[95vh]"
+        className="bg-bg-surface border-4 border-accent/20 rounded-[2rem] p-6 md:p-8 max-w-md w-full shadow-[0_20px_50px_rgba(117,81,57,0.3)] relative overflow-hidden flex flex-col max-h-[95vh] flex-wrap min-w-0"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-accent to-accent-muted" />
         
@@ -55,7 +55,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
           <X size={16} />
         </button>
         
-        <div className="flex flex-col items-center text-center space-y-4 overflow-y-auto custom-scrollbar pr-2 pb-1">
+        <div className="flex flex-col items-center text-center space-y-4 overflow-y-auto custom-scrollbar pr-2 pb-1 flex-wrap min-w-0">
           <div className="space-y-1">
             <h2 className="text-2xl font-black uppercase tracking-tighter text-text-bright">
               Welcome to <span className="text-accent underline decoration-2 underline-offset-4 decoration-accent/30">TieBreaker</span> 👋
@@ -65,7 +65,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
             </p>
           </div>
 
-          <div className="relative w-full max-w-[280px] mx-auto flex items-center justify-between gap-3 px-2 py-2">
+          <div className="relative w-full max-w-full max-w-[min(280px,100vw)] min-w-0 mx-auto flex items-center justify-between gap-3 px-2 py-2 flex-wrap">
             <motion.div
               animate={{ y: leftY, scale: (phase === "winner" || phase === "bullets") ? 1.05 : 1 }}
               transition={{ type: "spring", stiffness: 50, damping: 15 }}
@@ -75,7 +75,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
               )}
             >
               <div className={cn(
-                "text-[11px] font-black uppercase tracking-wider",
+                "text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-wider",
                 (phase === "winner" || phase === "bullets") ? "text-text-bright" : "text-text-main"
               )}>
                 Option A
@@ -85,7 +85,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
                   <motion.div
                     initial={{ scale: 0, opacity: 0, y: 5 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
-                    className="bg-accent text-bg-surface px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1 mt-1"
+                    className="bg-accent text-bg-surface px-2 py-0.5 rounded-full text-[clamp(10px,0.9vw,17px)] font-black uppercase tracking-widest shadow-lg flex items-center gap-1 mt-1 flex-wrap min-w-0"
                   >
                     <Trophy size={10} /> Winner
                   </motion.div>
@@ -98,7 +98,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
               transition={ phase === "analysis" ? { duration: 0.6, ease: "easeInOut" } : { type: "spring", stiffness: 50, damping: 12 } }
               className="shrink-0 relative z-30"
             >
-              <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-bg-surface shadow-lg shadow-accent/30">
+              <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-bg-surface shadow-lg shadow-accent/30 flex-wrap min-w-0">
                 <ScaleIcon size={24} />
               </div>
             </motion.div>
@@ -106,9 +106,9 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
             <motion.div
               animate={{ y: rightY, opacity: (phase === "winner" || phase === "bullets") ? 0.4 : 1 }}
               transition={{ type: "spring", stiffness: 50, damping: 15 }}
-              className="relative z-20 flex-1 bg-bg-panel border-2 rounded-xl p-2 shadow-sm flex flex-col items-center min-w-0 border-border-dim"
+              className="relative z-20 flex-1 bg-bg-panel border-2 rounded-xl p-2 shadow-sm flex flex-col items-center min-w-0 border-border-dim flex-wrap"
             >
-              <div className="text-[11px] font-black uppercase tracking-wider text-text-main">
+              <div className="text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-wider text-text-main">
                 Option B
               </div>
             </motion.div>
@@ -122,13 +122,13 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
                 className="w-full text-left bg-bg-base/50 p-4 rounded-2xl border border-border-dim overflow-hidden"
               >
                 <h3 className="font-black text-xs uppercase tracking-widest text-text-bright mb-3">Why create an account?</h3>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-2 text-[11px] font-semibold text-text-main">
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Prevent spam & automated abuse</li>
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Protect AI resources</li>
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Save to your personal history</li>
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Sync decisions across devices</li>
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Enable privacy controls</li>
-                  <li className="flex gap-2 items-start"><span className="text-accent">•</span> Personalized experience over time</li>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-2 text-[clamp(10px,1.1vw,19px)] font-semibold text-text-main">
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Prevent spam & automated abuse</li>
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Protect AI resources</li>
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Save to your personal history</li>
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Sync decisions across devices</li>
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Enable privacy controls</li>
+                  <li className="flex gap-2 items-start flex-wrap min-w-0"><span className="text-accent">•</span> Personalized experience over time</li>
                 </ul>
               </motion.div>
             )}
@@ -140,7 +140,7 @@ export function WelcomeModal({ onClose, onOpenAuth }: { onClose: () => void; onO
                 onClose();
                 onOpenAuth(true);
               }}
-              className="w-full py-3 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-accent text-bg-surface rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-accent/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 flex-wrap min-w-0"
             >
               Sign Up <ArrowRight size={16} />
             </button>

@@ -8,7 +8,7 @@ interface ConfirmLogoutModalProps {
 
 export function ConfirmLogoutModal({ onConfirm, onCancel }: ConfirmLogoutModalProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 flex-wrap min-w-0">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -32,8 +32,8 @@ export function ConfirmLogoutModal({ onConfirm, onCancel }: ConfirmLogoutModalPr
           <X size={16} />
         </button>
 
-        <div className="flex flex-col items-center text-center mt-2">
-          <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent mb-4">
+        <div className="flex flex-col items-center text-center mt-2 flex-wrap min-w-0">
+          <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent mb-4 flex-wrap min-w-0">
             <Power size={24} />
           </div>
           <h2 className="text-xl font-bold text-text-bright mb-2">
@@ -43,7 +43,7 @@ export function ConfirmLogoutModal({ onConfirm, onCancel }: ConfirmLogoutModalPr
             Are you sure you want to sign out of your account?
           </p>
 
-          <div className="flex w-full gap-3">
+          <div className="flex w-full gap-3 flex-wrap min-w-0">
             <button
               onClick={onCancel}
               className="flex-1 py-2.5 rounded-xl border border-border-dim font-bold text-text-main hover:bg-bg-panel transition-colors"

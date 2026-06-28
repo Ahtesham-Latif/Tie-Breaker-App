@@ -18,8 +18,8 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
             isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl p-3 md:p-4"
           )}
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-bg-surface shadow-lg">
+          <div className="flex items-center gap-3 mb-4 flex-wrap min-w-0">
+            <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-bg-surface shadow-lg flex-wrap min-w-0">
               <CheckCircle2 size={20} />
             </div>
             <h2 className={cn("font-black text-text-bright tracking-tighter uppercase break-words min-w-0 flex-1", isSideBySide ? "text-lg md:text-xl" : "text-2xl")}>
@@ -37,7 +37,7 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
 
           <div className={cn("grid", isSideBySide ? "grid-cols-1 gap-1" : "grid-cols-1 md:grid-cols-2 gap-4")}>
             <div className="space-y-3">
-              <h3 className="text-sm font-black text-accent uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-sm font-black text-accent uppercase tracking-widest flex items-center gap-2 flex-wrap min-w-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent" /> Strategic
                 Advantages
               </h3>
@@ -64,7 +64,7 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
               </ul>
             </div>
             <div className="space-y-3">
-              <h3 className="text-sm font-black text-danger uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-sm font-black text-danger uppercase tracking-widest flex items-center gap-2 flex-wrap min-w-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-danger" /> Potential
                 Constraints
               </h3>

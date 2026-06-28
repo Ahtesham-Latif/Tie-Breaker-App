@@ -252,6 +252,23 @@ export default function App() {
   const scrollTopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const handleZoom = () => {
+      const zoom = Math.round((window.outerWidth / window.innerWidth) * 100);
+      if (zoom <= 50) {
+        document.documentElement.setAttribute('data-zoom', 'out');
+      } else if (zoom >= 300) {
+        document.documentElement.setAttribute('data-zoom', 'in');
+      } else {
+        document.documentElement.setAttribute('data-zoom', 'normal');
+      }
+    };
+
+    handleZoom();
+    window.addEventListener('resize', handleZoom);
+    return () => window.removeEventListener('resize', handleZoom);
+  }, []);
+
+  useEffect(() => {
     const handleWindowScroll = () => {
       const currentScrollY = window.scrollY;
       
@@ -864,7 +881,7 @@ export default function App() {
       {/* Sidebar - Inputs */}
       <motion.aside 
         className={cn(
-          "bg-bg-surface border-border-dim flex flex-col shrink-0 z-50",
+          "sidebar bg-bg-surface border-border-dim flex flex-col shrink-0 z-50",
           
           // --- MOBILE LOGIC ---
           isMobile && !hasStarted && "relative w-full border-b p-3 sm:p-5",
@@ -1228,7 +1245,7 @@ export default function App() {
 
       {/* Main Content - Results */}
       <main className={cn(
-        "flex-1 flex flex-col min-w-0 bg-bg-base relative z-10",
+        "result-main-content flex-1 flex flex-col min-w-0 bg-bg-base relative z-10",
         isMobile && !hasStarted && "hidden" // On mobile, hide results area until started
       )}>
 
@@ -1344,14 +1361,14 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex-1 flex flex-col p-4 md:px-8 md:pb-8 md:pt-0 bg-bg-base min-w-0"
+              className="result-container flex-1 flex flex-col p-4 md:px-8 md:pb-8 md:pt-0 bg-bg-base min-w-0 w-full max-w-[1600px] mx-auto"
             >
               <InteractiveGuide activeType={selectedType} onSelectType={handleAnalyze} />
               
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4 min-w-0">
-                  <div className="space-y-3 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <span className="px-2 py-0 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
+                  <div className="space-y-3 min-w-0 w-full xl:w-auto">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <span className="px-2 py-0 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md whitespace-nowrap">
                       {selectedType.replace("-", " ")} Mode
                     </span>
                     <button
@@ -1362,12 +1379,12 @@ export default function App() {
                       New Decision
                     </button>
                   </div>
-                  <h2 className="text-xl md:text-2xl font-black text-text-bright tracking-tight max-w-2xl uppercase italic leading-tight">
-                    {optionA} <span className="text-accent text-sm mx-2">VS</span> {optionB}
+                  <h2 className="vs-title text-xl md:text-2xl font-black text-text-bright tracking-tight max-w-2xl uppercase italic leading-tight break-words min-w-0">
+                    {optionA} <span className="text-accent text-sm mx-2 inline-block">VS</span> {optionB}
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap bg-accent-muted p-0 rounded-2xl border-2 border-accent/10 shadow-sm gap-1 shrink-0">
+                <div className="tab-bar grid grid-cols-2 sm:flex sm:flex-wrap bg-accent-muted p-0 rounded-2xl border-2 border-accent/10 shadow-sm gap-1 shrink-0 w-full xl:w-auto overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   <TypeTab
                     active={selectedType === "pros-cons"}
                     onClick={() => handleAnalyze("pros-cons")}
@@ -1392,14 +1409,14 @@ export default function App() {
                 </div>
 
               <div className="grow shrink-0 bg-bg-surface rounded-3xl border-2 border-accent/10 relative shadow-[0_20px_50px_rgba(117,81,57,0.1)]">
-                <div className="flex justify-between items-center p-0 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm">
-                  <div className="pl-0 pr-0 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                <div className="flex flex-wrap justify-between items-center p-0 border-b-2 border-accent/5 bg-bg-surface z-20 shadow-sm gap-2">
+                  <div className="pl-0 pr-0 font-black text-accent uppercase tracking-wider text-[10px] md:text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-[100px]">
                     {selectedType === "pros-cons" && "Pros & Cons"}
                     {selectedType === "comparison" && "Comparison"}
                     {selectedType === "swot" && "SWOT"}
                     {selectedType === "verdict" && "Verdict"}
                   </div>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="toolbar-row flex gap-1 shrink-0">
                     <Tooltip content={isSidebarOpen ? "Hide" : "Input"} position="bottom">
                       <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}

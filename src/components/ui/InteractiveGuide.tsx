@@ -41,10 +41,10 @@ export function InteractiveGuide({ activeType, onSelectType }: InteractiveGuideP
 
   if (!isOpen) {
     return (
-      <div className="w-full flex justify-end mb-2">
+      <div className="w-full flex justify-end mb-2 flex-wrap min-w-0">
         <button 
           onClick={() => setIsOpen(true)}
-          className="px-2 py-1 rounded-md border border-accent/20 bg-accent/5 hover:bg-accent/10 transition-colors text-[9px] font-black uppercase tracking-widest text-accent flex items-center gap-1.5"
+          className="px-2 py-1 rounded-md border border-accent/20 bg-accent/5 hover:bg-accent/10 transition-colors text-[clamp(10px,0.9vw,17px)] font-black uppercase tracking-widest text-accent flex items-center gap-1.5 flex-wrap min-w-0"
         >
           <Info size={12} /> Use Case Guide
         </button>
@@ -58,7 +58,7 @@ export function InteractiveGuide({ activeType, onSelectType }: InteractiveGuideP
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: 1, height: 'auto' }}
         exit={{ opacity: 0, height: 0 }}
-        className="w-full bg-bg-panel border border-border-dim rounded-lg p-1 mb-2 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-1 relative pr-6"
+        className="w-full bg-bg-panel border border-border-dim rounded-lg p-1 mb-2 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-1 relative pr-6 flex-wrap min-w-0"
       >
         <button 
           onClick={() => setIsOpen(false)}
@@ -66,14 +66,14 @@ export function InteractiveGuide({ activeType, onSelectType }: InteractiveGuideP
         >
           <X size={12} />
         </button>
-        <div className="flex items-center gap-1 shrink-0 md:w-24 lg:w-32 pl-0.5">
+        <div className="flex items-center gap-1 shrink-0 md:w-24 lg:w-32 pl-0.5 flex-wrap min-w-0">
           <span className="text-xs leading-none">🧠</span>
-          <span className="text-[6px] font-black uppercase tracking-widest text-text-muted leading-tight">
+          <span className="text-[clamp(10px,0.6vw,14px)] font-black uppercase tracking-widest text-text-muted leading-tight">
             How to read<br/>your analysis
           </span>
         </div>
         
-        <div className="flex flex-col md:flex-row w-full gap-2">
+        <div className="flex flex-col md:flex-row w-full gap-2 flex-wrap min-w-0">
           {GUIDE_ITEMS.map((item) => {
             const isActive = activeType === item.type;
             return (
@@ -96,17 +96,17 @@ export function InteractiveGuide({ activeType, onSelectType }: InteractiveGuideP
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <div className="flex items-center gap-1 relative z-10 min-w-[80px] md:min-w-0">
-                  <span className="text-[10px] md:text-xs opacity-90 group-hover:scale-110 transition-transform">{item.icon}</span>
+                <div className="flex items-center gap-1 relative z-10 min-w-full max-w-[min(80px,100vw)] min-w-0 md:min-w-0 flex-wrap">
+                  <span className="text-[clamp(10px,1.0vw,18px)] md:text-xs opacity-90 group-hover:scale-110 transition-transform">{item.icon}</span>
                   <span className={cn(
-                    "text-[6px] font-black uppercase tracking-wider",
+                    "text-[clamp(10px,0.6vw,14px)] font-black uppercase tracking-wider",
                     isActive ? "text-accent" : "text-text-main"
                   )}>
                     {item.title}
                   </span>
                 </div>
                 <span className={cn(
-                  "text-[5px] font-bold relative z-10 leading-tight",
+                  "text-[clamp(10px,0.5vw,13px)] font-bold relative z-10 leading-tight",
                   isActive ? "text-text-main" : "text-text-muted"
                 )}>
                   {item.desc}

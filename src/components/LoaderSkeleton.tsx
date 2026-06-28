@@ -86,13 +86,13 @@ export default function LoaderSkeleton({ isDark, isLoading = true, startTime: in
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-bg-base/90 backdrop-blur-2xl"
+      className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-bg-base/90 backdrop-blur-2xl flex-wrap min-w-0"
     >
       {/* Central Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-lg px-8">
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-lg px-8 flex-wrap min-w-0">
         
         {/* Premium Fluid AI Orb (Minimized) */}
-        <div className="relative w-12 h-12 mb-4 flex items-center justify-center opacity-70">
+        <div className="relative w-12 h-12 mb-4 flex items-center justify-center opacity-70 flex-wrap min-w-0">
           {/* Base Glow */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
@@ -129,7 +129,7 @@ export default function LoaderSkeleton({ isDark, isLoading = true, startTime: in
         </div>
 
         {/* Dynamic Stage Text (Minimized) */}
-        <div className="h-6 w-full relative flex items-center justify-center mb-4">
+        <div className="h-6 w-full relative flex items-center justify-center mb-4 flex-wrap min-w-0">
           <AnimatePresence mode="wait">
             <motion.p
               key={stageIndex}
@@ -145,10 +145,10 @@ export default function LoaderSkeleton({ isDark, isLoading = true, startTime: in
         </div>
 
         {/* Smooth Continuous Time-Based Progress Bar (Minimized) */}
-        <div className="w-full max-w-[200px] flex flex-col gap-1.5 opacity-60">
-          <div className="flex justify-between items-center px-1">
-            <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Processing</span>
-            <span className="text-[10px] font-black text-text-bright tabular-nums">{Math.floor(progress)}%</span>
+        <div className="w-full max-w-full max-w-[min(200px,100vw)] min-w-0 flex flex-col gap-1.5 opacity-60 flex-wrap">
+          <div className="flex justify-between items-center px-1 flex-wrap min-w-0">
+            <span className="text-[clamp(10px,0.9vw,17px)] font-bold text-text-muted uppercase tracking-widest">Processing</span>
+            <span className="text-[clamp(10px,1.0vw,18px)] font-black text-text-bright tabular-nums">{Math.floor(progress)}%</span>
           </div>
           
           <div className="h-1 w-full bg-bg-surface/50 rounded-full overflow-hidden backdrop-blur-sm border border-border-dim shadow-inner">
@@ -167,7 +167,7 @@ export default function LoaderSkeleton({ isDark, isLoading = true, startTime: in
 
         {/* Dynamic Quotes (Maximized & Emphasized) */}
         {quotes.length > 0 && (
-          <div className="min-h-[160px] w-full flex items-center justify-center mt-12 px-2 sm:px-6">
+          <div className="min-h-[160px] w-full flex items-center justify-center mt-12 px-2 sm:px-6 flex-wrap min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={quoteIndex}
@@ -175,10 +175,10 @@ export default function LoaderSkeleton({ isDark, isLoading = true, startTime: in
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-col items-center text-center w-full max-w-lg"
+                className="flex flex-col items-center text-center w-full max-w-lg flex-wrap min-w-0"
               >
                 <p className="text-lg sm:text-xl md:text-2xl font-bold text-text-bright italic leading-snug mb-5">"{quotes[quoteIndex].text}"</p>
-                <p className="text-[11px] sm:text-[12px] md:text-sm font-black text-accent uppercase tracking-[0.25em]">— {quotes[quoteIndex].author}</p>
+                <p className="text-[clamp(10px,1.1vw,19px)] sm:text-[clamp(10px,1.2vw,20px)] md:text-sm font-black text-accent uppercase tracking-[0.25em]">— {quotes[quoteIndex].author}</p>
               </motion.div>
             </AnimatePresence>
           </div>

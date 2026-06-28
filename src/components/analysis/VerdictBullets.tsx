@@ -32,7 +32,7 @@ export function VerdictBullets({
 
       <div className="relative z-10 space-y-10">
         <div className="space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-60">
+          <span className="text-[clamp(10px,1.0vw,18px)] font-black uppercase tracking-[0.5em] opacity-60">
             The Winning Choice
           </span>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
@@ -47,14 +47,14 @@ export function VerdictBullets({
         </div>
 
         <div className="space-y-6 pt-8 border-t border-bg-surface/20">
-          <h3 className="text-[11px] font-black uppercase tracking-widest opacity-60">
+          <h3 className="text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-widest opacity-60">
             Analysis Takeaways
           </h3>
           <ul className="space-y-4">
             {data.keyTakeaways.map((point: string, i: number) => (
               <li
                 key={i}
-                className="flex items-start gap-4 text-sm font-black italic text-justify"
+                className="flex items-start gap-4 text-sm font-black italic text-justify flex-wrap min-w-0"
               >
                 <ArrowRight size={20} className="shrink-0 mt-1" />
                 <div className="flex-1">

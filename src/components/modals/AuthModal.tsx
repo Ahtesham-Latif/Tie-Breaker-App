@@ -113,23 +113,23 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialIsSignUp = false 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bg-base/80 md:bg-black/60 backdrop-blur-md md:p-3">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bg-base/80 md:bg-black/60 backdrop-blur-md md:p-3 flex-wrap min-w-0">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full h-full md:h-auto md:max-w-md flex flex-col overflow-y-auto bg-bg-surface md:border-2 border-accent/20 md:rounded-2xl shadow-2xl"
+          className="relative w-full h-full md:h-auto md:max-w-md flex flex-col overflow-y-auto bg-bg-surface md:border-2 border-accent/20 md:rounded-2xl shadow-2xl flex-wrap min-w-0"
         >
-          <div className="flex items-center justify-start p-5 pb-1 md:p-5 md:pb-0">
+          <div className="flex items-center justify-start p-5 pb-1 md:p-5 md:pb-0 flex-wrap min-w-0">
             <button
               onClick={onClose}
-              className="flex items-center gap-2 text-xs font-black text-text-muted hover:text-text-main transition-colors uppercase tracking-widest bg-bg-panel px-2 py-0.5 rounded-lg border border-border-dim"
+              className="flex items-center gap-2 text-xs font-black text-text-muted hover:text-text-main transition-colors uppercase tracking-widest bg-bg-panel px-2 py-0.5 rounded-lg border border-border-dim flex-wrap min-w-0"
             >
               <X size={14} /> Back
             </button>
           </div>
 
-          <div className="p-5 md:p-7 flex-1 flex flex-col justify-center">
+          <div className="p-5 md:p-7 flex-1 flex flex-col justify-center flex-wrap min-w-0">
             <h2 className="text-2xl font-black uppercase tracking-tight text-text-bright mb-2">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
@@ -196,7 +196,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialIsSignUp = false 
                         />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 flex-wrap min-w-0">
                       <label className="block text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Profession</label>
                       <div className="relative">
                         <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
@@ -237,7 +237,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialIsSignUp = false 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-accent hover:bg-accent/90 text-bg-surface font-black uppercase tracking-widest py-2.5 rounded-xl mt-6 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-accent hover:bg-accent/90 text-bg-surface font-black uppercase tracking-widest py-2.5 rounded-xl mt-6 transition-colors flex items-center justify-center gap-2 flex-wrap min-w-0"
               >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : (isSignUp ? 'Create Account' : 'Log In')}
               </button>
