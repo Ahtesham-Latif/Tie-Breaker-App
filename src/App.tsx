@@ -350,7 +350,7 @@ export default function App() {
       supabase.from('profiles').select('ties_count').eq('id', user.id).single().then(({ data }) => {
         if (data) {
           setUsageCount(data.ties_count);
-          if (data.ties_count > 2) {
+          if (data.ties_count > 0) {
             supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('user_id', user.id).then(({ count }) => {
               if (count === 0) setShowSurveyModal(true);
             });
@@ -492,6 +492,7 @@ export default function App() {
             setIsSidebarOpen(true);
             return;
           }
+          // Note: Pricing modal can also be opened manually via the Go Pro button at any time
         }
       } catch (err) {
         console.warn("Failed to check plan limits", err);
@@ -596,7 +597,7 @@ export default function App() {
                 is_hidden: userPrivacyMode
               }).then(() => {
                 supabase.from('profiles').select('ties_count').eq('id', user.id).single().then(({ data: profile }) => {
-                  if (profile && profile.ties_count >= 2) {
+                  if (profile && profile.ties_count >= 1) {
                     supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('user_id', user.id).then(({ count }) => {
                       if (count === 0) {
                         setSurveyTriggerType(type);
@@ -919,7 +920,7 @@ export default function App() {
               </div>
 
               <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-                <Tooltip content="Meet The Creator" position="bottom">
+                <Tooltip content="Meet The Creator" position="left">
                   <motion.button
                     initial={{ scale: 1, x: -10, opacity: 0 }}
                     animate={{ 
@@ -975,15 +976,31 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                aria-label="Toggle Theme"
-                onClick={toggleTheme}
-                className="px-3 py-1.5 rounded-full bg-bg-panel border border-border-dim text-text-main hover:text-accent hover:border-accent/30 transition-all shadow-sm flex items-center gap-1.5 shrink-0 group"
-              >
-                {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
-                <span className="text-[10px] font-black uppercase tracking-widest">Theme</span>
-              </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Tooltip content="Toggle Theme" position="right">
+                <button
+                  aria-label="Toggle Theme"
+                  onClick={toggleTheme}
+                  className="px-3 py-1.5 rounded-full bg-bg-panel border border-border-dim text-text-main hover:text-accent hover:border-accent/30 transition-all shadow-sm flex items-center gap-1.5 shrink-0 group"
+                >
+                  {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+                  <span className="text-[10px] font-black uppercase tracking-widest">Theme</span>
+                </button>
+              </Tooltip>
+
+              {/* Go Pro Button — visible only to logged-in free users */}
+              {user && userProfile?.plan !== 'pro' && (
+                <Tooltip content="Continue to Pro" position="right">
+                  <button
+                    onClick={() => setShowPricingModal(true)}
+                    className="group flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/8 text-amber-500 hover:bg-amber-500 hover:text-white hover:border-amber-500 hover:shadow-md hover:shadow-amber-500/30 transition-all duration-200 text-[10px] font-black uppercase tracking-wide shrink-0"
+                    title="Continue to Pro"
+                  >
+                    <Crown size={13} className="group-hover:animate-bounce shrink-0" />
+                    <span>Go Pro</span>
+                  </button>
+                </Tooltip>
+              )}
 
               {isMobile && hasStarted && (
                 <button 
@@ -1176,6 +1193,9 @@ export default function App() {
                   </button>
                 </div>
               )}
+
+
+
               <button
                 title="Calculate Decision Analysis"
                 onClick={() => handleAnalyze(selectedType)}

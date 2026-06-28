@@ -106,7 +106,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 overflow-y-auto flex-wrap min-w-0"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 overflow-y-auto min-w-0"
         >
           <motion.div
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -128,16 +128,16 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="flex flex-col items-center justify-center text-center py-11 flex-wrap min-w-0"
+                className="flex flex-col items-center justify-center text-center py-11 min-w-0"
               >
-                <div className="w-16 h-16 bg-accent/20 text-accent rounded-full flex items-center justify-center mb-4 flex-wrap min-w-0">
+                <div className="w-16 h-16 bg-accent/20 text-accent rounded-full flex items-center justify-center mb-4 min-w-0">
                   <CheckCircle size={32} />
                 </div>
                 <h2 className="text-2xl font-black uppercase tracking-widest text-text-bright mb-2">Thank You!</h2>
                 <p className="text-text-muted text-sm font-semibold">Your detailed insights will shape our future updates.</p>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[80vh] overflow-y-auto scrollbar-hide flex-wrap min-w-0">
+              <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[80vh] overflow-y-auto scrollbar-hide min-w-0">
                 <div className="mb-6 text-center mt-2">
                   <h2 className="text-2xl font-black uppercase tracking-tighter text-text-bright mb-2">
                     Help us <span className="text-accent">Improve</span>
@@ -214,7 +214,7 @@ export function SurveyModal({ isOpen, onClose, triggeredAfter = 'unknown' }: Sur
                   
                   {/* Q5: NPS */}
                   <div className="space-y-2">
-                    <div className="flex flex-col gap-0.5 ml-1 flex-wrap min-w-0">
+                    <div className="flex flex-col gap-0.5 ml-1 min-w-0">
                       <label className="text-xs font-bold text-text-dim uppercase tracking-wider">5. How likely are you to recommend TieBreaker?</label>
                       <span className="text-[clamp(10px,1.0vw,18px)] font-medium text-text-muted">0 = Never, 10 = Absolutely</span>
                     </div>

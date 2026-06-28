@@ -58,7 +58,7 @@ export function Tooltip({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              "absolute z-999 px-2.5 py-1.5 shadow-xl bg-text-bright text-bg-base rounded-md text-[clamp(10px,1.0vw,18px)] font-black tracking-widest uppercase whitespace-nowrap pointer-events-none before:content-[''] before:absolute",
+              "absolute z-999 px-2 py-1 shadow-lg bg-text-bright text-bg-base rounded text-[9px] font-black tracking-wider uppercase whitespace-nowrap pointer-events-none before:content-[''] before:absolute",
               positionClasses[position],
               position === 'top' && "before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-text-bright",
               position === 'bottom' && "before:bottom-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-b-text-bright"

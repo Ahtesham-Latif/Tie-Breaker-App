@@ -38,7 +38,7 @@ export function PricingModal({ onClose, onClaim }: PricingModalProps) {
             Level Up to <span className="text-accent">Pro</span>
           </h2>
           <p className="text-text-main font-semibold opacity-80 text-sm max-w-sm mx-auto">
-            You've reached your limit of 15 ties on the free plan. We hope you've enjoyed the insights!
+            You crushed 15 free ties: either you hit the ceiling, or you love this enough to go all in. Either way, you're exactly where you need to be. ⚡
           </p>
         </div>
 
