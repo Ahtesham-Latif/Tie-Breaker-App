@@ -1344,12 +1344,12 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex-1 flex flex-col p-4 md:p-8 bg-bg-base"
+              className="flex-1 flex flex-col p-4 md:px-8 md:pb-8 md:pt-0 bg-bg-base min-w-0"
             >
               <InteractiveGuide activeType={selectedType} onSelectType={handleAnalyze} />
               
-              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4">
-                  <div className="space-y-3">
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 shrink-0 mb-4 min-w-0">
+                  <div className="space-y-3 min-w-0">
                   <div className="flex items-center gap-3">
                     <span className="px-2 py-0 bg-accent text-bg-surface rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
                       {selectedType.replace("-", " ")} Mode
@@ -1367,7 +1367,7 @@ export default function App() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 sm:flex bg-accent-muted p-0 rounded-2xl border-2 border-accent/10 shadow-sm gap-1">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap bg-accent-muted p-0 rounded-2xl border-2 border-accent/10 shadow-sm gap-1 shrink-0">
                   <TypeTab
                     active={selectedType === "pros-cons"}
                     onClick={() => handleAnalyze("pros-cons")}

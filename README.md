@@ -37,7 +37,7 @@ Every dilemma is transformed into a structured decision artifact:
 > **Sub-second TTFB • Live Web Grounding • Zero Layout Shifts**
 
 * 🚀 **Real-Time SSE Streaming:** Bypasses standard SDKs for raw `text/event-stream` processing.
-* 🧠 **Azure AI Engine:** Powered by `gpt-4o-mini` for ultra-low latency execution.
+* 🧠 **Azure AI Engine:** Powered by `gpt-4.1-mini` for ultra-low latency execution.
 * 🌍 **Live Deep Research:** Autonomously queries Bing to override stale AI assumptions.
 * 🗄️ **Supabase Vault:** Non-destructive `jsonb` persistence with instant, zero-latency retrieval.
 * 🛡️ **Bulletproof Formatting:** Strict regex sanitization guarantees the React UI never breaks.
