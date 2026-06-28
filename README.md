@@ -238,6 +238,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 * **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
 * **Premium Fluid AI Orb & Domain-Aware Quotes:** An Apple/OpenAI-style continuous progress animation pairs with an intelligent text parser that feeds curated, domain-specific quotes (Tech, Business, Career, etc.) dynamically based on your `My Case` constraints while you wait.
 * **Native Desktop Scrolling:** Flawlessly transitions between side-by-side data grids and vertical stacked views, leveraging native window scrolling for an incredibly smooth experience across both desktop trackpads and mobile devices.
+* **Extreme Zoom Resilience:** Employs a pure mathematics layout engine with viewport-relative typography clamping (`clamp()`), flex-wrapping, and an intelligent `data-zoom` hook that dynamically adjusts structural elements—ensuring perfect readability from 25% out to 500% zoom.
 * **Mobile-First Accessibility:** Minimalist icon-only mobile buttons and edge-handles gracefully expand to reveal descriptive labels upon interaction, keeping the UI perfectly clean without sacrificing usability.
 * **Theme Adaptability:** Full Dark/Light structural synchronization.
 
