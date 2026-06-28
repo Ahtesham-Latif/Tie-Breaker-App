@@ -1042,7 +1042,7 @@ export default function App() {
                   value={optionA}
                   onChange={(e) => setOptionA(e.target.value)}
                   maxLength={100}
-                  placeholder="Option A (e.g. iPhone 15 Pro Max)"
+                  placeholder="e.g. Honda City 2024"
                   rows={2}
                   className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
@@ -1054,7 +1054,7 @@ export default function App() {
                   value={optionB}
                   onChange={(e) => setOptionB(e.target.value)}
                   maxLength={100}
-                  placeholder="Option B (e.g. Galaxy S24 Ultra)"
+                  placeholder="e.g. Toyota Corolla 2024"
                   rows={2}
                   className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-15"
                 />
@@ -1079,7 +1079,7 @@ export default function App() {
                         setMyCase(e.target.value);
                       }
                     }}
-                    placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                    placeholder="E.g. I'm a salaried professional in Karachi, budget around 50 lakh, need fuel efficiency for daily commute and long GT Road trips."
                     rows={4}
                     className="w-full bg-bg-panel border-2 border-transparent rounded-xl px-3 py-1.5 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner resize-y min-h-25"
                   />
@@ -1098,7 +1098,7 @@ export default function App() {
                   >
                     <textarea
                       disabled
-                      placeholder="E.g. I am a student with a tight budget looking for a device that lasts 4 years."
+                      placeholder="E.g. I'm a salaried professional in Karachi, budget around 50 lakh, need fuel efficiency for daily commute and long GT Road trips."
                       rows={4}
                       className="w-full bg-bg-panel border-2 border-dashed border-border-dim rounded-xl px-3 py-1.5 text-sm text-text-main font-semibold shadow-inner resize-none min-h-25 cursor-pointer group-hover:border-accent/50 transition-colors pointer-events-none"
                     />
@@ -1133,7 +1133,7 @@ export default function App() {
                   </span>
                 </label>
                 <p className="text-[9px] font-bold text-text-dim uppercase tracking-wider -mt-2 opacity-60 italic leading-tight">
-                  Add factors like "Cost" or "Health" to guide the comparison
+                  Add factors like "Fuel Economy" or "Resale Value" to guide the comparison
                 </p>
                 <div className="space-y-3">
                   {options.map((opt, idx) => (
@@ -1143,7 +1143,7 @@ export default function App() {
                         value={opt}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
                         maxLength={25}
-                        placeholder={`Factor ${idx + 1} (e.g. Cost)`}
+                        placeholder={(['Fuel Economy', 'Resale Value', 'Maintenance Cost', 'Comfort', 'Parts Availability', 'Engine Power'][idx] || `Factor ${idx + 1}`)}
                         className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-3 py-1 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                       />
                       {options.length > 2 && (

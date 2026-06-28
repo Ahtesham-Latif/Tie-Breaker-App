@@ -77,78 +77,107 @@ Getting a definitive answer is a simple 3-step process:
 ## 🏗️ Architecture
 
 ```mermaid
-flowchart LR
-    %% =========================
-    %% Client Layer
-    %% =========================
-    U[User]
-    FE[React Frontend]
-    UI[Decision Dashboard UI]
-    LS[(Local Cache / Session State)]
-
-    U -->|Enter Option A vs B, Factors, My Case| FE
-    FE -->|Render results, tabs, verdict views| UI
-    FE <-->|Cache reads / repeat session checks| LS
-
-    %% =========================
-    %% Identity + Persistence
-    %% =========================
-    SB[(Supabase Auth + Postgres)]
-    FE <-->|Auth session, fetch history, save decisions| SB
-
-    %% =========================
-    %% Client Access Control
-    %% =========================
-    FE --> G{Authenticated?}
-    G -- Yes --> PRO{Pro Plan?}
-    PRO -- Yes --> API
-    PRO -- No --> FREE{< 15 Free Ties?}
-    FREE -- Yes --> API
-    FREE -- No --> UPGRADE[Show Pro Upgrade]
-    G -- No --> WALL[Show Auth Modal]
-
-    %% =========================
-    %% Backend Orchestration
-    %% =========================
-    API[Express API Gateway]
-
-    subgraph BACKEND[Backend Orchestration Layer]
-        RL[Rate Limiter]
-        NORM[Input Validation + Normalization]
-        PAD[Factor Padding + Payload Assembly]
-        AIREQ[AI Request Builder]
-        SAN[Response Sanitization]
-        VAL[Schema Validation]
+flowchart TB
+    %% ─────────────────────────────────────────
+    %% LAYER 1 — User Interface
+    %% ─────────────────────────────────────────
+    subgraph CLIENT["🖥️  Client Layer  —  React 19 · TypeScript · Vite"]
+        direction LR
+        U(["👤 User"])
+        FE["⚛️ React Frontend\n──────────────\nStreaming SSE Handler\nTab Orchestrator\nTheme Engine"]
+        UI["📊 Decision Dashboard\n──────────────\nComparison Matrix\nPros & Cons\nSWOT Grid\nFinal Verdict"]
+        LS[("💾 Local LRU Cache\nSession State")]
     end
 
-    API --> RL
-    RL --> NORM
-    NORM --> PAD
-    PAD --> AIREQ
+    U -- "Option A · Option B\nFactors · My Case" --> FE
+    FE -- "Render structured\nanalysis artifacts" --> UI
+    FE <-- "Cache hit /\nSession read" --> LS
 
-    %% =========================
-    %% AI Decision Layer
-    %% =========================
-    subgraph AI[Melinda Decision Engine - Azure AI Foundry]
-        MEL[Structured Decision Agent]
-        WEB[Optional Live Web Grounding]
+    %% ─────────────────────────────────────────
+    %% LAYER 2 — Identity & Persistence
+    %% ─────────────────────────────────────────
+    subgraph DB["🗄️  Identity & Persistence Layer  —  Supabase"]
+        direction LR
+        AUTH["🔐 GoTrue Auth\n──────────────\nJWT · RLS Policies\nSession Tokens"]
+        PG[("🐘 PostgreSQL\n──────────────\njsonb Decision Vault\nUsage Quotas\nUser Profiles")]
     end
 
-    AIREQ --> MEL
-    MEL <-->|Optional retrieval for current facts| WEB
-    MEL -->|Structured JSON decision payload| SAN
+    FE <-- "Auth session · JWT\nFetch & save history" --> AUTH
+    AUTH <--> PG
 
-    %% =========================
-    %% Contract Enforcement
-    %% =========================
-    SAN --> VAL
-    VAL -->|Validated decision artifact| API
+    %% ─────────────────────────────────────────
+    %% LAYER 3 — Access Control Gate
+    %% ─────────────────────────────────────────
+    subgraph GATE["🔒  Access Control  —  Quota & Auth Enforcement"]
+        direction TB
+        G{"Authenticated?"}
+        PRO{"Pro Plan?"}
+        FREE{"Quota\n< 15?"}
+        WALL["🚧 Auth Modal\nLogin / Register"]
+        UPGRADE["⭐ Pro Upgrade\nCTA Card"]
+    end
 
-    %% =========================
-    %% Return + Persistence
-    %% =========================
-    API -->|Comparison matrix, SWOT, verdict, reasoning| FE
-    FE -->|Persist authenticated decision history| SB
+    FE --> G
+    G -- "❌ No" --> WALL
+    G -- "✅ Yes" --> PRO
+    PRO -- "✅ Yes\n(Unlimited)" --> API
+    PRO -- "❌ No" --> FREE
+    FREE -- "✅ Yes" --> API
+    FREE -- "❌ No" --> UPGRADE
+
+    %% ─────────────────────────────────────────
+    %% LAYER 4 — Backend Orchestration
+    %% ─────────────────────────────────────────
+    subgraph BACKEND["⚙️  Backend Orchestration Layer  —  Node.js · Express"]
+        direction LR
+        API["🚦 Express API Gateway\n──────────────\nJWT Verification\nBearer Token Check"]
+        RL["🛡️ Rate Limiter\n5 req / 15 min\nIP-based"]
+        NORM["📐 Input Normalizer\nLength Bounds\nString Sanitizer"]
+        PAD["🧩 Payload Assembler\nFactor Padding\nXML Tag Injection"]
+        AIREQ["📤 AI Request Builder\n60s Token Cache\nSchema Directives"]
+        SAN["🔧 Response Sanitizer\nRegex Repair\nMarkdown Bleed Fix"]
+        VAL["✅ Schema Validator\nJSON Contract\nField Compliance"]
+    end
+
+    API --> RL --> NORM --> PAD --> AIREQ
+    SAN --> VAL --> API
+
+    %% ─────────────────────────────────────────
+    %% LAYER 5 — AI Decision Engine
+    %% ─────────────────────────────────────────
+    subgraph AI["🧠  Melinda  —  Azure AI Foundry Decision Engine"]
+        direction LR
+        MEL["🤖 Melinda Agent\n──────────────\ngpt-4.1-mini · Temp 0.3\nStructured JSON Output\nSSE Streaming"]
+        WEB["🌐 Deep Research\n──────────────\nAzure Bing Search\nLive Web Grounding\nMax 2 Calls"]
+    end
+
+    AIREQ -- "Structured prompt\n+ user context" --> MEL
+    MEL <-- "Optional: live\npricing / market data" --> WEB
+    MEL -- "Strict JSON\ndecision payload" --> SAN
+
+    %% ─────────────────────────────────────────
+    %% RETURN & PERSIST
+    %% ─────────────────────────────────────────
+    API -- "Comparison · SWOT\nVerdict · Reasoning" --> FE
+    FE -- "Persist jsonb\ndecision artifact" --> PG
+
+    %% ─────────────────────────────────────────
+    %% STYLES
+    %% ─────────────────────────────────────────
+    classDef clientNode fill:#1e3a5f,stroke:#4a90d9,color:#e8f4fd,rx:8
+    classDef dbNode fill:#1a3d2b,stroke:#3ecf8e,color:#d4f5e9,rx:8
+    classDef gateNode fill:#3d2a00,stroke:#f5a623,color:#fff3d4,rx:8
+    classDef backendNode fill:#2d1b4e,stroke:#9b59b6,color:#ead5f5,rx:8
+    classDef aiNode fill:#3d0f0f,stroke:#e74c3c,color:#fde8e8,rx:8
+    classDef blockNode fill:#0f1923,stroke:#4a90d9,color:#a8c6e0,rx:4
+    classDef decision fill:#2a1f00,stroke:#f5a623,color:#ffd88a
+
+    class U,FE,UI,LS clientNode
+    class AUTH,PG dbNode
+    class G,PRO,FREE decision
+    class WALL,UPGRADE gateNode
+    class API,RL,NORM,PAD,AIREQ,SAN,VAL backendNode
+    class MEL,WEB aiNode
 ```
 
 ### Staged Processing Pipeline
