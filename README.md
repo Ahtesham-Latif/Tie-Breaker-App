@@ -4,7 +4,12 @@
 > **Stop guessing. Start deciding.**  
 > *A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.*
 
-![React 19](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+> 🔗 **[Try TieBreaker Live](https://tie-breaker-v2-avdmcehxfef8caeh.centralus-01.azurewebsites.net/)** 
+> ⭐ **[Support on Product Hunt](https://www.producthunt.com/products/credible-labs)**
+---
+[![Featured on Product Hunt](https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1182579&theme=light)](https://www.producthunt.com/products/credible-labs)
+
+>![React 19](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Azure AI Foundry](https://img.shields.io/badge/Azure%20AI%20Foundry-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
@@ -30,6 +35,17 @@ Every dilemma is transformed into a structured decision artifact:
 ### 📺 Watch the User Manual Guide
 [![The TieBreaker User Manual](https://img.youtube.com/vi/m__IZkOf2AU/maxresdefault.jpg)](https://youtu.be/m__IZkOf2AU)
 > *Click the image above to watch a complete walkthrough of The TieBreaker's features and decision intelligence engine!*
+
+## 📸 Screenshots
+
+### Decision Engine
+![Decision Input](Pictures/input-screen.png)
+
+### Comparison Matrix  
+![Comparison](Pictures/comparison.png)
+
+### Final Verdict
+![Verdict](Pictures/verdict.png)
 
 ---
 
@@ -209,7 +225,7 @@ The TieBreaker relies heavily on:
 The backend cognitive engine of TieBreaker is **Melinda**, a specialized decision agent hosted on Azure AI Foundry. Rather than functioning as an open-ended conversationalist, Melinda operates as a strict analytical compiler—transforming ambiguous, emotionally charged dilemmas into objective, strictly-typed data artifacts.
 
 ### Engine Specifications & Tooling
-* **Core Model:** Powered by Azure's `gpt-4o-mini` (or equivalent ultra-fast deployments). We specifically leverage low-latency mini models without internal reasoning loops to achieve sub-second TTFB (Time to First Byte) while preserving high-tier logical structuring.
+* **Core Model:** Powered by Azure's `gpt-4.1-mini` (or equivalent ultra-fast deployments). We specifically leverage low-latency mini models without internal reasoning loops to achieve sub-second TTFB (Time to First Byte) while preserving high-tier logical structuring.
 * **Grounding Integration:** Equipped with the **Azure Bing Web Search Tool**. When Deep Research is enabled, Melinda autonomously queries the live web to anchor her analysis in current pricing, market realities, and factual specs, completely overriding stale pre-trained assumptions.
 * **Context Injection:** She receives layered prompt configurations dynamically assembled by the Express backend. This includes strict XML boundaries around user inputs, historical session memory (ensuring sequential tabs build upon, rather than repeat, past insights), and explicit schema directives.
 
@@ -403,18 +419,21 @@ cp .env.example .env
 ```
 Populate `.env` with:
 ```env
-FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-05-15-preview
+FOUNDRY_ENDPOINT=https://your-agent.services.ai.azure.com/openai/deployments/gpt-4.1-mini/chat/completions?api-version=2025-05-15-preview
 Melinda_Agent=your-agent-identifier
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### 4. Authenticate Infrastructure
+### 4. Database Setup (Supabase)
+For the database structure and table initialization, please refer to the [schema.sql](schema.sql) file. You can run its contents in your Supabase SQL Editor.
+
+### 5. Authenticate Infrastructure
 ```bash
 az login
 ```
 
-### 5. Launch Local Dev Node
+### 6. Launch Local Dev Node
 Execute frontend and backend tasks concurrently:
 ```bash
 npm run dev:full
@@ -447,16 +466,24 @@ The **Google Gemini CLI** was utilized as an engineering accelerator throughout 
 ---
 
 ## 🤝 Contributing
-Contributions, suggestions, and feedback are welcome.
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Open a pull request
+
+Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
+
+### Good first issues
+- Add new local market facts to the system prompt (R4)
+- Improve zoom resilience at non-standard DPI settings
+- Add new quote domains to Quotes.txt
+- Write additional Vitest test cases
+
+### What we don't accept
+- Changes to the Melinda system prompt without test evidence
+- UI changes that break the 100% zoom layout
+- Dependencies that increase bundle size > 10kb
 
 ---
 
 ## 📄 License
-MIT License
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 

@@ -10,7 +10,7 @@ We do **not** intentionally use your personal identity for this purpose. Where p
 
 Your privacy comes first.
 
-Pro users can enable **Private Mode**, which excludes their decision history and analyses from being used to improve TieBreaker. Your analyses remain available only for your personal use and account history, subject to our operational requirements.
+Pro users can enable **Privacy Mode**. Privacy Mode keeps your private decisions out of your visible decision history and provides additional privacy protections for sensitive analyses. Our privacy architecture will continue to evolve as TieBreaker grows.
 
 ## What We Don't Do
 
@@ -20,4 +20,4 @@ Pro users can enable **Private Mode**, which excludes their decision history and
 
 ## Your Choice
 
-If you prefer complete privacy, upgrading to **TieBreaker Pro** with **Private Mode** allows you to opt out of improvement-related data usage while continuing to enjoy all premium features.
+If you prefer complete privacy, upgrading to **TieBreaker Pro** with **Privacy Mode** allows you to opt out of improvement-related data usage while continuing to enjoy all premium features.
