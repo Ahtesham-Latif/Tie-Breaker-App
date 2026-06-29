@@ -329,10 +329,10 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                   <div className="bg-bg-panel border-2 border-border-dim rounded-2xl p-3 shadow-sm space-y-2">
                     <h3 className="text-[clamp(13px,1.7vw,25px)] font-black uppercase tracking-widest text-text-bright border-b border-border-dim pb-1">Free Plan</h3>
                     <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
-                      By using the free version of TieBreaker, you agree that your submitted decision prompts, analysis preferences, and generated results may be reviewed and used in an anonymized form to improve TieBreaker, including its prompts, decision engine, features, and overall user experience.
+                      By using the Free Plan, you agree that your decision prompts, analysis preferences, and generated results may be used in an anonymized or de-identified form to improve TieBreaker, including its reasoning engine, prompts, features, and overall user experience.
                     </p>
                     <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
-                      We do <span className="font-bold text-text-bright">not</span> intentionally use your personal identity for this purpose. Where practical, personally identifying information is excluded or anonymized before review.
+                      We do <span className="font-bold text-text-bright">not</span> intentionally associate this information with your personal identity when it is used for product improvement.
                     </p>
                   </div>
 
@@ -355,7 +355,7 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                     </h3>
                     <p className="text-[clamp(10px,1.3vw,21px)] font-bold text-text-bright">Your privacy comes first.</p>
                     <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold leading-relaxed">
-                      Pro users can enable <span className="font-bold text-accent">Private Mode</span>, which excludes their decision history and analyses from being used to improve TieBreaker. Your analyses remain available only for your personal use and account history, subject to our operational requirements.
+                      Private Mode provides enhanced privacy for sensitive decisions by keeping them out of your visible decision history and offering additional privacy protections within the TieBreaker experience. Our privacy architecture will continue to evolve as the platform grows.
                     </p>
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-2 mt-2 border-t border-accent/20 min-w-0">
                       <span className="text-[clamp(10px,1.1vw,19px)] font-black uppercase tracking-widest text-accent shrink-0">Offer Ends In:</span>
@@ -375,15 +375,16 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                   </h3>
                   <ul className="space-y-1 text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold">
                     <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not sell your personal data.</li>
-                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not share your private decision history with other users.</li>
                     <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not use your data for advertising.</li>
+                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not share your private decision history with other users.</li>
+                    <li className="flex items-center gap-3 flex-wrap min-w-0"><span className="w-2 h-2 rounded-full bg-danger shrink-0" /> We do not publish your decisions or make them publicly accessible.</li>
                   </ul>
                 </div>
 
                 <div className="text-center bg-bg-surface p-3 rounded-2xl border-2 border-border-dim">
                   <h3 className="text-[clamp(10px,1.4vw,22px)] font-black uppercase tracking-widest text-text-bright mb-1">Your Choice</h3>
                   <p className="text-[clamp(10px,1.3vw,21px)] text-text-main font-semibold">
-                    If you prefer complete privacy, upgrading to <span className="font-bold text-accent">TieBreaker Pro</span> with <span className="font-bold text-text-bright">Private Mode</span> allows you to opt out of improvement-related data usage while continuing to enjoy all premium features. <span className="text-accent font-bold">(Good news: Pro is currently completely free for the first month!)</span>
+                    If you need stronger privacy controls, <span className="font-bold text-accent">TieBreaker Pro</span> includes <span className="font-bold text-text-bright">Private Mode</span> along with additional premium features. We're continuously improving our privacy architecture as TieBreaker evolves to provide even stronger privacy protections over time. <span className="text-accent font-bold">(Good news: Pro is currently completely free for the first month!)</span>
                   </p>
                 </div>
               </motion.div>

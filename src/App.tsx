@@ -1142,7 +1142,7 @@ export default function App() {
                         title={`Comparison Factor ${idx + 1}`}
                         value={opt}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
-                        maxLength={25}
+                        maxLength={30}
                         placeholder={`Factor ${idx + 1} e.g. ${['Fuel Economy', 'Resale Value', 'Maintenance Cost', 'Comfort', 'Parts Availability', 'Engine Power'][idx] || 'Custom Factor'}`}
                         className="w-full bg-bg-panel border-2 border-transparent rounded-lg px-3 py-1 text-sm text-text-main focus:border-accent focus:bg-bg-surface outline-none transition-all font-semibold shadow-inner"
                       />

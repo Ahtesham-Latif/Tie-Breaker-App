@@ -127,8 +127,8 @@ app.post('/api/analyze', async (req, res) => {
     if (factors && (!Array.isArray(factors) || factors.length > 20)) {
       return res.status(400).json({ error: 'Too many factors provided (max 20). (Error Code: ERR-VAL3)' });
     }
-    if (myCase && (typeof myCase !== 'string' || myCase.length > 2000)) {
-      return res.status(400).json({ error: 'My Case text is too long (max 2000 chars). (Error Code: ERR-VAL4)' });
+    if (myCase && (typeof myCase !== 'string' || myCase.length > 3000)) {
+      return res.status(400).json({ error: 'My Case text is too long (max 3000 chars). (Error Code: ERR-VAL4)' });
     }
 
     if (!foundryEndpoint) {

@@ -1,23 +1,39 @@
-# TieBreaker Usage & Privacy Policy
+## Usage & Privacy Policy
 
-## Free Plan
+We believe in being transparent about how your data is used and how your privacy is protected.
 
-By using the free version of TieBreaker, you agree that your submitted decision prompts, analysis preferences, and generated results may be reviewed and used in an anonymized form to improve TieBreaker, including its prompts, decision engine, features, and overall user experience.
+### Free Plan
 
-We do **not** intentionally use your personal identity for this purpose. Where practical, personally identifying information is excluded or anonymized before review.
+By using the Free Plan, you agree that your decision prompts, analysis preferences, and generated results may be used in an anonymized or de-identified form to improve TieBreaker, including its reasoning engine, prompts, features, and overall user experience.
 
-## Pro Plan
+We do not intentionally associate this information with your personal identity when it is used for product improvement.
+
+---
+
+### Pro Plan
+
+👏 **FREE FOR THE FIRST MONTH**
+
+### 🔒 Private Mode
 
 Your privacy comes first.
 
-Pro users can enable **Privacy Mode**. Privacy Mode keeps your private decisions out of your visible decision history and provides additional privacy protections for sensitive analyses. Our privacy architecture will continue to evolve as TieBreaker grows.
+Private Mode provides enhanced privacy for sensitive decisions by keeping them out of your visible decision history and offering additional privacy protections within the TieBreaker experience. Our privacy architecture will continue to evolve as the platform grows.
+
+**Offer Ends In:**
+28d 09h 59m 49s
+
+---
 
 ## What We Don't Do
 
-* We do not sell your personal data.
-* We do not share your private decision history with other users.
-* We do not use your data for advertising.
+* We do **not** sell your personal data.
+* We do **not** use your data for advertising.
+* We do **not** share your private decision history with other users.
+* We do **not** publish your decisions or make them publicly accessible.
+
+---
 
 ## Your Choice
 
-If you prefer complete privacy, upgrading to **TieBreaker Pro** with **Privacy Mode** allows you to opt out of improvement-related data usage while continuing to enjoy all premium features.
+If you need stronger privacy controls, TieBreaker Pro includes Private Mode along with additional premium features. We're continuously improving our privacy architecture as TieBreaker evolves to provide even stronger privacy protections over time.
