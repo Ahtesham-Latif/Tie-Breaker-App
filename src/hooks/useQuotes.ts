@@ -1,10 +1,4 @@
-import rawQuotes from '../Quotes.txt?raw';
-
-export interface Quote {
-  text: string;
-  author: string;
-  domain: string;
-}
+import { Quote, ALL_QUOTES } from '../quotes';
 
 type Domain = 'BUSINESS' | 'TECH' | 'CAREER' | 'LIFE' | 'ACADEMIC' | 'DECISION';
 
@@ -56,36 +50,6 @@ const PROFESSION_MAP: Record<string, Domain[]> = {
   'family': ['LIFE', 'DECISION'],
 };
 
-function parseQuotes(raw: string): Quote[] {
-  const quotes: Quote[] = [];
-  let currentDomain: Domain = 'DECISION';
-
-  raw.split('\n').forEach(line => {
-    line = line.trim();
-    if (!line) return;
-
-    // Domain header
-    const domainMatch = line.match(/^\[([A-Z]+)\]$/);
-    if (domainMatch) {
-      currentDomain = domainMatch[1] as Domain;
-      return;
-    }
-
-    // Quote line
-    const quoteMatch = line.match(/^"?(.+?)"?\s*[—–-]\s*(.+)$/);
-    if (quoteMatch) {
-      quotes.push({
-        text: quoteMatch[1].trim(),
-        author: quoteMatch[2].trim(),
-        domain: currentDomain
-      });
-    }
-  });
-
-  return quotes;
-}
-
-const ALL_QUOTES = parseQuotes(rawQuotes);
 
 function detectDomains(myCase?: string): Domain[] {
   if (!myCase) return ['DECISION'];
