@@ -118,12 +118,20 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                     <img src={meImage} alt="Ahtesham Latif" className="w-full h-full object-cover max-w-full h-auto" loading="lazy" />
                  </div>
                  <h2 className="text-3xl font-black uppercase tracking-tighter text-text-bright">
-                    About The Creator
+                    Meet the Creator
                  </h2>
-                 <p className="text-[clamp(11px,1.5vw,23px)] text-text-main font-semibold">
-                    Ahtesham Latif
-                 </p>
-                 <div className="flex flex-wrap justify-center gap-4 pt-3 min-w-0">
+                 <div className="space-y-1.5 -mt-2">
+                   <p className="text-[clamp(16px,2vw,28px)] text-text-main font-black">
+                      Ahtesham Latif
+                   </p>
+                   <p className="text-[clamp(12px,1.2vw,18px)] text-accent font-bold tracking-wide">
+                      Backend AI Engineer & Full-Stack Developer
+                   </p>
+                   <p className="text-[clamp(12px,1.1vw,16px)] text-text-muted max-w-sm mx-auto">
+                      Building AI products that help people make better decisions.
+                   </p>
+                 </div>
+                 <div className="flex flex-wrap justify-center items-center gap-4 pt-3 min-w-0">
                     <a href="https://github.com/Ahtesham-Latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[clamp(11px,1.5vw,23px)] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all flex-wrap min-w-0">
                        <Github size={20} /> GitHub
                     </a>
@@ -132,6 +140,12 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                     </a>
                     <a href="https://www.credly.com/users/f23ba044-ahtesham-latif" target="_blank" rel="noreferrer" className="px-[19px] py-[7px] text-[clamp(11px,1.5vw,23px)] bg-bg-panel border-2 border-border-dim rounded-xl font-bold flex items-center gap-2 hover:border-accent hover:text-accent transition-all flex-wrap min-w-0">
                        <Award size={20} /> Credly Profile
+                    </a>
+                 </div>
+                 
+                 <div className="flex justify-center pt-4">
+                    <a href="https://www.producthunt.com/products/credible-labs/reviews/new?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-credible-labs" target="_blank" rel="noopener noreferrer">
+                       <img src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=519139&theme=dark" alt="Credible Labs - Customer Identity Tools and APIs | Product Hunt" style={{ width: "250px", height: "54px" }} width="250" height="54" />
                     </a>
                  </div>
               </motion.div>
