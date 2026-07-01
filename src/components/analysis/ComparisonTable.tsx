@@ -12,7 +12,7 @@ export function ComparisonTable({
 }) {
   return (
     <div className="space-y-6 md:space-y-8">
-      {data.factors.map((factor, fIdx) => (
+      {(data.factors || []).map((factor, fIdx) => (
         <table key={fIdx} className={cn(
           "w-full table-fixed bg-bg-panel border-2 md:border-4 border-accent/20 shadow-lg hover:border-accent/40 transition-colors border-separate border-spacing-2",
           isSideBySide ? "rounded-xl md:rounded-2xl p-1 md:p-2" : "rounded-xl md:rounded-2xl p-2 md:p-4"
@@ -26,7 +26,7 @@ export function ComparisonTable({
           </thead>
           <tbody className={cn(isSideBySide ? "table-row-group" : "block md:table-row-group")}>
             <tr className={cn(isSideBySide ? "table-row" : "block md:table-row")}>
-            {data.comparison.map((opt, oIdx) => (
+            {(data.comparison || []).map((opt, oIdx) => (
               <td key={oIdx} className={cn(
                 "align-top min-w-0 bg-bg-surface border-2 border-accent/5 shadow-sm block max-[480px]:block",
                 isSideBySide ? "md:table-cell rounded-lg p-1" : "md:table-cell rounded-lg md:rounded-xl p-2 md:p-3",

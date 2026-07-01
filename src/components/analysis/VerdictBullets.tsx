@@ -11,13 +11,9 @@ export function VerdictBullets({
 }) {
   const [isWeighing, setIsWeighing] = useState(true);
 
-  useEffect(() => {
-    setIsWeighing(true);
-  }, [data]);
-
   return (
     <AnimatePresence mode="wait">
-      {isWeighing && data.winner ? (
+      {isWeighing || !data.winner ? (
         <VerdictAnimation key="animation" data={data} onComplete={() => setIsWeighing(false)} />
       ) : (
         <motion.div
@@ -51,7 +47,7 @@ export function VerdictBullets({
             Analysis Takeaways
           </h3>
           <ul className="space-y-4">
-            {data.keyTakeaways.map((point: string, i: number) => (
+            {(data.keyTakeaways || []).map((point: string, i: number) => (
               <li
                 key={i}
                 className="flex items-start gap-4 text-sm font-black italic text-justify flex-wrap min-w-0"

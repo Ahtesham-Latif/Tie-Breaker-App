@@ -334,10 +334,21 @@ app.post('/api/analyze', async (req, res) => {
             // Accumulate text deltas (Azure sometimes sends pure string deltas)
             if (parsed.type === 'response.output_text.delta' && typeof parsed.delta === 'string') {
               finalRawText += parsed.delta;
+              res.write(`data: ${JSON.stringify({ status: 'chunk', delta: finalRawText })}\n\n`);
+              if (typeof res.flush === 'function') res.flush();
             } else if (parsed.delta?.text) {
               finalRawText += parsed.delta.text;
+              res.write(`data: ${JSON.stringify({ status: 'chunk', delta: finalRawText })}\n\n`);
+              if (typeof res.flush === 'function') res.flush();
             } else if (parsed.delta?.content?.[0]?.text) {
-              finalRawText += parsed.delta.content[0].text;
+              const textDelta = parsed.delta.content[0].text;
+              finalRawText += typeof textDelta === 'object' ? (textDelta.value || '') : textDelta;
+              res.write(`data: ${JSON.stringify({ status: 'chunk', delta: finalRawText })}\n\n`);
+              if (typeof res.flush === 'function') res.flush();
+            } else if (parsed.choices?.[0]?.delta?.content) {
+              finalRawText += parsed.choices[0].delta.content;
+              res.write(`data: ${JSON.stringify({ status: 'chunk', delta: finalRawText })}\n\n`);
+              if (typeof res.flush === 'function') res.flush();
             }
             
             // Fallback for done event

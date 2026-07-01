@@ -28,7 +28,12 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      onComplete();
+      if (data.winner) onComplete();
+      return;
+    }
+
+    if (!data.winner) {
+      setPhase("neutral");
       return;
     }
 
@@ -54,7 +59,7 @@ export function VerdictAnimation({ data, onComplete }: VerdictAnimationProps) {
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, [onComplete, prefersReducedMotion]);
+  }, [onComplete, prefersReducedMotion, data.winner]);
 
   // Wobble animation during analysis, then tilt towards winner
   let rotation = 0;

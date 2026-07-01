@@ -46,6 +46,7 @@ import { AuthModal } from "./components/modals/AuthModal";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./db/supabase";
 import { User as UserIcon, LogOut, Clock, Lock, Info } from "lucide-react";
+import { parsePartialJson } from "./lib/jsonParser";
 
 
 // --- AI Service ---
@@ -60,7 +61,8 @@ async function analyzeDecision(
   useWebSearch: boolean,
   contextData?: any,
   myCase?: string,
-  token?: string
+  token?: string,
+  onProgress?: (partialData: any) => void
 ): Promise<{ content: string; structuredData?: any }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) {
@@ -97,6 +99,7 @@ async function analyzeDecision(
   const decoder = new TextDecoder();
   let finalResult: any = null;
   let buffer = '';
+  let lastProgressUpdate = 0;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -121,6 +124,15 @@ async function analyzeDecision(
           throw new Error(parsed.error || 'Unknown streaming error');
         } else if (parsed.status === 'complete') {
           finalResult = JSON.parse(parsed.content);
+        } else if (parsed.status === 'chunk' && onProgress) {
+          const now = Date.now();
+          if (now - lastProgressUpdate > 100) {
+            const partial = parsePartialJson(parsed.delta);
+            if (Object.keys(partial).length > 0) {
+              onProgress(partial);
+              lastProgressUpdate = now;
+            }
+          }
         }
       } catch (e) {
          if (e instanceof Error && e.message !== "Unexpected end of JSON input" && !e.message.includes("Unexpected token")) {
@@ -560,7 +572,18 @@ export default function App() {
         useWebSearch,
         contextData,
         myCase,
-        token
+        token,
+        (partialData) => {
+          setAnalysisCache((prev) => ({
+            ...prev,
+            [cacheKey]: {
+              type,
+              content: "Generating...",
+              structuredData: partialData,
+              factors: validFactors,
+            },
+          }));
+        }
       );
 
       if (structuredData?.entities?.length < 2 && (type === "comparison" || type === "verdict")) {

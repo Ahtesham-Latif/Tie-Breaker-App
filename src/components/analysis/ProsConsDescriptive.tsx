@@ -7,7 +7,7 @@ import { cn } from "../../lib/utils";
 export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSideBySide?: boolean }) {
   return (
     <div className={cn("grid", isSideBySide ? "grid-cols-2 gap-1 md:gap-2" : "grid-cols-1 gap-4")}>
-      {data.map((opt, i) => (
+      {(Array.isArray(data) ? data : []).map((opt, i) => (
         <motion.div
           key={i}
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +42,7 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
                 Advantages
               </h3>
               <ul className="space-y-2">
-                {opt.pros.map((pro: string, idx: number) => (
+                {(opt.pros || []).map((pro: string, idx: number) => (
                   <li
                     key={idx}
                     className={cn(
@@ -69,7 +69,7 @@ export function ProsConsDescriptive({ data, isSideBySide }: { data: any[]; isSid
                 Constraints
               </h3>
               <ul className="space-y-2">
-                {opt.cons.map((con: string, idx: number) => (
+                {(opt.cons || []).map((con: string, idx: number) => (
                   <li
                     key={idx}
                     className={cn(
