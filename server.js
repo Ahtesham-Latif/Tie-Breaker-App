@@ -80,9 +80,17 @@ async function getAzureToken() {
   return cachedToken;
 }
 
-// Implement CORS
+// Implement CORS — locked to production domain and local dev
+const allowedOrigins = [
+  'https://tie-breaker-v2-avdmcehxfef8caeh.centralus-01.azurewebsites.net',
+  'http://localhost:3000',
+  'http://localhost:8080'
+];
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   if (req.method === 'OPTIONS') {
@@ -142,26 +150,32 @@ app.post('/api/analyze', async (req, res) => {
     let userId = null;
     let currentTiesCount = 0;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication is required to generate an analysis. (Error Code: AUTH-REQ)' });
-    }
+    if (process.env.NODE_ENV !== 'production' && (!authHeader || !authHeader.startsWith('Bearer '))) {
+      // Dev mode: skip Supabase auth when no Bearer token (az login handles Azure auth)
+      userId = 'dev-user';
+      console.log('⚠️  Dev mode: Skipping Supabase auth (az login active)');
+    } else {
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authentication is required to generate an analysis. (Error Code: AUTH-REQ)' });
+      }
 
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid authentication session. (Error Code: AUTH-01)' });
-    }
-    userId = user.id;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('ties_count, plan')
-      .eq('id', user.id)
-      .single();
-    
-    currentTiesCount = profile ? profile.ties_count : 0;
-    if (currentTiesCount >= 15 && profile?.plan !== 'pro') {
-      return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
+      const token = authHeader.split(' ')[1];
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        return res.status(401).json({ error: 'Invalid authentication session. (Error Code: AUTH-01)' });
+      }
+      userId = user.id;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('ties_count, plan')
+        .eq('id', user.id)
+        .single();
+      
+      currentTiesCount = profile ? profile.ties_count : 0;
+      if (currentTiesCount >= 15 && profile?.plan !== 'pro') {
+        return res.status(403).json({ error: 'You have reached your 15-tie limit! Please upgrade to continue. (Error Code: QUOTA-01)' });
+      }
     }
 
     // Cache key based on input
@@ -173,7 +187,13 @@ app.post('/api/analyze', async (req, res) => {
     const cachedResponse = analysisCache.get(cacheKey);
     if (cachedResponse) {
       console.log('Serving from cache for:', decision);
-      return res.json(cachedResponse);
+      // Respond via SSE to match the streaming protocol the frontend expects
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+      res.write(`data: ${JSON.stringify({ status: 'complete', content: cachedResponse.content })}\n\n`);
+      return res.end();
     }
 
     // 2. Request a scoped access token specifically for Azure AI services
@@ -269,9 +289,14 @@ app.post('/api/analyze', async (req, res) => {
       } catch (e) {
         actualReason = errText;
       }
-      if (actualReason.length > 200) actualReason = actualReason.substring(0, 200) + '...';
-      const errorCode = actualReason.toLowerCase().includes('content management policy') ? 'ERR-04-SAFETY' : 'ERR-04';
-      throw new Error(`AI Service Error (${response.status}): ${actualReason} (Error Code: ${errorCode})`);
+      const isSafety = actualReason.toLowerCase().includes('content management policy');
+      const errorCode = isSafety ? 'ERR-04-SAFETY' : 'ERR-04';
+      // Log the full error server-side, but send a sanitized message to the client
+      console.error(`Azure AI Error (${response.status}):`, actualReason.substring(0, 300));
+      const clientMessage = isSafety
+        ? 'Your request was flagged by content safety filters. Please rephrase your decision or factors.'
+        : 'The AI engine encountered an error while processing your request. Please try again.';
+      throw new Error(`${clientMessage} (Error Code: ${errorCode})`);
     }
 
     // 5. Parsing the Streaming Azure Response
@@ -452,6 +477,11 @@ app.post('/api/analyze', async (req, res) => {
     res.write(`data: ${JSON.stringify({ status: 'error', error: errorMsg })}\n\n`);
     return res.end();
   }
+});
+
+// Health check endpoint for Azure App Service probes
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // 2. Handle React routing (send all requests to index.html)
