@@ -52,7 +52,7 @@ Every dilemma is transformed into a structured decision artifact:
 ## ⚡ At a Glance
 > **Sub-second TTFB • Live Web Grounding • Zero Layout Shifts**
 
-* 🚀 **Real-Time SSE Streaming:** Bypasses standard SDKs for raw `text/event-stream` processing.
+* 🚀 **Real-Time SSE Streaming & Partial JSON:** Bypasses standard SDKs for raw `text/event-stream` processing, rendering analysis matrices live before the AI even finishes thinking!
 * 🧠 **Azure AI Engine:** Powered by `gpt-4.1-mini` for ultra-low latency execution.
 * 🌍 **Live Deep Research:** Autonomously queries Bing to override stale AI assumptions.
 * 🗄️ **Supabase Vault:** Non-destructive `jsonb` persistence with instant, zero-latency retrieval.
@@ -200,7 +200,7 @@ flowchart TB
 1. **Ingestion:** Enforces `maxLength` bounds and normalizes input strings.
 2. **Padding:** Auto-injects universal baseline dimensions if user factors are sparse.
 3. **Orchestration:** Dispatches strict schemas to Azure, utilizing a **60-second in-memory token cache** to drop auth overhead.
-4. **SSE Streaming:** Processes raw `text/event-stream` chunks, firing live `thinking` pings to the UI while extracting the JSON payload.
+4. **SSE Streaming & Partial JSON Parsing:** Processes raw `text/event-stream` chunks, dynamically stitching and rendering incomplete JSON fragments live on the UI so users watch the matrices build in real-time.
 5. **Sanitization:** Repairs markdown bleed, validates JSON schemas, and intercepts Azure `ERR-04-SAFETY` filters.
 6. **Persistence:** Saves the exact `jsonb` artifact into Supabase PostgreSQL for zero-latency historical retrieval.
 
@@ -293,7 +293,7 @@ The TieBreaker isn't just a temporary calculator; it acts as a long-term, crypto
 * **Smart Auto-Selection:** History links auto-scan the payload to land the user on the first valid, non-empty tab.
 
 ### Interface Design
-* **Real-time SSE Streaming:** Dynamically reacts to backend streams, instantly establishing a connection instead of showing a static loading screen.
+* **Real-time SSE Streaming:** Dynamically reacts to backend streams, parsing incomplete JSON on the fly to build tables and logic live before your eyes, entirely removing static loading screens.
 * **Premium Fluid AI Orb & Domain-Aware Quotes:** An Apple/OpenAI-style continuous progress animation pairs with an intelligent text parser that feeds curated, domain-specific quotes (Tech, Business, Career, etc.) dynamically based on your `My Case` constraints while you wait.
 * **Native Desktop Scrolling:** Flawlessly transitions between side-by-side data grids and vertical stacked views, leveraging native window scrolling for an incredibly smooth experience across both desktop trackpads and mobile devices.
 * **Extreme Zoom Resilience:** Employs a pure mathematics layout engine with viewport-relative typography clamping (`clamp()`), flex-wrapping, and an intelligent `data-zoom` hook that dynamically adjusts structural elements—ensuring perfect readability from 25% out to 500% zoom.

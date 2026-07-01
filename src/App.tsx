@@ -23,7 +23,8 @@ import {
   ArrowLeft,
   Crown,
   EyeOff,
-  Shield
+  Shield,
+  Sparkles
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "./lib/utils";
@@ -247,6 +248,7 @@ export default function App() {
   const [showAboutUsModal, setShowAboutUsModal] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [aboutUsInitialTab, setAboutUsInitialTab] = useState<"about" | "what-it-does" | "whats-new" | "demo" | "policy">("about");
   const [surveyTriggerType, setSurveyTriggerType] = useState<string>("");
   const [usageCount, setUsageCount] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -835,7 +837,7 @@ export default function App() {
             setShowAuthModal(false);
           }}
         />
-        {showAboutUsModal && <AboutUsModal onClose={() => setShowAboutUsModal(false)} />}
+        {showAboutUsModal && <AboutUsModal onClose={() => { setShowAboutUsModal(false); setAboutUsInitialTab("about"); }} initialTab={aboutUsInitialTab} />}
         {showLogoutModal && (
           <ConfirmLogoutModal 
             onConfirm={() => {
@@ -1009,6 +1011,23 @@ export default function App() {
                   {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
                   <span className="text-[10px] font-black uppercase tracking-widest">Theme</span>
                 </button>
+              </Tooltip>
+
+              <Tooltip content="Click me!" position="bottom">
+                <motion.button
+                  animate={{ 
+                    boxShadow: ["0px 0px 0px rgba(245,158,11,0)", "0px 0px 15px rgba(245,158,11,0.6)", "0px 0px 0px rgba(245,158,11,0)"]
+                  }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  onClick={() => {
+                    setAboutUsInitialTab("whats-new");
+                    setShowAboutUsModal(true);
+                  }}
+                  className="relative overflow-hidden px-3 py-1.5 rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white font-black uppercase tracking-widest text-[10px] shadow-lg flex items-center gap-1.5 shrink-0 group border border-amber-300/50"
+                >
+                  <Sparkles size={14} className="group-hover:animate-spin" />
+                  <span className="whitespace-nowrap drop-shadow-sm">Surprise</span>
+                </motion.button>
               </Tooltip>
 
               {/* Go Pro Button — visible only to logged-in free users */}

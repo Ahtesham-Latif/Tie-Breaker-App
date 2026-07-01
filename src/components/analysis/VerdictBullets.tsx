@@ -20,7 +20,7 @@ export function VerdictBullets({
           key="verdict"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="max-w-3xl mx-auto bg-accent text-bg-surface p-4 md:p-6 rounded-xl md:rounded-2xl shadow-2xl relative overflow-hidden"
+          className="max-w-3xl mx-auto bg-accent text-bg-surface selection:bg-bg-surface selection:text-accent p-4 md:p-6 rounded-xl md:rounded-2xl shadow-2xl relative overflow-hidden"
         >
       <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
         <Zap size={160} />

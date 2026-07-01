@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Github, Linkedin, Mail, Youtube, Video, Info, User, HelpCircle, Award, Zap, BrainCircuit, CheckCircle2, Target, Activity, Layers, ArrowRight, Scale as ScaleIcon, Shield } from "lucide-react";
+import { X, Github, Linkedin, Mail, Youtube, Video, Info, User, HelpCircle, Award, Zap, BrainCircuit, CheckCircle2, Target, Activity, Layers, ArrowRight, Scale as ScaleIcon, Shield, Sparkles } from "lucide-react";
 import meImage from "../../assets/me1.png";
 interface AboutUsModalProps {
   onClose: () => void;
+  initialTab?: "about" | "what-it-does" | "whats-new" | "demo" | "policy";
 }
 
-export function AboutUsModal({ onClose }: AboutUsModalProps) {
-  const [activeTab, setActiveTab] = useState<"about" | "what-it-does" | "demo" | "policy">("about");
+export function AboutUsModal({ onClose, initialTab }: AboutUsModalProps) {
+  const [activeTab, setActiveTab] = useState<"about" | "what-it-does" | "whats-new" | "demo" | "policy">(initialTab || "about");
   const [timeLeft, setTimeLeft] = useState({ days: 30, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -80,6 +81,12 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                 className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${activeTab === 'what-it-does' ? 'bg-accent text-bg-surface' : 'bg-transparent text-text-main hover:bg-accent/10 hover:text-accent'}`}
              >
                 <HelpCircle size={16} /> What it does
+             </button>
+             <button
+                onClick={() => setActiveTab("whats-new")}
+                className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 shrink-0 ${activeTab === 'whats-new' ? 'bg-accent text-bg-surface' : 'bg-transparent text-text-main hover:bg-accent/10 hover:text-accent'}`}
+             >
+                <Sparkles size={16} /> What's New
              </button>
              <button
                 onClick={() => setActiveTab("demo")}
@@ -270,6 +277,96 @@ export function AboutUsModal({ onClose }: AboutUsModalProps) {
                        </p>
                     </div>
                  </div>
+              </motion.div>
+            )}
+
+            {activeTab === "whats-new" && (
+              <motion.div
+                key="whats-new"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="max-w-4xl mx-auto space-y-6 pb-6"
+              >
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 bg-accent/10 text-accent rounded-xl flex items-center justify-center mx-auto mb-2 shadow-sm">
+                    <Sparkles size={24} />
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-text-bright">
+                    Experience Decisions in <span className="text-accent">Real-Time</span>
+                  </h2>
+                  <p className="text-[clamp(11px,1.5vw,23px)] text-text-main font-semibold max-w-2xl mx-auto">
+                    The days of staring at a loading spinner are over. Watch TieBreaker dissect your dilemma live, step by step.
+                  </p>
+                </div>
+
+                <div className="bg-bg-panel border-2 border-border-dim rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
+                  <h3 className="text-xl font-black uppercase tracking-widest text-text-bright border-b border-border-dim pb-2 flex items-center gap-2">
+                    <Zap size={20} className="text-accent" /> Why You'll Love It
+                  </h3>
+                  <div className="grid gap-3">
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                      className="flex items-start gap-3 bg-bg-surface p-3 rounded-xl border border-border-dim hover:border-accent/40 transition-colors group cursor-default shadow-sm"
+                    >
+                      <div className="bg-accent/10 p-2 rounded-lg text-accent shrink-0 group-hover:scale-110 transition-transform">
+                        <Zap size={20} />
+                      </div>
+                      <div>
+                        <strong className="text-text-bright block text-[clamp(12px,1.5vw,22px)] mb-0.5">Instant Gratification</strong>
+                        <span className="text-[clamp(11px,1.3vw,20px)] text-text-muted font-medium">See the analysis build right before your eyes. The moment you hit enter, the magic begins.</span>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      className="flex items-start gap-3 bg-bg-surface p-3 rounded-xl border border-border-dim hover:border-accent/40 transition-colors group cursor-default shadow-sm"
+                    >
+                      <div className="bg-accent/10 p-2 rounded-lg text-accent shrink-0 group-hover:scale-110 transition-transform">
+                        <BrainCircuit size={20} />
+                      </div>
+                      <div>
+                        <strong className="text-text-bright block text-[clamp(12px,1.5vw,22px)] mb-0.5">Watch the AI Think</strong>
+                        <span className="text-[clamp(11px,1.3vw,20px)] text-text-muted font-medium">Follow along as it weighs every pro, con, and constraint of your specific situation live.</span>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                      className="flex items-start gap-3 bg-bg-surface p-3 rounded-xl border border-border-dim hover:border-accent/40 transition-colors group cursor-default shadow-sm"
+                    >
+                      <div className="bg-accent/10 p-2 rounded-lg text-accent shrink-0 group-hover:scale-110 transition-transform">
+                        <Target size={20} />
+                      </div>
+                      <div>
+                        <strong className="text-text-bright block text-[clamp(12px,1.5vw,22px)] mb-0.5">The Big Reveal</strong>
+                        <span className="text-[clamp(11px,1.3vw,20px)] text-text-muted font-medium">The final verdict is kept hidden, building anticipation until the very end for the ultimate resolution.</span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-xl font-black uppercase tracking-widest text-text-bright text-center">
+                    See it in action
+                  </h3>
+                  <div className="w-full aspect-video bg-black rounded-2xl border-4 border-border-dim flex items-center justify-center overflow-hidden shadow-2xl relative">
+                    <iframe 
+                      width="100%" 
+                      height="100%" 
+                      src="https://www.youtube.com/embed/MUYkpzAhATs" 
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
               </motion.div>
             )}
 

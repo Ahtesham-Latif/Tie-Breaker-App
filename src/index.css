@@ -64,6 +64,11 @@
     color: var(--color-text-dim);
     opacity: 0.6;
   }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-bg-base);
+  }
 }
 
 /* Hide all scrollbars globally but keep scrolling functionality */
