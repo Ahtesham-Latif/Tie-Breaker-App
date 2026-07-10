@@ -1,6 +1,8 @@
 # 🧠 The TieBreaker
 [![Build and deploy Node.js app to Azure Web App](https://github.com/Ahtesham-Latif/Tie-Breaker-App/actions/workflows/main_tie-breaker.yml/badge.svg)](https://github.com/Ahtesham-Latif/Tie-Breaker-App/actions/workflows/main_tie-breaker.yml)
 
+> **Project Update (July 2026):** The public deployment of Tie-Breaker is currently offline due to infrastructure changes. The live demo is unavailable at this time, but the project remains part of my portfolio.
+
 > **Stop guessing. Start deciding.**  
 > *A deterministic AI decision engine that transforms ambiguous "A vs B" dilemmas into structured comparison matrices, multi-angle analysis, and context-aware verdicts.*
 
