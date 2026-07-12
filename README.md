@@ -398,7 +398,7 @@ The test suite is divided into 5 focused domains located in `src/__tests__/`:
 5. **`performance.test.jsx`** - Tests local `localStorage` cache hits to ensure identical requests resolve with zero network overhead.
 
 ### Test Results
-![Vitest Green Status](./TestResults.png)
+
 
 ```text
  ✓ src/App.test.jsx (1 test)
@@ -505,7 +505,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## 👨‍💻 Author
 
 **Ahtesham Latif**  
-*Business & IT Scholar — University of the Punjab (IBIT)*  
+*Business & IT Student — University of the Punjab (IBIT)*  
 [LinkedIn](https://www.linkedin.com/in/ahtesham-latif) | [Google Developer Profile](https://me.developers.google.com/u/me)  
 
 *"Turning subjective dilemmas into objective, fact-driven choices through deterministic software architecture."*
